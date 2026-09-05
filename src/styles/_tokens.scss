@@ -1,0 +1,80 @@
+// =====================================================================
+//  디자인 토큰 — 색·글꼴·간격은 여기서만 정합니다.
+//  (Bootstrap 4 변수 오버라이드도 여기서. Bootstrap import 전에 읽혀야 합니다.)
+// =====================================================================
+
+// ── 색 ────────────────────────────────────────────────────────────────
+$navy-900: #0f1f45;   // 헤더·푸터·히어로 스크림
+$navy-700: #1a2f63;
+$navy:     #223e7e;   // = $primary (버튼·링크)
+$navy-500: #3a5aa8;   // 포커스 링
+$navy-50:  #eef2fa;
+
+$gold:     #b9a066;   // 면·괘선·큰 장식에만. 위에는 항상 진한 글자($ink-900, 6.3:1)
+$gold-700: #7d6217;   // 흰 배경 위 금색 글자 (5.8:1)
+$gold-300: #e3d3a3;   // 남색 위 금색 글자 (10.8:1)
+$gold-50:  #f7f3e8;
+
+$ink-900:  #1b1f2a;   // 본문
+$ink-600:  #4b5563;   // 보조 글자 (7.6:1)
+$line:     #e5e7eb;   // 테두리
+$surface:  #f8f9fa;   // 교차 배경
+
+// ── Bootstrap 변수 오버라이드 ─────────────────────────────────────────
+$primary:   $navy;
+$secondary: $ink-600;
+$success:   #1e7e34;  // 흰 배경 위 5.0:1
+$info:      #0c6e8f;  // 흰 배경 위 5.8:1
+$danger:    #b02a37;
+$light:     $surface;
+$dark:      $navy-900;
+
+$body-bg:    #fff;
+$body-color: $ink-900;
+$text-muted: $ink-600;
+$border-color: $line;
+$link-color: $navy;
+$link-hover-color: $navy-700;
+$link-hover-decoration: underline;
+
+$font-family-sans-serif: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+$font-family-serif: "Nanum Myeongjo", "Apple Myungjo", serif;
+$font-size-base: 1rem;      // 16px
+$line-height-base: 1.7;
+$lead-font-size: 1.125rem;
+$headings-font-weight: 700;
+$headings-line-height: 1.3;
+$headings-margin-bottom: .75rem;
+$h1-font-size: 2.5rem;
+$h2-font-size: 2rem;
+$h3-font-size: 1.375rem;
+$h4-font-size: 1.125rem;
+$h5-font-size: 1rem;
+$h6-font-size: .875rem;
+
+$border-radius:    .5rem;
+$border-radius-lg: .625rem;
+$border-radius-sm: .375rem;
+$enable-shadows: false;
+$enable-responsive-font-sizes: false;
+
+$btn-font-weight: 600;
+$input-btn-padding-y: .625rem;
+$input-btn-padding-x: 1.25rem;
+$input-btn-padding-y-sm: .375rem;
+$input-btn-padding-x-sm: .875rem;
+$input-btn-padding-y-lg: .75rem;
+$input-btn-padding-x-lg: 1.5rem;
+$input-btn-focus-width: 3px;
+$input-btn-focus-color: rgba($navy-500, .35);
+$badge-font-weight: 700;
+
+// ── 간격·기타 ─────────────────────────────────────────────────────────
+$section-space: clamp(3rem, 8vw, 6rem);
+$header-height: 64px;
+$header-height-lg: 80px;
+
+// ── 과도기 별칭 (_legacy.scss 가 참조; Phase 3~5 에서 삭제) ─────────────
+$gold-text: $gold-700;
+$header-bg: $navy-900;
+$front-header-bg: $navy-900;

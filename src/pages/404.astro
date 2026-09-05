@@ -4,7 +4,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import { nav } from '../data/nav';
 ---
 <BaseLayout title="페이지를 찾을 수 없습니다" variant="sub" pageTitle="페이지를 찾을 수 없습니다">
-  <div class="container py-5 text-center">
+  <main id="main" tabindex="-1" class="container py-5 text-center">
     <h2 class="mb-3">요청하신 페이지를 찾을 수 없습니다.</h2>
     <p class="text-muted">주소가 바뀌었거나 삭제된 페이지일 수 있습니다. 아래 메뉴에서 원하시는 곳으로 이동해 주세요.</p>
     <p><a href="/" class="btn btn-primary">홈으로 돌아가기</a></p>
@@ -18,5 +18,5 @@ import { nav } from '../data/nav';
         </div>
       ))}
     </div>
-  </div>
+  </main>
 </BaseLayout>

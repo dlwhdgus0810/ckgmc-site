@@ -3,6 +3,7 @@
  * 모든 페이지의 뼈대: <head>, 상단 SNS 바, 헤더(로고+메뉴), 푸터
  */
 import 'font-awesome/css/font-awesome.min.css';
+import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
 import '../styles/fonts.css';
 import '../styles/global.scss';
 import Header from '../components/Header.astro';
@@ -38,10 +39,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#364e91" />
-    <link rel="preload" href="/fonts/SUIT-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <meta name="theme-color" content="#0f1f45" />
   </head>
   <body>
+    <a class="skip-link" href="#main">본문으로 건너뛰기</a>
     <Header variant={variant} headerImage={headerImage} pageTitle={pageTitle} />
     <div id="content-wrapper">
       <slot />

@@ -1,0 +1,154 @@
+// =====================================================================
+//  공통 컴포넌트: 카드·섹션·버튼·미디어 프레임
+// =====================================================================
+
+// ── 카드 (게시글·시리즈·포스터·소식 공용) ─────────────────────────────
+.card-tile {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #fff;
+  border: 1px solid $line;
+  border-radius: $border-radius;
+  overflow: hidden;
+  color: inherit;
+  transition: transform .2s ease, box-shadow .2s ease;
+  &:hover, &:focus-within {
+    transform: translateY(-3px);
+    box-shadow: 0 .75rem 1.5rem rgba($navy-900, .12);
+  }
+  a { color: inherit; }
+  a:hover { color: $navy; text-decoration: none; }
+
+  &__media {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: $surface;
+    img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  }
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: .375rem;
+    flex: 1 1 auto;
+    padding: 1rem 1.125rem 1.125rem;
+  }
+  &__eyebrow {
+    font-size: .75rem;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: $gold-700;
+  }
+  &__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  &__text {
+    margin: 0;
+    color: $ink-600;
+    font-size: .9375rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  &__meta {
+    margin-top: auto;
+    padding-top: .25rem;
+    color: $ink-600;
+    font-size: .875rem;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+  }
+  &--poster &__media { aspect-ratio: auto; img { height: auto; } }
+  &--portrait &__media { aspect-ratio: 4 / 3; }
+  &--flat { border: 0; background: $surface; &:hover, &:focus-within { transform: none; box-shadow: none; } }
+}
+.badge-new {
+  display: inline-block;
+  padding: .2em .55em;
+  border-radius: 999px;
+  background: $success;
+  color: #fff;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  line-height: 1.4;
+  vertical-align: middle;
+}
+// 예전 클래스 호환: 확대 대신 살짝 떠오르는 효과
+.hover-scale {
+  transition: transform .2s ease, box-shadow .2s ease;
+  &:hover, &:focus-within { transform: translateY(-3px); }
+}
+
+// ── 섹션 ──────────────────────────────────────────────────────────────
+.section {
+  padding-top: $section-space;
+  padding-bottom: $section-space;
+  &--surface { background: $surface; }
+  &--navy {
+    background: $navy-900;
+    color: rgba(#fff, .9);
+    --focus-ring: #fff;
+    a { color: #fff; }
+    .section__eyebrow { color: $gold-300; }
+    .section__title { color: #fff; }
+  }
+}
+.section__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: .75rem 1.5rem;
+  margin-bottom: 2rem;
+}
+.section__eyebrow {
+  display: block;
+  margin-bottom: .375rem;
+  font-size: .8125rem;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: $gold-700;
+}
+.section__title { margin: 0; }
+.section__more { font-weight: 600; white-space: nowrap; }
+
+// ── 버튼 ──────────────────────────────────────────────────────────────
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .5rem;
+  min-height: 44px;
+  svg { flex: none; }
+}
+.btn-lg { min-height: 52px; }
+.btn-sm { min-height: 36px; }
+.btn-gold {
+  @include button-variant($gold, $gold, $hover-background: $gold-700, $hover-border: $gold-700);
+  color: $ink-900;
+  &:hover, &:focus, &:active { color: #fff; }
+}
+
+// ── 미디어 프레임 (유튜브·지도 iframe) ─────────────────────────────────
+.media-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border-radius: $border-radius;
+  overflow: hidden;
+  iframe, video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+}

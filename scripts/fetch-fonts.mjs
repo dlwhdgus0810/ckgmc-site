@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * 웹폰트를 내려받아 자체 호스팅합니다 (Google Fonts / jsDelivr 의존 제거).
+ * 나눔명조(성경 구절·인용용) 웹폰트를 Google Fonts 에서 내려받아 자체 호스팅합니다.
+ * 본문 글꼴 Pretendard 는 npm 패키지(pretendard)에서 가져오므로 여기서 다루지 않습니다.
  *
  *   node scripts/fetch-fonts.mjs
  *
@@ -12,8 +13,7 @@
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36';
-const GOOGLE_CSS = 'https://fonts.googleapis.com/css2?family=Gothic+A1:wght@700&family=Nanum+Myeongjo:wght@400;700&family=Patua+One&display=swap';
-const SUIT_WOFF2 = 'https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.woff2';
+const GOOGLE_CSS = 'https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap';
 const OUT_DIR = 'public/fonts';
 const CSS_OUT = 'src/styles/fonts.css';
 
@@ -42,20 +42,10 @@ for (let i = 0; i < urls.length; i += 10) {
 }
 console.log();
 
-const suit = await fetch(SUIT_WOFF2);
-if (!suit.ok) throw new Error(`SUIT 폰트 요청 실패: ${suit.status}`);
-writeFileSync(`${OUT_DIR}/SUIT-Variable.woff2`, Buffer.from(await suit.arrayBuffer()));
-
 const header = `/*
  * 자체 호스팅 웹폰트 — scripts/fetch-fonts.mjs 가 자동 생성한 파일입니다. 직접 수정하지 마세요.
- * SUIT Variable (본문), Nanum Myeongjo (페이지 제목·인용), Patua One (메인 섹션 제목), Gothic A1 (사이드메뉴 제목)
+ * Nanum Myeongjo (성경 구절·인용·강조 문구). 본문 글꼴 Pretendard 는 BaseLayout 에서 npm 패키지로 불러옵니다.
  */
-@font-face {
-  font-family: 'SUIT Variable';
-  font-weight: 100 900;
-  font-display: swap;
-  src: url('/fonts/SUIT-Variable.woff2') format('woff2-variations'), url('/fonts/SUIT-Variable.woff2') format('woff2');
-}
 `;
 writeFileSync(CSS_OUT, header + css.replace(/\/\* [a-z\-\[\]0-9]+ \*\/\n/g, ''));
-console.log(`완료: ${OUT_DIR}/ (${urls.length + 1}개 파일), ${CSS_OUT}`);
+console.log(`완료: ${OUT_DIR}/ (${urls.length}개 파일), ${CSS_OUT}`);
