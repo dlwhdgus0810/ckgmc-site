@@ -1,8 +1,7 @@
-# GitHub Pages 자동 배포. 저장소 Settings → Pages → Source 를 "GitHub Actions" 로 설정하세요.
-name: Deploy to GitHub Pages
+# GitHub Pages 수동 배포 (예비용). 기본 배포는 Cloudflare Pages 가 GitHub push 를 감지해 자동으로 합니다.
+# 사용하려면 저장소 Settings → Pages → Source 를 "GitHub Actions" 로 두고 Actions 탭에서 이 워크플로를 실행하세요.
+name: Deploy to GitHub Pages (manual)
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read

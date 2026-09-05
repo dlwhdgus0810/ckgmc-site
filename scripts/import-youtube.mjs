@@ -21,6 +21,13 @@ if (!channelId) {
   process.exit(1);
 }
 
+/** 유튜브가 주는 UTC 시각을 캔자스(America/Chicago) 벽시계 시각 'YYYY-MM-DDTHH:mm' 으로 */
+const toKansasTime = (iso) => {
+  const d = new Date(iso);
+  const s = new Intl.DateTimeFormat('sv-SE', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false }).format(d);
+  return s.replace(' ', 'T');
+};
+
 const unescape = (s) =>
   s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'");
 const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -49,7 +56,7 @@ for (const e of entries) {
   const id = tag(e, 'yt:videoId');
   if (!id || existing.has(id)) continue;
   const title = tag(e, 'title');
-  const published = tag(e, 'published'); // 2026-08-02T14:10:00+00:00
+  const published = toKansasTime(tag(e, 'published')); // 캔자스 현지 시각 YYYY-MM-DDTHH:mm
   const description = tag(e, 'media:description');
   const date = published.slice(0, 10);
   const file = join(DIR, `${date}-${id}.md`);
@@ -60,7 +67,7 @@ for (const e of entries) {
   const fm = [
     '---',
     `title: ${JSON.stringify(title)}`,
-    `date: ${published.slice(0, 16)}`,
+    `date: ${published}`,
     `youtube: ${JSON.stringify(id)}`,
     '---',
   ].join('\n');

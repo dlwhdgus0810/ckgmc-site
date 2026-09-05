@@ -9,7 +9,7 @@ export default defineConfig({
   trailingSlash: 'ignore',
   build: { format: 'directory' },
   // sitemap.xml 자동 생성 (검색엔진 등록용)
-  integrations: [sitemap()],
+  integrations: [sitemap({ filter: (page) => !/\/(thanks|404)\/?$/.test(page) })],
   vite: {
     css: {
       preprocessorOptions: {

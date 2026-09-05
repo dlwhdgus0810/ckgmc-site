@@ -1,0 +1,539 @@
+# =====================================================================
+#  Sveltia CMS 설정 — https://ckgmc.org/admin/ 관리 화면
+#  ▶ 배포 후 아래 두 값을 채워야 로그인이 됩니다 (README "콘텐츠 관리 화면" 참고)
+#     repo:      GitHub 저장소 (예: jonghyunlee/ckgmc-site)
+#     base_url:  sveltia-cms-auth 워커 주소 (예: https://sveltia-cms-auth.abc.workers.dev)
+# =====================================================================
+backend:
+  name: github
+  repo: OWNER/ckgmc-site
+  branch: main
+  base_url: https://sveltia-cms-auth.SUBDOMAIN.workers.dev
+
+site_url: https://ckgmc.org
+display_url: https://ckgmc.org
+logo_url: /images/logo.png
+locale: ko
+
+media_folder: public/images/uploads
+public_folder: /images/uploads
+
+slug:
+  encoding: unicode
+  clean_accents: true
+  sanitize_replacement: "-"
+
+# ── 공통 필드 (YAML 앵커) ────────────────────────────────────────────
+_defs:
+  date: &date
+    name: date
+    label: 날짜
+    widget: datetime
+    format: "YYYY-MM-DDTHH:mm"
+    date_format: "YYYY-MM-DD"
+    time_format: "HH:mm"
+    hint: "적은 시각 그대로 표시됩니다"
+  date_only: &date_only
+    name: date
+    label: 날짜
+    widget: datetime
+    format: "YYYY-MM-DD"
+    date_format: "YYYY-MM-DD"
+    time_format: false
+  writer: &writer
+    name: writer
+    label: 작성자
+    widget: string
+    required: false
+    default: 관리자
+  thumbnail: &thumbnail
+    name: thumbnail
+    label: 목록 썸네일
+    widget: image
+    required: false
+    media_folder: /public/images/posts
+    public_folder: /images/posts
+    hint: "비우면 유튜브 썸네일이나 본문 첫 사진을 씁니다"
+  youtube: &youtube
+    name: youtube
+    label: 유튜브 영상 ID
+    widget: string
+    required: false
+    hint: "https://youtu.be/XXXXXXXXXXX 에서 XXXXXXXXXXX 부분(11자)만 넣습니다"
+    pattern: ["^[A-Za-z0-9_-]{11}$", "유튜브 영상 ID 11자를 입력하세요"]
+  attachments: &attachments
+    name: attachments
+    label: 첨부파일
+    widget: list
+    required: false
+    summary: "{{fields.name}}"
+    fields:
+      - { name: name, label: 표시 이름, widget: string, hint: "예: 20260830 주일예배 주보.pdf" }
+      - { name: file, label: 파일, widget: file, media_folder: /public/files, public_folder: /files }
+  post_body: &post_body
+    name: body
+    label: 본문
+    widget: markdown
+    required: false
+    modes: [rich_text, raw]
+  page_body: &page_body
+    name: body
+    label: 본문 (HTML/마크다운)
+    widget: markdown
+    required: false
+    modes: [raw]
+    hint: "Bootstrap 클래스(row, col-sm-6, img-fluid …)를 그대로 쓸 수 있습니다"
+  page_fields: &page_fields
+    - { name: title, label: 제목, widget: string }
+    - { name: subtitle, label: 영문 부제, widget: string, required: false }
+    - { name: menuTitle, label: 메뉴 표시 이름, widget: string, required: false, hint: "비우면 '제목 부제'로 표시" }
+    - { name: order, label: 메뉴 순서, widget: number, value_type: int, default: 999, hint: "작을수록 위 (10, 20, 30 …)" }
+    - { name: hideFromNav, label: 메뉴에서 숨김, widget: boolean, default: false, required: false }
+    - { name: headerImage, label: 상단 배너 사진, widget: image, required: false, media_folder: /public/images/headers, public_folder: /images/headers, hint: "권장 1600×500" }
+    - { name: image, label: 카드 사진 (메인 사역 소개), widget: image, required: false, media_folder: /public/images/pages, public_folder: /images/pages }
+    - { name: description, label: 한 줄 설명 (카드·검색엔진), widget: string, required: false }
+    - name: board
+      label: 이 페이지 아래에 붙일 게시판
+      widget: select
+      required: false
+      options:
+        - { label: "(없음)", value: "" }
+        - { label: 설교 시리즈, value: series }
+        - { label: 영상 설교, value: sermons }
+        - { label: 특별 집회, value: special-services }
+        - { label: 성가대 찬양, value: choir }
+        - { label: 주보, value: bulletins }
+        - { label: 자료실, value: resources }
+        - { label: 선교지 소식, value: mission-stories }
+        - { label: 유아·어린이부 소식, value: children }
+        - { label: 청소년부 소식, value: youth }
+        - { label: 청년부 소식, value: young-adult }
+        - { label: 캠핑 미니스트리 소식, value: camping }
+        - { label: English Ministry 소식, value: english }
+        - { label: 새가족환영회 소식, value: newcomers }
+        - { label: 교회 섬김 소식, value: serving }
+        - { label: 지역 사회 섬김 소식, value: community }
+    - { name: perPage, label: 게시판 한 페이지 글 수, widget: number, value_type: int, default: 15, required: false }
+    - name: widget
+      label: 특수 기능
+      widget: select
+      required: false
+      options:
+        - { label: "(없음)", value: "" }
+        - { label: 문의 폼 + 연락처, value: contact }
+        - { label: 세례 신청 폼, value: baptism }
+        - { label: 교인등록 구글폼, value: membership }
+        - { label: 온라인 헌금, value: offering }
+        - { label: 지도, value: map }
+        - { label: 예배 시간표, value: service-times }
+    - name: widgetPosition
+      label: 특수 기능 위치
+      widget: select
+      required: false
+      default: bottom
+      options:
+        - { label: 본문 위, value: top }
+        - { label: 본문 아래, value: bottom }
+    - *page_body
+
+collections:
+  # ── 사이트 설정 ────────────────────────────────────────────────────
+  - name: settings
+    label: 사이트 설정
+    icon: settings
+    files:
+      - name: site
+        label: 기본 정보 · 메인 화면
+        file: src/data/site.json
+        fields:
+          - { name: name, label: 교회 이름, widget: string }
+          - { name: nameEn, label: 교회 이름 (영문), widget: string }
+          - { name: description, label: 사이트 설명 (검색엔진·공유), widget: text }
+          - { name: address, label: 주소, widget: string }
+          - { name: mapQuery, label: 구글 지도 검색어, widget: string, hint: "지도 임베드·길찾기에 쓰는 주소" }
+          - { name: phone, label: 전화, widget: string }
+          - { name: email, label: 대표 이메일, widget: string, hint: "문의 폼도 이 주소로 갑니다(formEndpoint 참고)" }
+          - { name: logo, label: 로고, widget: image, media_folder: /public/images, public_folder: /images }
+          - { name: ogImage, label: 공유용 대표 이미지, widget: image, media_folder: /public/images, public_folder: /images }
+          - name: social
+            label: SNS
+            widget: object
+            fields:
+              - { name: facebook, label: 페이스북, widget: string }
+              - { name: youtube, label: 유튜브, widget: string }
+              - { name: instagram, label: 인스타그램, widget: string }
+          - { name: youtubeChannelId, label: 유튜브 채널 ID, widget: string, hint: "자동 설교 등록에 사용" }
+          - { name: liveUrl, label: 유튜브 라이브 주소, widget: string, required: false }
+          - name: giving
+            label: 온라인 헌금 (ChurchTrac)
+            widget: object
+            fields:
+              - { name: url, label: 헌금 페이지 주소, widget: string }
+              - { name: embed, label: 임베드 주소, widget: string }
+          - { name: membershipFormEmbed, label: 교인등록 구글폼 임베드 주소, widget: string }
+          - { name: newFamilyFormUrl, label: 새가족 등록 신청서 주소, widget: string }
+          - { name: formEndpoint, label: 문의 폼 전송 주소 (FormSubmit), widget: string, required: false, hint: "https://formsubmit.co/이메일 — 비우면 이메일 링크로 대체" }
+          - { name: formThanksPath, label: 폼 전송 후 이동 경로, widget: string, default: /thanks }
+          - name: hero
+            label: 메인 첫 화면
+            widget: object
+            fields:
+              - { name: image, label: 배경 사진, widget: image, media_folder: /public/images/hero, public_folder: /images/hero, hint: "가로 1920px 이상 권장" }
+              - { name: alt, label: 사진 설명 (대체 텍스트), widget: string }
+              - { name: eyebrow, label: 작은 윗글 (영문 교회명), widget: string, required: false }
+              - { name: headline, label: 큰 제목, widget: string }
+              - { name: subline, label: 소개 문장, widget: text, required: false }
+              - name: primary
+                label: 첫 번째 버튼
+                widget: object
+                fields:
+                  - { name: label, label: 글자, widget: string }
+                  - { name: href, label: 링크, widget: string }
+              - name: secondary
+                label: 두 번째 버튼
+                widget: object
+                fields:
+                  - { name: label, label: 글자, widget: string }
+                  - { name: href, label: 링크, widget: string }
+          - name: serviceTimes
+            label: 예배 시간
+            widget: list
+            summary: "{{fields.name}} — {{fields.time}}"
+            fields:
+              - { name: name, label: 예배 이름, widget: string }
+              - { name: time, label: 시간, widget: string }
+              - { name: place, label: 장소, widget: string, required: false }
+              - { name: note, label: 비고, widget: string, required: false }
+          - name: notices
+            label: 교회 소식 포스터
+            widget: list
+            summary: "{{fields.title}}"
+            hint: "권장 1600×500. 대체 텍스트는 꼭 채워주세요"
+            fields:
+              - { name: image, label: 포스터 이미지, widget: image, media_folder: /public/images/slides, public_folder: /images/slides }
+              - { name: alt, label: 대체 텍스트 (포스터 내용 요약), widget: string }
+              - { name: title, label: 제목, widget: string, required: false }
+              - { name: href, label: 링크, widget: string, required: false }
+          - name: quickLinks
+            label: 바로가기 (예비)
+            widget: list
+            required: false
+            collapsed: true
+            fields:
+              - { name: title, label: 제목, widget: string }
+              - { name: subtitle, label: 영문, widget: string }
+              - { name: icon, label: 아이콘, widget: image, media_folder: /public/images/icons, public_folder: /images/icons }
+              - { name: href, label: 링크, widget: string }
+          - name: links
+            label: 협력 단체 배너
+            widget: list
+            summary: "{{fields.title}}"
+            fields:
+              - { name: title, label: 단체 이름, widget: string }
+              - { name: image, label: 로고, widget: image, media_folder: /public/images/links, public_folder: /images/links }
+              - { name: href, label: 링크, widget: string }
+
+  - divider: true
+
+  # ── 페이지 (섹션별) ────────────────────────────────────────────────
+  - name: pages_about
+    label: 페이지 · 교회 소개
+    label_singular: 페이지
+    icon: church
+    folder: src/content/pages/about
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    identifier_field: title
+    sortable_fields: [order, title]
+    summary: "{{order}} · {{title}}"
+    fields: *page_fields
+  - name: pages_media
+    label: 페이지 · 미디어
+    label_singular: 페이지
+    folder: src/content/pages/media
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    identifier_field: title
+    sortable_fields: [order, title]
+    summary: "{{order}} · {{title}}"
+    fields: *page_fields
+  - name: pages_ministries
+    label: 페이지 · 사역
+    label_singular: 페이지
+    folder: src/content/pages/ministries
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    identifier_field: title
+    sortable_fields: [order, title]
+    summary: "{{order}} · {{title}}"
+    fields: *page_fields
+  - name: pages_next_steps
+    label: 페이지 · 양육과 훈련
+    label_singular: 페이지
+    folder: src/content/pages/next-steps
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    identifier_field: title
+    sortable_fields: [order, title]
+    summary: "{{order}} · {{title}}"
+    fields: *page_fields
+  - name: pages_missions
+    label: 페이지 · 섬김과 선교
+    label_singular: 페이지
+    folder: src/content/pages/missions
+    create: true
+    slug: "{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    identifier_field: title
+    sortable_fields: [order, title]
+    summary: "{{order}} · {{title}}"
+    fields: *page_fields
+  - name: pages_misc
+    label: 페이지 · 기타
+    files:
+      - { name: welcome, label: 처음 오셨나요?, file: src/content/pages/welcome.md, fields: *page_fields }
+      - { name: offering, label: 온라인 헌금, file: src/content/pages/offering.md, fields: *page_fields }
+      - { name: privacy, label: 개인정보 보호정책, file: src/content/pages/privacy-policy.md, fields: *page_fields }
+      - { name: terms, label: 이용 약관, file: src/content/pages/terms-of-use.md, fields: *page_fields }
+
+  - divider: true
+
+  # ── 게시판 ──────────────────────────────────────────────────────────
+  - name: sermons
+    label: 영상 설교
+    label_singular: 설교
+    icon: play_circle
+    folder: src/content/posts/sermons
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    sortable_fields: [date, title]
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields:
+      - { name: title, label: 제목, widget: string, hint: "예: 주일예배 LIVE | 참된 믿음 | 송명철 목사 | 2026.08.02" }
+      - *date
+      - *writer
+      - *youtube
+      - *thumbnail
+      - *post_body
+  - name: bulletins
+    label: 주보
+    label_singular: 주보
+    icon: description
+    folder: src/content/posts/bulletins
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    sortable_fields: [date, title]
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields:
+      - { name: title, label: 제목, widget: string, hint: "예: 8/30/2026 주일예배 주보" }
+      - *date
+      - *writer
+      - *attachments
+      - *post_body
+  - name: resources
+    label: 자료실 (소그룹 나눔지)
+    label_singular: 자료
+    icon: menu_book
+    folder: src/content/posts/resources
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    sortable_fields: [date, title]
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields:
+      - { name: title, label: 제목, widget: string }
+      - *date
+      - *writer
+      - { name: excerpt, label: 목록 요약, widget: string, required: false }
+      - *thumbnail
+      - *attachments
+      - *post_body
+  - name: choir
+    label: 성가대 찬양
+    label_singular: 찬양
+    icon: music_note
+    folder: src/content/posts/choir
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    sortable_fields: [date, title]
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *youtube, *thumbnail, *post_body]
+  - name: special_services
+    label: 특별 집회
+    label_singular: 집회
+    folder: src/content/posts/special-services
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    sortable_fields: [date, title]
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *youtube, *thumbnail, *post_body]
+  - name: mission_stories
+    label: 선교지 소식
+    label_singular: 소식
+    icon: public
+    folder: src/content/posts/mission-stories
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    sortable_fields: [date, title]
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *thumbnail, *attachments, *post_body]
+
+  - divider: true
+
+  # ── 부서 소식 (사역 페이지 아래 게시판) ─────────────────────────────
+  - name: posts_children
+    label: 부서 소식 · 유아·어린이부
+    label_singular: 소식
+    folder: src/content/posts/children
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *thumbnail, *post_body]
+  - name: posts_youth
+    label: 부서 소식 · 청소년부
+    label_singular: 소식
+    folder: src/content/posts/youth
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *thumbnail, *post_body]
+  - name: posts_young_adult
+    label: 부서 소식 · 청년부
+    label_singular: 소식
+    folder: src/content/posts/young-adult
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *thumbnail, *post_body]
+  - name: posts_camping
+    label: 부서 소식 · 캠핑 미니스트리
+    label_singular: 소식
+    folder: src/content/posts/camping
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *thumbnail, *post_body]
+  - name: posts_english
+    label: 부서 소식 · English Ministry
+    label_singular: 소식
+    folder: src/content/posts/english
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *thumbnail, *post_body]
+  - name: posts_newcomers
+    label: 부서 소식 · 새가족환영회
+    label_singular: 소식
+    folder: src/content/posts/newcomers
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *thumbnail, *post_body]
+  - name: posts_serving
+    label: 부서 소식 · 교회 섬김
+    label_singular: 소식
+    folder: src/content/posts/serving
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *thumbnail, *post_body]
+  - name: posts_community
+    label: 부서 소식 · 지역 사회 섬김
+    label_singular: 소식
+    folder: src/content/posts/community
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields: [{ name: title, label: 제목, widget: string }, *date, *writer, *thumbnail, *post_body]
+
+  - divider: true
+
+  # ── 설교 시리즈 · 우리 교회 이야기 ────────────────────────────────
+  - name: series
+    label: 설교 시리즈
+    label_singular: 시리즈
+    icon: video_library
+    folder: src/content/series
+    create: true
+    slug: "{{year}}-{{month}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    sortable_fields: [updated, date, title]
+    summary: "{{title}}"
+    fields:
+      - { name: title, label: 시리즈 제목, widget: string }
+      - { name: thumbnail, label: 대표 이미지, widget: image, media_folder: /public/images/series, public_folder: /images/series, hint: "권장 960×540" }
+      - { name: ongoing, label: 진행 중, widget: boolean, default: true, hint: "켜면 메인 화면과 '진행 중인 시리즈'에 표시" }
+      - <<: *date_only
+        name: date
+        label: 시작일
+      - <<: *date_only
+        name: updated
+        label: 마지막 업데이트
+        required: false
+      - name: episodes
+        label: 에피소드
+        widget: list
+        summary: "{{fields.title}}"
+        fields:
+          - { name: title, label: 제목, widget: string }
+          - { name: youtube, label: 유튜브 영상 ID, widget: string, hint: "https://youtu.be/XXXXXXXXXXX 의 XXXXXXXXXXX" }
+      - *post_body
+  - name: stories
+    label: 우리 교회 이야기
+    label_singular: 이야기
+    icon: photo_library
+    folder: src/content/stories
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    extension: md
+    format: yaml-frontmatter
+    sortable_fields: [date, title]
+    summary: "{{date | date('YYYY-MM-DD')}} · {{title}}"
+    fields:
+      - { name: title, label: 제목, widget: string }
+      - *date
+      - { name: image, label: 대표 사진, widget: image, required: false, media_folder: /public/images/stories, public_folder: /images/stories }
+      - name: images
+        label: 앨범 사진
+        widget: list
+        required: false
+        field: { name: image, label: 사진, widget: image, media_folder: /public/images/stories, public_folder: /images/stories }
+      - { name: permalink, label: 원본 페이스북 글 링크, widget: string, required: false }
+      - *post_body
