@@ -1,2 +1,6 @@
 /admin/*
   X-Robots-Tag: noindex
+
+# 임시 주소(workers.dev)는 검색엔진에 노출하지 않음 — 정식 주소는 ckgmc.org
+https://ckgmc-site.ckgmc-site.workers.dev/*
+  X-Robots-Tag: noindex
