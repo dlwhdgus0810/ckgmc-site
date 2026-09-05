@@ -1,10 +1,34 @@
 // =====================================================================
 //  캔사스중앙글로벌감리교회 사이트 전역 스타일
-//  순서: 토큰 → Bootstrap 4 → 기본 타이포/접근성 → 공통 컴포넌트 → (과도기) 레거시
+//  순서: 토큰 → Bootstrap 4(필요한 부분만) → 기본 타이포/접근성 → 공통 컴포넌트 → 셸(헤더/배너/내비/푸터) → (과도기) 레거시
 //  색·글꼴·간격을 바꾸려면 _tokens.scss 만 고치면 됩니다.
 // =====================================================================
 @import "tokens";
-@import "bootstrap/scss/bootstrap";
+
+// Bootstrap 4 — 콘텐츠(마크다운)가 쓰는 grid/utilities/card/table/forms 등만 가져옵니다.
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/root";
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type";
+@import "bootstrap/scss/images";
+@import "bootstrap/scss/grid";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/transitions";
+@import "bootstrap/scss/badge";
+@import "bootstrap/scss/breadcrumb";
+@import "bootstrap/scss/pagination";
+@import "bootstrap/scss/card";
+@import "bootstrap/scss/utilities";
+@import "bootstrap/scss/print";
+
 @import "base";
 @import "components";
+@import "header";
+@import "banner";
+@import "section-nav";
+@import "footer";
 @import "legacy";

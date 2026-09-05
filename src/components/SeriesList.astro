@@ -4,6 +4,7 @@
  */
 import { getCollection } from 'astro:content';
 import { formatDate } from '../lib/posts';
+import Icon from './Icon.astro';
 
 interface Props { base: string }
 const { base } = Astro.props;
@@ -23,7 +24,7 @@ const finished = all.filter((s) => !s.data.ongoing);
           <div class="card-body">
             <div class="img-wrap position-relative border" style={`background-image:url(${s.data.thumbnail})`}></div>
             <h4 class="series-title text-center my-3">{s.data.title}</h4>
-            <p class="text-center mb-1"><i class="fa fa-circle text-success"></i> <span class="text-primary">Detail</span></p>
+            <p class="text-center mb-1"><Icon name="dot" size={12} class="text-success" /> <span class="text-primary">Detail</span></p>
             <div class="text-center"><small class="text-muted">updated at {formatDate(s.data.updated ?? s.data.date)}</small></div>
           </div>
         </div>

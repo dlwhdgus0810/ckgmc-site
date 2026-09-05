@@ -1,51 +1,42 @@
 ---
 /**
- * 서브페이지 레이아웃: 배경 이미지 헤더 + 브레드크럼 + 사이드메뉴 + 본문
+ * 서브페이지 레이아웃: 배너(사진+제목) → [섹션 내비 | 본문]
  */
 import BaseLayout from './BaseLayout.astro';
-import Breadcrumb from '../components/Breadcrumb.astro';
-import Sidebar from '../components/Sidebar.astro';
-import { getNav, findNavItem, findSection } from '../lib/nav';
+import PageBanner from '../components/PageBanner.astro';
+import SectionNav from '../components/SectionNav.astro';
+import { getNav, findSection } from '../lib/nav';
 
 interface Props {
-  /** 페이지 URL (예: /about/staff). 사이드메뉴/브레드크럼의 활성 항목을 정합니다 */
+  /** 페이지 URL (예: /about/staff). 섹션 내비·현재 위치의 활성 항목을 정합니다 */
   path: string;
   title: string;
   subtitle?: string;
   headerImage?: string;
   description?: string;
-  /** 게시글 제목 등 브레드크럼 마지막 항목 */
+  /** 게시글 제목 등 현재 위치의 마지막 항목 (브라우저 제목으로도 쓰임) */
   leaf?: string;
-  /** 메뉴에 없는 페이지에서 브레드크럼 상위 항목 주소 */
+  /** 메뉴에 없는 페이지에서 현재 위치의 상위 항목 주소 */
   parentHref?: string;
-  /** 본문 상단에 "제목 <small>부제</small>" 자동 표시 여부 */
+  /** 배너 제목 태그. 본문이 <h1> 을 가진 게시글이면 'p' */
+  bannerHeading?: 'h1' | 'p';
+  /** @deprecated 예전 호환용. 더 이상 본문 제목을 그리지 않습니다 */
   showTitle?: boolean;
 }
-const { path, title, subtitle, headerImage, description, leaf, parentHref, showTitle = true } = Astro.props;
-const nav = await getNav();
-const navItem = findNavItem(nav, path);
-const hasSidebar = !!findSection(nav, path);
-const headerTitle = navItem?.item.label ?? (subtitle ? `${title} ${subtitle}` : title);
+const { path, title, subtitle, headerImage, description, leaf, parentHref, bannerHeading = 'h1' } = Astro.props;
+const hasSideNav = !!findSection(await getNav(), path);
 ---
-<BaseLayout title={leaf ?? title} description={description} variant="sub" headerImage={headerImage} pageTitle={headerTitle}>
-  <Breadcrumb path={path} fallbackTitle={title} leaf={leaf} parentHref={parentHref} />
-  <div class="container">
+<BaseLayout title={leaf ?? title} description={description}>
+  <PageBanner title={title} subtitle={subtitle} image={headerImage} heading={bannerHeading} path={path} leaf={leaf} parentHref={parentHref} />
+  <div class="container page-body">
     <div class="row">
-      <div class="col">
-        <div id="content-wrap">
-          {hasSidebar && <aside><Sidebar path={path} /></aside>}
-          <main id="main" tabindex="-1" class:list={{ 'no-aside': !hasSidebar }}>
-            <div class="entry-content">
-              {showTitle && (
-                <>
-                  <h2>{title} {subtitle && <small>{subtitle}</small>}</h2>
-                  <hr />
-                </>
-              )}
-              <slot />
-            </div>
-          </main>
-        </div>
+      {hasSideNav && (
+        <div class="col-lg-3 mb-4 mb-lg-0"><SectionNav path={path} /></div>
+      )}
+      <div class={hasSideNav ? 'col-lg-9' : 'col-12'}>
+        <main id="main" tabindex="-1" class="entry-content">
+          <slot />
+        </main>
       </div>
     </div>
   </div>

@@ -1,13 +1,14 @@
 ---
 /** 문의/세례 신청 폼 전송 후 도착하는 감사 페이지 */
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { site } from '../data/site';
+import SubpageLayout from '../layouts/SubpageLayout.astro';
+import Icon from '../components/Icon.astro';
+import { site, telHref } from '../data/site';
 ---
-<BaseLayout title="접수되었습니다" variant="sub" pageTitle="접수되었습니다">
-  <main id="main" tabindex="-1" class="container py-5 text-center">
-    <p class="display-4" style="font-size:3rem;"><i class="fa fa-check-circle"></i></p>
+<SubpageLayout path="/thanks" title="접수되었습니다" subtitle="Thank you">
+  <div class="text-center py-4">
+    <p class="text-primary mb-3"><Icon name="check-circle" size={56} /></p>
     <h2 class="mb-3">소중한 말씀이 접수되었습니다.</h2>
-    <p class="text-muted">확인 후 남겨주신 이메일로 연락드리겠습니다.<br />급한 문의는 {site.phone} 으로 전화해 주세요.</p>
+    <p class="text-muted">확인 후 남겨주신 이메일로 연락드리겠습니다.<br />급한 문의는 <a href={telHref}>{site.phone}</a> 으로 전화해 주세요.</p>
     <p class="mt-4"><a href="/" class="btn btn-primary">홈으로 돌아가기</a></p>
-  </main>
-</BaseLayout>
+  </div>
+</SubpageLayout>

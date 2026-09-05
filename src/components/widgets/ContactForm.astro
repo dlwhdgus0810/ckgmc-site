@@ -1,5 +1,6 @@
 ---
 import { site } from '../../data/site';
+import Icon from '../Icon.astro';
 const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
 ---
 <div class="row">
@@ -38,7 +39,7 @@ const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
       </form>
     ) : (
       <p>
-        <a class="btn btn-primary" href={`mailto:${site.email}?subject=${encodeURIComponent('[홈페이지 문의]')}`}><i class="fa fa-envelope"></i> 이메일로 문의하기</a>
+        <a class="btn btn-primary" href={`mailto:${site.email}?subject=${encodeURIComponent('[홈페이지 문의]')}`}><Icon name="mail" size={18} /> 이메일로 문의하기</a>
         <br /><span class="form-note">이메일 프로그램이 열립니다.</span>
       </p>
     )}

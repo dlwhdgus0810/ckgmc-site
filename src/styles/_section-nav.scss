@@ -1,0 +1,64 @@
+// =====================================================================
+//  섹션 내비 (서브페이지 왼쪽 메뉴 / 모바일 가로 탭)
+// =====================================================================
+.page-body {
+  padding: 1.5rem 0 3rem;
+  @include media-breakpoint-up(lg) { padding: 3rem 0 4rem; }
+}
+.section-nav {
+  &__list { list-style: none; margin: 0; padding: 0; }
+
+  @include media-breakpoint-up(lg) {
+    position: sticky;
+    top: calc(#{$header-height-lg} + 1.5rem);
+    &__title {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: .5rem;
+      padding: .75rem 1rem;
+      border-left: 3px solid $navy;
+      border-radius: 0 $border-radius $border-radius 0;
+      background: $navy-50;
+      strong { font-size: 1.0625rem; color: $navy-900; }
+      span { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: $ink-600; }
+    }
+    &__list li a {
+      display: block;
+      padding: .6rem 1rem;
+      border-left: 3px solid transparent;
+      border-radius: 0 $border-radius-sm $border-radius-sm 0;
+      color: $ink-600;
+      &:hover { color: $navy; background: $surface; text-decoration: none; }
+      &[aria-current="page"] { color: $navy; font-weight: 600; border-left-color: $gold; background: $gold-50; }
+    }
+  }
+
+  @include media-breakpoint-down(md) {
+    margin: -1.5rem -15px 1.5rem;
+    padding: .75rem 15px;
+    border-bottom: 1px solid $line;
+    background: #fff;
+    &__title { display: none; }
+    &__list {
+      display: flex;
+      gap: .5rem;
+      overflow-x: auto;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      &::-webkit-scrollbar { display: none; }
+      li { flex: none; scroll-snap-align: center; }
+      li a {
+        display: inline-block;
+        padding: .45rem .9rem;
+        border: 1px solid $line;
+        border-radius: 999px;
+        color: $ink-600;
+        font-size: .9375rem;
+        white-space: nowrap;
+        &:hover { border-color: $navy; color: $navy; text-decoration: none; }
+        &[aria-current="page"] { background: $navy; border-color: $navy; color: #fff; font-weight: 600; }
+      }
+    }
+  }
+}

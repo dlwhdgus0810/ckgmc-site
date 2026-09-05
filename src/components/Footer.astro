@@ -1,35 +1,59 @@
 ---
-import { site } from '../data/site';
-import { footerNav } from '../data/nav';
+/** 푸터: 교회 정보 · 예배 시간 · 바로가기 · SNS/헌금 + 하단 저작권 */
+import { site, telHref, mapsDirectionsUrl, liveUrl } from '../data/site';
+import { footerNav, footerQuickLinks } from '../data/nav';
+import Icon from './Icon.astro';
+const year = new Date().getFullYear();
 ---
-<footer class="site-footer container-fluid bg-dark text-light py-lg-3">
+<footer class="site-footer on-dark">
   <div class="container">
-    <div class="row justify-content-sm-center">
-      <div class="col-sm">
-        <div class="d-flex justify-content-center">
-          <ul class="nav" id="footer-menu">
-            {footerNav.map((item) => (
-              <li class="nav-item"><a class="nav-link" href={item.href}>{item.label}</a></li>
-            ))}
-          </ul>
+    <div class="row site-footer__grid">
+      <div class="col-md-6 col-lg-3">
+        <h2 class="site-footer__heading">{site.name}</h2>
+        <p class="site-footer__sub">{site.nameEn}</p>
+        <address class="site-footer__address">
+          <a href={mapsDirectionsUrl} target="_blank" rel="noopener"><Icon name="map-pin" size={16} /> {site.address}</a>
+          <a href={telHref}><Icon name="phone" size={16} /> {site.phone}</a>
+          <a href={`mailto:${site.email}`}><Icon name="mail" size={16} /> {site.email}</a>
+        </address>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <h2 class="site-footer__heading">예배 안내</h2>
+        <dl class="site-footer__times">
+          {site.serviceTimes.map((s) => (
+            <div>
+              <dt>{s.name}</dt>
+              <dd>{s.time}{s.place && <span> · {s.place}</span>}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <h2 class="site-footer__heading">바로가기</h2>
+        <ul class="site-footer__links">
+          {footerQuickLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        </ul>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <h2 class="site-footer__heading">함께해요</h2>
+        <ul class="site-footer__social">
+          <li><a href={site.social.facebook} target="_blank" rel="noopener"><Icon name="facebook" size={18} /> Facebook</a></li>
+          <li><a href={site.social.youtube} target="_blank" rel="noopener"><Icon name="youtube" size={18} /> YouTube</a></li>
+          <li><a href={site.social.instagram} target="_blank" rel="noopener"><Icon name="instagram" size={18} /> Instagram</a></li>
+        </ul>
+        <div class="site-footer__actions">
+          <a class="btn btn-gold" href="/offering"><Icon name="heart" size={18} /> 온라인헌금</a>
+          <a class="btn btn-outline-light" href={liveUrl} target="_blank" rel="noopener"><Icon name="youtube" size={18} /> YouTube Live</a>
         </div>
       </div>
     </div>
-    <div class="row">
-      <div class="col-sm">
-        <div class="text-center"><b>&copy; {site.name} {site.nameEn}.</b> All rights reserved.</div>
-        <ul class="list-inline mb-sm-0 text-center">
-          <li class="list-inline-item text-light"><i class="fa fa-map-marker" aria-hidden="true"></i> {site.address}</li>
-          <li class="list-inline-item text-light"><i class="fa fa-envelope" aria-hidden="true"></i> {site.email}</li>
-          <li class="list-inline-item text-light"><i class="fa fa-phone" aria-hidden="true"></i> {site.phone}</li>
-          {site.social.facebook && (
-            <li class="list-inline-item text-light"><a href={site.social.facebook} target="_blank" rel="noopener" class="text-light"><i class="fa fa-facebook-official"></i> FACEBOOK</a></li>
-          )}
-          {site.social.youtube && (
-            <li class="list-inline-item text-light"><a href={site.social.youtube} target="_blank" rel="noopener" class="text-light"><i class="fa fa-youtube-play"></i> YOUTUBE</a></li>
-          )}
-        </ul>
-      </div>
+  </div>
+  <div class="site-footer__bottom">
+    <div class="container d-flex flex-wrap justify-content-between align-items-center">
+      <p class="mb-0">&copy; {year} {site.name} {site.nameEn}. All rights reserved.</p>
+      <ul class="site-footer__policy">
+        {footerNav.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      </ul>
     </div>
   </div>
 </footer>

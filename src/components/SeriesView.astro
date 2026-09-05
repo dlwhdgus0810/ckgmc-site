@@ -3,6 +3,7 @@
  * 설교 시리즈 상세: 대표 이미지 자리에 유튜브 플레이어, 아래에 에피소드 목록
  */
 import { render, type CollectionEntry } from 'astro:content';
+import Icon from './Icon.astro';
 interface Props { series: CollectionEntry<'series'>; base: string }
 const { series, base } = Astro.props;
 const { Content } = await render(series);
@@ -23,7 +24,7 @@ const total = series.data.episodes.length;
           <span class="title">{ep.title}</span>
         </div>
         <div class="episode-control">
-          <button type="button" class="btn btn-sm btn-outline-info" data-youtube-id={ep.youtube}><i class="fa fa-play"></i> PLAY</button>
+          <button type="button" class="btn btn-sm btn-outline-info" data-youtube-id={ep.youtube}><Icon name="play" size={14} /> PLAY</button>
         </div>
       </section>
     ))}

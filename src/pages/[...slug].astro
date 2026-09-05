@@ -58,7 +58,7 @@ const d = page.data;
 const { Content } = await render(page);
 ---
 {kind === 'page' && (
-  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} description={d.description} showTitle={d.showTitle}>
+  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} description={d.description}>
     {d.widget && d.widgetPosition === 'top' && <Widget name={d.widget} />}
     <Content />
     {d.widget && d.widgetPosition === 'bottom' && <Widget name={d.widget} />}
@@ -70,12 +70,12 @@ const { Content } = await render(page);
   </SubpageLayout>
 )}
 {kind === 'post' && post && (
-  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={post.data.title} showTitle={true}>
+  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={post.data.title} bannerHeading="p">
     <PostView post={post} base={base} prev={prev} next={next} />
   </SubpageLayout>
 )}
 {kind === 'series' && series && (
-  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={series.data.title} showTitle={false}>
+  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={series.data.title} bannerHeading="p">
     <SeriesView series={series} base={base} />
   </SubpageLayout>
 )}

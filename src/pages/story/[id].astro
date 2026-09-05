@@ -3,6 +3,7 @@
 import { getCollection, render } from 'astro:content';
 import SubpageLayout from '../../layouts/SubpageLayout.astro';
 import { formatStoryDate } from '../../lib/posts';
+import Icon from '../../components/Icon.astro';
 
 export async function getStaticPaths() {
   const stories = (await getCollection('stories')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
@@ -15,9 +16,9 @@ const { story, prev, next } = Astro.props;
 const { Content } = await render(story);
 const images = story.data.images.length ? story.data.images : story.data.image ? [story.data.image] : [];
 ---
-<SubpageLayout path="/story" parentHref="/#our-story" title="우리 교회 이야기" subtitle="Our Story" headerImage="/images/headers/about-story.png" leaf={story.data.title} showTitle={true}>
+<SubpageLayout path="/story" parentHref="/#our-story" title="우리 교회 이야기" subtitle="Our Story" headerImage="/images/headers/about-story.png" leaf={story.data.title} >
   <article class="story">
-    <p><small class="text-muted"><i class="fa fa-calendar"></i> {formatStoryDate(story.data.date)}</small></p>
+    <p><small class="text-muted"><Icon name="calendar" size={14} /> {formatStoryDate(story.data.date)}</small></p>
     {images[0] && <img src={images[0]} alt="" class="img-fluid w-100 mb-4" />}
     <div class="story-body"><Content /></div>
     {images.length > 1 && (
@@ -28,7 +29,7 @@ const images = story.data.images.length ? story.data.images : story.data.image ?
       </div>
     )}
     {story.data.permalink && (
-      <p class="mt-3"><a href={story.data.permalink} target="_blank" rel="noopener" class="btn btn-sm btn-primary"><i class="fa fa-facebook-official"></i> 페이스북에서 보기</a></p>
+      <p class="mt-3"><a href={story.data.permalink} target="_blank" rel="noopener" class="btn btn-sm btn-primary"><Icon name="facebook" size={16} /> 페이스북에서 보기</a></p>
     )}
   </article>
   <hr />

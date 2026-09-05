@@ -1,0 +1,64 @@
+// =====================================================================
+//  서브페이지 배너 + 현재 위치(브레드크럼)
+// =====================================================================
+.page-banner {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: clamp(200px, 30vw, 360px);
+  background: linear-gradient(135deg, $navy-700, $navy-900);
+  color: #fff;
+  --focus-ring: #fff;
+  overflow: hidden;
+
+  &__img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  &__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba($navy-900, .2) 0%, rgba($navy-900, .55) 55%, rgba($navy-900, .85) 100%);
+  }
+  &:not(.page-banner--image) &__scrim { display: none; }
+  &__content {
+    position: relative;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+    @include media-breakpoint-up(lg) { padding-bottom: 2.25rem; }
+  }
+  &__eyebrow {
+    margin: 0 0 .25rem;
+    font-size: .8125rem;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: $gold-300;
+  }
+  &__title {
+    margin: 0;
+    font-size: clamp(1.75rem, 1.2rem + 2.2vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff;
+    text-wrap: balance;
+    text-shadow: 0 1px 12px rgba($navy-900, .5);
+  }
+}
+
+.crumbs .breadcrumb {
+  margin: 0 0 .75rem;
+  padding: 0;
+  background: transparent;
+  font-size: .8125rem;
+  color: rgba(#fff, .85);
+  flex-wrap: nowrap;
+  overflow: hidden;
+  .breadcrumb-item { white-space: nowrap; }
+  .breadcrumb-item.active { color: #fff; overflow: hidden; text-overflow: ellipsis; }
+  .breadcrumb-item + .breadcrumb-item::before { color: rgba(#fff, .5); }
+  a { color: rgba(#fff, .85); &:hover { color: #fff; } }
+}

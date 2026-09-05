@@ -1,11 +1,12 @@
 ---
-import { getNav, findSection, findNavItem, sectionLabel } from '../lib/nav';
+/** 현재 위치 표시 (배너 안에서 사용). HOME / 섹션 / 페이지 [/ 게시글] */
+import { getNav, findSection, findNavItem } from '../lib/nav';
 interface Props {
   /** 페이지 URL (예: /about/staff) */
   path: string;
-  /** 메뉴에 없는 페이지일 때 표시할 제목 */
+  /** 메뉴에 없는 페이지의 표시 제목 */
   fallbackTitle?: string;
-  /** 게시글 등 하위 항목 제목 (있으면 마지막에 추가) */
+  /** 게시글 제목 등 마지막 항목 */
   leaf?: string;
   /** 메뉴에 없는 페이지에서 상위 항목이 가리킬 주소 (기본: path) */
   parentHref?: string;
@@ -16,23 +17,19 @@ const section = findSection(nav, path);
 const found = findNavItem(nav, path);
 const pageLabel = found?.item.label ?? fallbackTitle ?? '';
 ---
-<div class="container-fluid" id="page-header-bottom">
-  <div class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb bg-transparent">
-        <li class="breadcrumb-item"><a href="/">HOME</a></li>
-        {section && section.items && (
-          <li class="breadcrumb-item"><a href={section.items[0].href}>{sectionLabel(section)}</a></li>
-        )}
-        {leaf ? (
-          <>
-            <li class="breadcrumb-item"><a href={parentHref}>{pageLabel}</a></li>
-            <li class="breadcrumb-item active" aria-current="page">{leaf}</li>
-          </>
-        ) : (
-          <li class="breadcrumb-item active" aria-current="page">{pageLabel}</li>
-        )}
-      </ol>
-    </nav>
-  </div>
-</div>
+<nav aria-label="현재 위치" class="crumbs">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/">HOME</a></li>
+    {section?.items && (
+      <li class="breadcrumb-item"><a href={section.items[0].href}>{section.label}</a></li>
+    )}
+    {leaf ? (
+      <>
+        <li class="breadcrumb-item"><a href={parentHref}>{pageLabel}</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{leaf}</li>
+      </>
+    ) : (
+      <li class="breadcrumb-item active" aria-current="page">{pageLabel}</li>
+    )}
+  </ol>
+</nav>

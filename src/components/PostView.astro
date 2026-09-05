@@ -4,6 +4,7 @@
  */
 import { render } from 'astro:content';
 import { slugOf, formatDate, type Post } from '../lib/posts';
+import Icon from './Icon.astro';
 
 interface Props {
   post: Post;
@@ -53,7 +54,7 @@ const pdfs = post.data.attachments.filter((a) => a.file.toLowerCase().endsWith('
               <h6 class="text-muted">첨부파일</h6>
               <ul class="list-unstyled mb-0">
                 {post.data.attachments.map((a) => (
-                  <li><a href={`/files/${a.file}`} target="_blank" rel="noopener"><i class="fa fa-paperclip"></i> {a.name}</a></li>
+                  <li><a href={`/files/${a.file}`} target="_blank" rel="noopener"><Icon name="paperclip" size={16} /> {a.name}</a></li>
                 ))}
               </ul>
             </div>
@@ -74,13 +75,13 @@ const pdfs = post.data.attachments.filter((a) => a.file.toLowerCase().endsWith('
       <tbody>
         {next && (
           <tr>
-            <td class="align-middle text-center bg-light"><a href={`${base}/${slugOf(next)}`} title="다음 글"><i class="fa fa-angle-up"></i></a></td>
+            <td class="align-middle text-center bg-light"><a href={`${base}/${slugOf(next)}`} title="다음 글"><Icon name="arrow-up" size={18} /></a></td>
             <td><a href={`${base}/${slugOf(next)}`}>{next.data.title}</a></td>
           </tr>
         )}
         {prev && (
           <tr>
-            <td class="align-middle text-center bg-light"><a href={`${base}/${slugOf(prev)}`} title="이전 글"><i class="fa fa-angle-down"></i></a></td>
+            <td class="align-middle text-center bg-light"><a href={`${base}/${slugOf(prev)}`} title="이전 글"><Icon name="arrow-down" size={18} /></a></td>
             <td><a href={`${base}/${slugOf(prev)}`}>{prev.data.title}</a></td>
           </tr>
         )}

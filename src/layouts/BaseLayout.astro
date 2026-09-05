@@ -1,8 +1,7 @@
 ---
 /**
- * 모든 페이지의 뼈대: <head>, 상단 SNS 바, 헤더(로고+메뉴), 푸터
+ * 모든 페이지의 뼈대: <head>, 스킵 링크, 헤더, 본문(slot), 푸터
  */
-import 'font-awesome/css/font-awesome.min.css';
 import 'pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css';
 import '../styles/fonts.css';
 import '../styles/global.scss';
@@ -13,13 +12,9 @@ import { site } from '../data/site';
 interface Props {
   title?: string;
   description?: string;
-  /** 'front' = 메인 화면(짧은 남색 헤더), 'sub' = 서브페이지(배경 이미지 + 제목) */
-  variant?: 'front' | 'sub';
-  headerImage?: string;
-  pageTitle?: string;
   ogImage?: string;
 }
-const { title, description = site.description, variant = 'sub', headerImage, pageTitle, ogImage = site.ogImage } = Astro.props;
+const { title, description = site.description, ogImage = site.ogImage } = Astro.props;
 const fullTitle = title ? `${title} | ${site.name}` : `${site.name} ${site.nameEn}`;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
@@ -43,10 +38,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   </head>
   <body>
     <a class="skip-link" href="#main">본문으로 건너뛰기</a>
-    <Header variant={variant} headerImage={headerImage} pageTitle={pageTitle} />
-    <div id="content-wrapper">
-      <slot />
-    </div>
+    <Header />
+    <slot />
     <Footer />
     <script>
       import '../scripts/nav';

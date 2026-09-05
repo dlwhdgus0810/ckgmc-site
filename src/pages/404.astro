@@ -1,23 +1,20 @@
 ---
 /** 없는 주소로 들어왔을 때 보여주는 페이지 (Cloudflare Pages / GitHub Pages 가 404.html 을 자동으로 사용) */
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { getNav, sectionLabel } from '../lib/nav';
+import SubpageLayout from '../layouts/SubpageLayout.astro';
+import { getNav } from '../lib/nav';
 const nav = await getNav();
 ---
-<BaseLayout title="페이지를 찾을 수 없습니다" variant="sub" pageTitle="페이지를 찾을 수 없습니다">
-  <main id="main" tabindex="-1" class="container py-5 text-center">
-    <h2 class="mb-3">요청하신 페이지를 찾을 수 없습니다.</h2>
-    <p class="text-muted">주소가 바뀌었거나 삭제된 페이지일 수 있습니다. 아래 메뉴에서 원하시는 곳으로 이동해 주세요.</p>
-    <p><a href="/" class="btn btn-primary">홈으로 돌아가기</a></p>
-    <div class="row justify-content-center mt-5 text-left">
-      {nav.filter((s) => s.items).map((s) => (
-        <div class="col-6 col-md-2 mb-4">
-          <h6 class="text-primary">{sectionLabel(s)}</h6>
-          <ul class="list-unstyled small">
-            {s.items!.map((i) => <li><a href={i.href} class="text-body">{i.label}</a></li>)}
-          </ul>
-        </div>
-      ))}
-    </div>
-  </main>
-</BaseLayout>
+<SubpageLayout path="/404" title="페이지를 찾을 수 없습니다" subtitle="Page not found">
+  <p class="lead">주소가 바뀌었거나 삭제된 페이지일 수 있습니다. 아래 메뉴에서 원하시는 곳으로 이동해 주세요.</p>
+  <p><a href="/" class="btn btn-primary">홈으로 돌아가기</a></p>
+  <div class="row mt-5">
+    {nav.filter((s) => s.items).map((s) => (
+      <div class="col-6 col-md-4 col-lg mb-4">
+        <h2 class="h6 text-primary">{s.label} <small class="text-muted">{s.labelEn}</small></h2>
+        <ul class="list-unstyled small mb-0">
+          {s.items!.map((i) => <li class="mb-1"><a href={i.href} class="text-body">{i.label}</a></li>)}
+        </ul>
+      </div>
+    ))}
+  </div>
+</SubpageLayout>

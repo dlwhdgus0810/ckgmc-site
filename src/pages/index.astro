@@ -2,6 +2,7 @@
 /** 메인 화면 */
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
 import { site, quickLinks, links } from '../data/site';
 const slides = site.notices; // 과도기: Phase 4 에서 교회 소식 카드로 교체
 import { getBoardPosts, slugOf, excerptOf, thumbnailOf, formatLongDate, formatStoryDate, textExcerpt } from '../lib/posts';
@@ -20,7 +21,7 @@ const stories = (await getCollection('stories')).sort((a, b) => b.data.date.getT
 const STORY_INITIAL = 12;
 const storyExcerpt = (body: string | undefined) => textExcerpt(body, 130);
 ---
-<BaseLayout variant="front" description={site.description}>
+<BaseLayout description={site.description}>
   <div class="hero-slider" id="frontSlider">
     <div class="hero-track">
       {slides.map((s, i) => (
@@ -151,7 +152,7 @@ const storyExcerpt = (body: string | undefined) => textExcerpt(body, 130);
                 {s.data.image ? <img src={s.data.image} alt="" loading="lazy" /> : <div class="bg-light" style="aspect-ratio:4/3"></div>}
               </a>
               <figcaption>
-                <p class="mb-2"><small class="text-muted"><i class="fa fa-calendar"></i> {formatStoryDate(s.data.date)}</small></p>
+                <p class="mb-2"><small class="text-muted"><Icon name="calendar" size={14} /> {formatStoryDate(s.data.date)}</small></p>
                 <a href={`/story/${s.id}`}><p class="card-text">{storyExcerpt(s.body)}</p></a>
               </figcaption>
             </figure>
@@ -163,7 +164,7 @@ const storyExcerpt = (body: string | undefined) => textExcerpt(body, 130);
           </div>
         )}
         <div class="text-center">
-          <a href={site.social.facebook} target="_blank" rel="noopener" class="text-muted"><i class="fa fa-facebook-official"></i> 페이스북에서 더 보기</a>
+          <a href={site.social.facebook} target="_blank" rel="noopener" class="text-muted"><Icon name="facebook" size={16} /> 페이스북에서 더 보기</a>
         </div>
       </div>
     </div>

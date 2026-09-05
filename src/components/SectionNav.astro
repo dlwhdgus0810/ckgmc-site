@@ -1,0 +1,30 @@
+---
+/**
+ * 섹션 내비: 데스크톱은 왼쪽 고정 목록, 모바일은 배너 아래 가로 스크롤 탭 (마크업은 하나, CSS 로 전환)
+ */
+import { getNav, findSection } from '../lib/nav';
+interface Props { path: string }
+const { path } = Astro.props;
+const section = findSection(await getNav(), path);
+---
+{section?.items && (
+  <nav class="section-nav" aria-label={`${section.label} 하위 메뉴`}>
+    <div class="section-nav__title">
+      <strong>{section.label}</strong>
+      <span>{section.labelEn}</span>
+    </div>
+    <ul class="section-nav__list">
+      {section.items.map((item) => (
+        <li><a href={item.href} aria-current={item.href === path ? 'page' : undefined}>{item.label}</a></li>
+      ))}
+    </ul>
+  </nav>
+)}
+<script>
+  // 모바일 탭에서 현재 페이지가 보이도록 가로 스크롤 위치를 맞춥니다 (세로 스크롤은 건드리지 않음)
+  const list = document.querySelector<HTMLElement>('.section-nav__list');
+  const cur = list?.querySelector<HTMLElement>('a[aria-current="page"]');
+  if (list && cur && window.matchMedia('(max-width: 991.98px)').matches) {
+    list.scrollLeft = cur.offsetLeft - list.clientWidth / 2 + cur.clientWidth / 2;
+  }
+</script>
