@@ -2,8 +2,9 @@
 //  섹션 내비 (서브페이지 왼쪽 메뉴 / 모바일 가로 탭)
 // =====================================================================
 .page-body {
-  padding: 1.5rem 0 3rem;
-  @include media-breakpoint-up(lg) { padding: 3rem 0 4rem; }
+  padding-top: 1.5rem;
+  padding-bottom: 3rem;
+  @include media-breakpoint-up(lg) { padding-top: 3rem; padding-bottom: 4rem; }
 }
 .section-nav {
   &__list { list-style: none; margin: 0; padding: 0; }
