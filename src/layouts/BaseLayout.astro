@@ -3,6 +3,7 @@
  * 모든 페이지의 뼈대: <head>, 상단 SNS 바, 헤더(로고+메뉴), 푸터
  */
 import 'font-awesome/css/font-awesome.min.css';
+import '../styles/fonts.css';
 import '../styles/global.scss';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -38,13 +39,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#364e91" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@700&family=Nanum+Myeongjo:wght@400;700&family=Patua+One&display=swap"
-      rel="stylesheet"
-    />
-    <link href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css" rel="stylesheet" />
+    <link rel="preload" href="/fonts/SUIT-Variable.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body>
     <Header variant={variant} headerImage={headerImage} pageTitle={pageTitle} />

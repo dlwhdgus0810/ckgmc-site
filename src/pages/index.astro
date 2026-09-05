@@ -33,9 +33,9 @@ const storyExcerpt = (body: string | undefined) => textExcerpt(body, 130);
       ))}
     </div>
     {slides.length > 1 && (
-      <ol class="hero-indicators">
-        {slides.map((_, i) => <li class:list={{ active: i === 0 }} data-slide-to={i} role="button" aria-label={`${i + 1}번째 슬라이드`}></li>)}
-      </ol>
+      <div class="hero-indicators" role="group" aria-label="슬라이드 선택">
+        {slides.map((_, i) => <button type="button" class:list={{ active: i === 0 }} data-slide-to={i} aria-label={`${i + 1}번째 슬라이드`}></button>)}
+      </div>
     )}
   </div>
 
@@ -184,7 +184,7 @@ const storyExcerpt = (body: string | undefined) => textExcerpt(body, 130);
   <script>
     // 메인 슬라이드: 5초마다 자동 전환, 아래 막대를 누르면 해당 슬라이드로 이동
     const slides = Array.from(document.querySelectorAll<HTMLElement>('.hero-slide'));
-    const dots = Array.from(document.querySelectorAll<HTMLElement>('.hero-indicators li'));
+    const dots = Array.from(document.querySelectorAll<HTMLElement>('.hero-indicators button'));
     let current = 0;
     let timer: number | undefined;
     const go = (n: number) => {

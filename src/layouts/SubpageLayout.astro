@@ -16,16 +16,18 @@ interface Props {
   description?: string;
   /** 게시글 제목 등 브레드크럼 마지막 항목 */
   leaf?: string;
+  /** 메뉴에 없는 페이지에서 브레드크럼 상위 항목 주소 */
+  parentHref?: string;
   /** 본문 상단에 "제목 <small>부제</small>" 자동 표시 여부 */
   showTitle?: boolean;
 }
-const { path, title, subtitle, headerImage, description, leaf, showTitle = true } = Astro.props;
+const { path, title, subtitle, headerImage, description, leaf, parentHref, showTitle = true } = Astro.props;
 const navItem = findNavItem(path);
 const hasSidebar = !!findSection(path);
 const headerTitle = navItem?.item.label ?? (subtitle ? `${title} ${subtitle}` : title);
 ---
 <BaseLayout title={leaf ?? title} description={description} variant="sub" headerImage={headerImage} pageTitle={headerTitle}>
-  <Breadcrumb path={path} fallbackTitle={title} leaf={leaf} />
+  <Breadcrumb path={path} fallbackTitle={title} leaf={leaf} parentHref={parentHref} />
   <div class="container">
     <div class="row">
       <div class="col">

@@ -102,8 +102,9 @@ header.site-header {
     }
   }
   @include media-breakpoint-up(md) {
-    // 데스크톱: 마우스를 올리면 하위 메뉴 표시
-    .nav-item.dropdown:hover > .dropdown-menu { display: block; }
+    // 데스크톱: 마우스를 올리거나 키보드 포커스가 들어오면 하위 메뉴 표시
+    .nav-item.dropdown:hover > .dropdown-menu,
+    .nav-item.dropdown:focus-within > .dropdown-menu { display: block; }
   }
   @include media-breakpoint-between(md, lg) {
     .nav-item { margin: 0 .3em; }
@@ -351,13 +352,16 @@ header.site-header {
     justify-content: center;
     gap: 6px;
     z-index: 2;
-    margin: 0; padding: 0; list-style: none;
-    li {
+    margin: 0; padding: 0;
+    button {
       width: 30px; height: 3px;
+      padding: 0;
+      border: 0;
       background: #fff;
       opacity: .5;
       cursor: pointer;
       &.active { opacity: 1; }
+      &:focus-visible { outline: 2px solid #ffc401; outline-offset: 2px; }
     }
   }
 }

@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
@@ -7,6 +8,8 @@ export default defineConfig({
   site: 'https://ckgmc.org',
   trailingSlash: 'ignore',
   build: { format: 'directory' },
+  // sitemap.xml 자동 생성 (검색엔진 등록용)
+  integrations: [sitemap()],
   vite: {
     css: {
       preprocessorOptions: {

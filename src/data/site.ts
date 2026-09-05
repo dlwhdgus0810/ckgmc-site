@@ -31,10 +31,16 @@ export const site = {
   newFamilyFormUrl: 'https://forms.gle/1YSckhKR3hkLQJv86',
   /**
    * 문의/세례 신청 폼 전송 주소.
-   * 정적 사이트에는 서버가 없으므로 Formspree(https://formspree.io) 같은 무료 폼 서비스를 사용합니다.
-   * 예: 'https://formspree.io/f/xxxxxxxx'  — 비워두면 이메일 링크(mailto)로 대체됩니다.
+   * 정적 사이트에는 서버가 없으므로 무료 폼 전송 서비스 FormSubmit(https://formsubmit.co)을 사용합니다.
+   * 가입이 필요 없고, 첫 번째 전송 때 아래 이메일로 "활성화(Activate)" 확인 메일이 한 번 오는데
+   * 그 링크를 누르면 이후부터 문의 내용이 이메일로 도착합니다.
+   * 이메일 주소를 페이지 소스에 노출하지 않으려면 활성화 후 FormSubmit이 알려주는 임의 문자열 주소
+   * (예: 'https://formsubmit.co/1a2b3c4d5e6f')로 바꿔 넣으세요. Formspree 주소를 넣어도 그대로 동작합니다.
+   * 비워두면 이메일 링크(mailto)로 대체됩니다.
    */
-  formEndpoint: '',
+  formEndpoint: 'https://formsubmit.co/mchrissong@gmail.com',
+  /** 폼 전송 후 이동할 감사 페이지 */
+  formThanksPath: '/thanks',
   /** 구글 지도 embed 주소 (찾아오시는 길) */
   mapEmbed:
     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3102.497794014454!2d-94.65218868426709!3d38.95829997956136!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x87c0ebe0ac4619c7%3A0x4cf299b35b41a697!2z7LqU7IKs7Iqk7ZWc7J247KSR7JWZ7Jew7ZWp6rCQ66as6rWQ7ZqMIENlbnRyYWwgS29yZWFuIFVuaXRlZCBNZXRob2Rpc3QgQ2h1cmNo!5e0!3m2!1sko!2skr!4v1527926670944',
@@ -44,8 +50,8 @@ export const site = {
 export const slides: { image: string; alt: string; href?: string }[] = [
   { image: '/images/slides/slide-1.jpg', alt: '청년부 수련회 9/6-7 Springfield, MO' },
   { image: '/images/slides/slide-2.jpg', alt: '' },
-  { image: '/images/slides/slide-3.png', alt: '' },
-  { image: '/images/slides/slide-4.png', alt: '' },
+  { image: '/images/slides/slide-3.jpg', alt: '' },
+  { image: '/images/slides/slide-4.jpg', alt: '' },
 ];
 
 /** 메인 화면 상단 바로가기 4개 */

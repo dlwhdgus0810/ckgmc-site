@@ -1,5 +1,6 @@
 ---
 import { site } from '../../data/site';
+const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
 ---
 <div class="row">
   <div class="col-sm">
@@ -16,6 +17,9 @@ import { site } from '../../data/site';
     {site.formEndpoint ? (
       <form action={site.formEndpoint} method="POST" id="request-form">
         <input type="hidden" name="_subject" value="[홈페이지 문의]" />
+        <input type="hidden" name="_next" value={thanksUrl} />
+        <input type="hidden" name="_template" value="table" />
+        <input type="text" name="_honey" class="d-none" tabindex="-1" autocomplete="off" aria-hidden="true" />
         <div class="form-group">
           <label for="name" class="sr-only">이름 Name</label>
           <input id="name" class="form-control" name="name" type="text" placeholder="Name" required />

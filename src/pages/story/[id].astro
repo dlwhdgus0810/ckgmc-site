@@ -15,7 +15,7 @@ const { story, prev, next } = Astro.props;
 const { Content } = await render(story);
 const images = story.data.images.length ? story.data.images : story.data.image ? [story.data.image] : [];
 ---
-<SubpageLayout path="/story" title="우리 교회 이야기" subtitle="Our Story" headerImage="/images/headers/about-story.png" leaf={story.data.title} showTitle={true}>
+<SubpageLayout path="/story" parentHref="/#our-story" title="우리 교회 이야기" subtitle="Our Story" headerImage="/images/headers/about-story.png" leaf={story.data.title} showTitle={true}>
   <article class="story">
     <p><small class="text-muted"><i class="fa fa-calendar"></i> {formatStoryDate(story.data.date)}</small></p>
     {images[0] && <img src={images[0]} alt="" class="img-fluid w-100 mb-4" />}

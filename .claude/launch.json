@@ -3,8 +3,8 @@
   "configurations": [
     {
       "name": "ckgmc-site",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["astro", "dev", "--port", "4321", "--host", "127.0.0.1"],
+      "runtimeExecutable": "zsh",
+      "runtimeArgs": ["-c", "source ~/.nvm/nvm.sh && nvm use >/dev/null && npx astro dev --port 4321 --host 127.0.0.1"],
       "port": 4321
     }
   ]

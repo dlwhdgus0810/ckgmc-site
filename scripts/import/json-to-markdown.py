@@ -1,5 +1,14 @@
 #!/usr/bin/env python3.11
-"""Convert scraped JSON into Astro content markdown files."""
+"""scrape-ckgmc.py 가 만든 JSON(data/*.json, fb/posts.json)과 내려받은 파일을
+Astro 콘텐츠(src/content/posts, series, stories)와 public/ 로 변환·복사합니다.
+
+    python3 scripts/import/json-to-markdown.py            # 프로젝트 루트 기준
+    python3 scripts/import/json-to-markdown.py /path/to/site
+
+주의: 기존 src/content/posts, series, stories 폴더를 지우고 다시 만듭니다.
+DB 덤프에서 직접 JSON 을 만들 때는 게시판별로 data/<board>.json 에
+[{pid, title, datetime "YYYY-MM-DD HH:MM", writer, youtube, thumb, body(HTML), attachments:[{name, file}]}, ...]
+형태로 저장하면 됩니다."""
 import json, os, re, html, glob, shutil, sys
 SRC = os.path.dirname(os.path.abspath(__file__))
 SITE = sys.argv[1] if len(sys.argv) > 1 else os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -71,6 +80,17 @@ for s in series:
     if body and not body.startswith('<'): body = f'<p>{html.escape(body)}</p>'
     open(os.path.join(SERIES, f'{s["id"]}.md'), 'w', encoding='utf-8').write('\n'.join(fm) + '\n' + (f'<div>\n{body}\n</div>\n' if body else ''))
 print('series', len(series))
+
+# --- copy downloaded images / files into public/ ---
+for src_dir, dst_dir in (('img/posts', 'public/images/posts'), ('img/series', 'public/images/series'), ('files', 'public/files')):
+    s_dir = os.path.join(SRC, src_dir); d_dir = os.path.join(SITE, dst_dir)
+    if not os.path.isdir(s_dir): continue
+    os.makedirs(d_dir, exist_ok=True)
+    n = 0
+    for name in os.listdir(s_dir):
+        if not os.path.exists(os.path.join(d_dir, name)):
+            shutil.copy(os.path.join(s_dir, name), os.path.join(d_dir, name)); n += 1
+    print(f'copied {n} new files -> {dst_dir}')
 
 # --- stories (facebook) ---
 out_img = os.path.join(SITE, 'public/images/stories')

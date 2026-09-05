@@ -1,5 +1,6 @@
 ---
 import { site } from '../../data/site';
+const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
 ---
 <div class="p-3 bg-light row">
   <div class="col-sm">
@@ -7,6 +8,9 @@ import { site } from '../../data/site';
     {site.formEndpoint ? (
       <form action={site.formEndpoint} method="POST" id="baptize-request-form">
         <input type="hidden" name="_subject" value="[세례 신청]" />
+        <input type="hidden" name="_next" value={thanksUrl} />
+        <input type="hidden" name="_template" value="table" />
+        <input type="text" name="_honey" class="d-none" tabindex="-1" autocomplete="off" aria-hidden="true" />
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="bp-name">이름 Name</label>
