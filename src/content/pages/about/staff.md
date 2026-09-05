@@ -12,8 +12,6 @@ order: 40
 <div><small>(from the left, Rev. John Park, Pastor Seolhee In, Lead Pastor Rev. Myungchul Song, Sanghee Kim, Pastor Victor Choi)</small></div>
 </div>
 <div class="my-5"></div>
-<h2>섬기는 이들 <small>Our Pastors &amp; Staff</small></h2>
-<hr>
 <div class="row">
 <div class="col-sm-4"><img class="img-fluid d-block my-1 mx-auto" src="/images/staff/song-myungchul.jpg" alt="송명철 목사"></div>
 <div class="col-sm">

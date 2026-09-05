@@ -1,48 +1,62 @@
 ---
-/**
- * 설교 시리즈 상세: 대표 이미지 자리에 유튜브 플레이어, 아래에 에피소드 목록
- */
+/** 설교 시리즈 상세: 플레이어 + 소개 + 에피소드 목록 (재생 버튼으로 영상 전환) */
 import { render, type CollectionEntry } from 'astro:content';
 import Icon from './Icon.astro';
+import { formatDate } from '../lib/posts';
+
 interface Props { series: CollectionEntry<'series'>; base: string }
 const { series, base } = Astro.props;
 const { Content } = await render(series);
 const total = series.data.episodes.length;
+const hasContent = (series.body ?? '').trim().length > 0;
 ---
-<div id="series">
-  <div id="yt-player" style={`background-image:url(${series.data.thumbnail})`}>
-    <img src={series.data.thumbnail} alt="" class="thumbnail img-fluid" />
+<article class="series">
+  <header class="series__header">
+    <h1 class="series__title">{series.data.title}</h1>
+    <p class="card-tile__meta">{total}편 · {formatDate(series.data.updated ?? series.data.date)} 업데이트</p>
+  </header>
+
+  <div id="yt-player" class="media-frame series__player" aria-live="polite">
+    <img class="series__poster" src={series.data.thumbnail} alt="" width="960" height="540" />
+    {total > 0 && <p class="series__hint">아래 목록에서 재생할 설교를 선택하세요</p>}
   </div>
-  <h3 class="series-title">{series.data.title}</h3>
-  <div class="series-content mb-4"><Content /></div>
-  <div id="episodes">
-    {total === 0 && <p class="text-muted text-center">등록된 영상이 없습니다.</p>}
-    {series.data.episodes.map((ep, i) => (
-      <section class="episode">
-        <div class="episode-title">
-          <span class="badge badge-dark"><span class="current_no">{i + 1}</span> of <span class="total_count">{total}</span></span>
-          <span class="title">{ep.title}</span>
-        </div>
-        <div class="episode-control">
-          <button type="button" class="btn btn-sm btn-outline-info" data-youtube-id={ep.youtube}><Icon name="play" size={14} /> PLAY</button>
-        </div>
-      </section>
-    ))}
-  </div>
-</div>
-<div class="text-center py-4">
-  <a href={base} class="btn btn-sm btn-dark">목록으로 돌아가기</a>
-</div>
+
+  {hasContent && <div class="series__content entry-content"><Content /></div>}
+
+  {total === 0 ? (
+    <p class="text-muted text-center">등록된 영상이 없습니다.</p>
+  ) : (
+    <ol class="episode-list">
+      {series.data.episodes.map((ep, i) => (
+        <li class="episode">
+          <span class="episode__no" aria-hidden="true">{i + 1}</span>
+          <span class="episode__title">{ep.title}</span>
+          <button type="button" class="btn btn-outline-primary btn-sm" data-youtube-id={ep.youtube} data-title={ep.title} aria-pressed="false" aria-label={`${i + 1}편 재생: ${ep.title}`}>
+            <Icon name="play" size={14} /> 재생
+          </button>
+        </li>
+      ))}
+    </ol>
+  )}
+</article>
+<p class="text-center mt-4"><a href={base} class="btn btn-outline-primary">목록으로</a></p>
 
 <script>
   const player = document.getElementById('yt-player');
-  document.querySelectorAll<HTMLButtonElement>('#episodes [data-youtube-id]').forEach((btn) => {
+  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('.episode [data-youtube-id]'));
+  buttons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const id = btn.dataset.youtubeId;
       if (!player || !id) return;
-      player.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" title="설교 영상" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
-      document.querySelectorAll('#episodes .episode.active').forEach((el) => el.classList.remove('active'));
-      btn.closest('.episode')?.classList.add('active');
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+      iframe.title = btn.dataset.title ?? '설교 영상';
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+      iframe.setAttribute('allowfullscreen', '');
+      player.replaceChildren(iframe);
+      buttons.forEach((b) => { b.setAttribute('aria-pressed', 'false'); b.closest('.episode')?.classList.remove('is-active'); });
+      btn.setAttribute('aria-pressed', 'true');
+      btn.closest('.episode')?.classList.add('is-active');
       player.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });

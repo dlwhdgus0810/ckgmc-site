@@ -1,0 +1,83 @@
+// =====================================================================
+//  게시글·시리즈 상세, 시리즈 목록
+// =====================================================================
+.post {
+  &__header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid $line; }
+  &__title { margin-bottom: .75rem; font-size: clamp(1.375rem, 1rem + 1.4vw, 1.875rem); line-height: 1.3; }
+  &__meta {
+    display: flex; flex-wrap: wrap; gap: .25rem 1.5rem;
+    margin: 0; font-size: .9rem; color: $ink-600;
+    dt { display: inline; margin-right: .35rem; font-weight: 600; &::after { content: ':'; } }
+    dd { display: inline; margin: 0; }
+  }
+  &__video { margin-bottom: 1.5rem; }
+  &__body { max-width: 72ch; > :last-child { margin-bottom: 0; } }
+  &__files {
+    margin-top: 1.5rem;
+    ul { list-style: none; margin: 0; padding: 0; }
+    li a { display: inline-flex; align-items: center; gap: .4rem; }
+  }
+  &__nav {
+    display: grid; gap: 1rem; margin-top: 2.5rem;
+    @include media-breakpoint-up(md) { grid-template-columns: 1fr 1fr; }
+  }
+  &__nav-link { display: flex; flex-direction: column; gap: .25rem; padding: 1rem 1.125rem; }
+  &__nav-title { font-weight: 600; color: $ink-900; }
+}
+
+.pdf-card {
+  margin-top: 1.5rem;
+  border: 1px solid $line;
+  border-radius: $border-radius;
+  overflow: hidden;
+  &__head {
+    display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem;
+    padding: 1rem 1.125rem;
+    background: $surface;
+    > .icon { flex: none; color: $gold-700; }
+    > div:not(.pdf-card__actions) { display: flex; flex-direction: column; flex: 1; min-width: 12rem; }
+    strong { word-break: break-all; }
+    small { color: $ink-600; }
+  }
+  &__actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+  &__frame { display: block; width: 100%; height: min(80vh, 1100px); border: 0; border-top: 1px solid $line; background: #525659; }
+}
+
+.series {
+  &__header { margin-bottom: 1.25rem; }
+  &__title { margin-bottom: .25rem; font-size: clamp(1.375rem, 1rem + 1.4vw, 1.875rem); }
+  &__player { margin-bottom: 1.5rem; background: $navy-900; }
+  &__poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  &__hint {
+    position: absolute; left: 0; right: 0; bottom: 0;
+    margin: 0; padding: .5rem 1rem;
+    background: rgba($navy-900, .75); color: #fff;
+    font-size: .875rem; text-align: center;
+  }
+  &__content { margin-bottom: 1.5rem; }
+}
+.episode-list {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: .5rem;
+  .episode {
+    display: flex; align-items: center; gap: .75rem;
+    padding: .75rem 1rem;
+    border: 1px solid $line; border-radius: $border-radius; background: #fff;
+    &.is-active { border-color: $navy; background: $navy-50; }
+    &__no {
+      flex: none; width: 2rem; height: 2rem;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 50%; background: $surface;
+      font-size: .875rem; font-weight: 700; color: $navy;
+    }
+    &__title { flex: 1; min-width: 0; font-size: .9375rem; }
+    .btn { flex: none; }
+  }
+}
+.series-list {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: .75rem;
+  &__item { flex-direction: row; align-items: center; gap: 1rem; padding: .75rem 1rem; h3 { color: $ink-900; } }
+  &__thumb { flex: none; width: 120px; height: auto; aspect-ratio: 16 / 9; object-fit: cover; border-radius: $border-radius-sm; }
+  .icon { margin-left: auto; flex: none; color: $ink-600; }
+}

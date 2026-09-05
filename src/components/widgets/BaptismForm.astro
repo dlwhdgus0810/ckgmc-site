@@ -2,9 +2,9 @@
 import { site } from '../../data/site';
 const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
 ---
-<div class="p-3 bg-light row">
+<div class="p-3 bg-light row rounded">
   <div class="col-sm">
-    <h5>세례 신청</h5>
+    <h2 class="h5">세례 신청</h2>
     {site.formEndpoint ? (
       <form action={site.formEndpoint} method="POST" id="baptize-request-form">
         <input type="hidden" name="_subject" value="[세례 신청]" />
@@ -14,7 +14,7 @@ const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="bp-name">이름 Name</label>
-            <input id="bp-name" class="form-control" name="name" type="text" required />
+            <input id="bp-name" class="form-control" name="name" type="text" autocomplete="name" required />
           </div>
           <div class="form-group col-md-6">
             <label for="bp-type">신청 구분</label>
@@ -28,11 +28,11 @@ const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
         <div class="form-row">
           <div class="form-group col-md-6">
             <label for="bp-email">이메일 E-mail</label>
-            <input id="bp-email" class="form-control" name="email" type="email" required />
+            <input id="bp-email" class="form-control" name="email" type="email" autocomplete="email" required />
           </div>
           <div class="form-group col-md-6">
             <label for="bp-phone">전화 Phone</label>
-            <input id="bp-phone" class="form-control" name="phone" type="tel" />
+            <input id="bp-phone" class="form-control" name="phone" type="tel" autocomplete="tel" />
           </div>
         </div>
         <div class="form-group">

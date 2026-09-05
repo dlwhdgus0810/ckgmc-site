@@ -8,7 +8,7 @@ order: 20
 <div class="row">
 <div class="col-sm-5"><img class="img-fluid mb-4" src="/images/pages/journal-with-jesus.jpeg" alt="예수동행일기"></div>
 <div class="col-sm">
-<h2 class="mb-2"><strong style="color: rgba(66,135,195,0.98);">예수동행일기 Journal with Jesus</strong></h2>
+<h2 class="h4 mb-2">임마누엘 예수님과 관계를 맺는 훈련</h2>
 <p>예수동행일기는 위드지저스미니스트리(With Jesus Ministry 대표: 유기성 목사)와 함께 하는 사역으로써 임마누엘이신 예수님과 관계를 맺는 훈련입니다. 아침에 일어나서 잠 잘 때까지 나와 함께 하시는 예수님을 얼마나(어떻게) 생각했고 주님께서 어떠한 생각과 마음을 주셨는지, 또한 그 일에 어떻게 순종했는지를 일기 형태로 기록해 보는 것입니다. 생활 일기의 초점이 자기 자신의 활동이라면, 예수동행일기의 초점은 주님의 일하심입니다. 캔사스한인중앙글로벌감리교회는 위지엠과 함께 동역하는 교회로서 예수동행일기에 참여하고 있습니다.</p>
 </div>
 </div>

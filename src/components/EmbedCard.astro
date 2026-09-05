@@ -1,0 +1,27 @@
+---
+/**
+ * 외부 서비스 iframe 카드 (헌금, 교인등록 폼 등).
+ * 항상 "새 창에서 열기" 버튼을 먼저 보여주고, mobile='button-only' 이면 폰에서는 iframe 을 숨깁니다.
+ */
+import Icon from './Icon.astro';
+interface Props {
+  title: string;
+  src: string;
+  openUrl: string;
+  openLabel?: string;
+  height?: string;
+  mobile?: 'button-only' | 'iframe';
+  note?: string;
+}
+const { title, src, openUrl, openLabel = '새 창에서 열기', height = '640px', mobile = 'iframe', note } = Astro.props;
+---
+<section class="embed-card" aria-label={title}>
+  <div class="embed-card__head">
+    <div>
+      <strong>{title}</strong>
+      {note && <small>{note}</small>}
+    </div>
+    <a class="btn btn-primary" href={openUrl} target="_blank" rel="noopener"><Icon name="external" size={16} /> {openLabel}<span class="sr-only"> (새 창)</span></a>
+  </div>
+  <iframe class:list={['embed-card__frame', { 'd-none d-md-block': mobile === 'button-only' }]} src={src} title={title} loading="lazy" style={`height:${height}`}></iframe>
+</section>

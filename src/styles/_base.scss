@@ -61,12 +61,19 @@ h1, h2 { text-wrap: balance; }
 }
 .visually-hidden { @extend .sr-only; }
 
-// 콘텐츠 영역 공통
+// 콘텐츠 영역 공통 (마크다운 본문)
 .entry-content {
   img { max-width: 100%; height: auto; }
   iframe { max-width: 100%; }
   .table td, .table th { word-break: keep-all; }
-  h2 small, h3 small { font-size: .6em; color: $ink-600; font-weight: 500; }
+  h2 small, h3 small, h4 small { font-size: .6em; color: $ink-600; font-weight: 500; }
+  h2 { margin-top: .5rem; }
+  h4 { font-size: 1.25rem; margin-top: 1.5rem; }
+  h5 { font-size: 1.125rem; font-weight: 700; margin-top: 1rem; }
+  ol li { padding: .2rem 0; }
+  dl dt { margin-top: .75rem; }
+  dt .no { display: inline-block; min-width: 1.6em; color: $navy; font-weight: 700; }
+  .lead { font-weight: 400; }
 }
 
 // 움직임을 줄이도록 설정한 사용자에게는 애니메이션을 끕니다

@@ -1,7 +1,13 @@
 ---
 import { site, mapEmbedUrl, mapsDirectionsUrl } from '../../data/site';
+import Icon from '../Icon.astro';
 ---
-<div class="embed-responsive embed-responsive-16by9 mb-3">
-  <iframe style="border:0;" src={mapEmbedUrl} allowfullscreen loading="lazy" title="찾아오시는 길 지도"></iframe>
+<div class="map-card">
+  <div class="media-frame">
+    <iframe src={mapEmbedUrl} allowfullscreen loading="lazy" title="찾아오시는 길 지도"></iframe>
+  </div>
+  <div class="map-card__foot">
+    <address><Icon name="map-pin" size={18} /> {site.address}</address>
+    <a class="btn btn-outline-primary btn-sm" href={mapsDirectionsUrl} target="_blank" rel="noopener"><Icon name="external" size={16} /> Google 지도로 길찾기</a>
+  </div>
 </div>
-<p><address class="mb-2">{site.address}</address><a class="btn btn-outline-primary btn-sm" href={mapsDirectionsUrl} target="_blank" rel="noopener">Google 지도로 길찾기</a></p>

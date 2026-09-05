@@ -1,9 +1,7 @@
 ---
-/**
- * 게시판 목록 (카드 3열) + 페이지네이션
- */
+/** 게시판 목록 (카드 3열) + 페이지네이션 */
 import Pagination from './Pagination.astro';
-import { getBoardPosts, slugOf, excerptOf, thumbnailOf, formatDateTime, isNew } from '../lib/posts';
+import { getBoardPosts, slugOf, excerptOf, thumbnailOf, formatDateTime, isoDate, isNew } from '../lib/posts';
 
 interface Props {
   board: string;
@@ -17,28 +15,24 @@ const all = await getBoardPosts(board);
 const totalPages = Math.max(1, Math.ceil(all.length / perPage));
 const posts = all.slice((page - 1) * perPage, page * perPage);
 ---
-<section id="loop-blog">
+<section id="loop-blog" aria-label="글 목록">
   {posts.length === 0 ? (
     <p class="text-muted py-4 text-center">아직 등록된 글이 없습니다.</p>
   ) : (
     <div class="row">
       {posts.map((post) => (
-        <div class="col-sm-6 col-md-4 mb-4">
-          <div class="card board-card hover-scale">
-            <a href={`${base}/${slugOf(post)}`}>
-              <img src={thumbnailOf(post)} alt="" class="card-img-top" loading="lazy" />
-            </a>
-            <div class="card-body">
-              <a href={`${base}/${slugOf(post)}`}>
-                <h5 class="card-title">{post.data.title}</h5>
-                <p class="card-text">{excerptOf(post)}</p>
-                <p class="card-text">
-                  <small class="text-muted">{formatDateTime(post.data.date)}</small>
-                  {isNew(post.data.date) && <span class="badge badge-pill badge-success position-absolute" style="top:10px;left:10px;">NEW</span>}
-                </p>
-              </a>
+        <div class="col-sm-6 col-lg-4 mb-4">
+          <a class="card-tile" href={`${base}/${slugOf(post)}`}>
+            <div class="card-tile__media"><img src={thumbnailOf(post)} alt="" loading="lazy" width="640" height="360" /></div>
+            <div class="card-tile__body">
+              <h2 class="card-tile__title h6">{post.data.title}</h2>
+              <p class="card-tile__text">{excerptOf(post)}</p>
+              <p class="card-tile__meta">
+                <time datetime={isoDate(post.data.date)}>{formatDateTime(post.data.date)}</time>
+                {isNew(post.data.date) && <span class="badge-new">NEW</span>}
+              </p>
             </div>
-          </div>
+          </a>
         </div>
       ))}
     </div>

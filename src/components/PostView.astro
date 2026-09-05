@@ -1,94 +1,97 @@
 ---
 /**
- * 게시글 상세 보기: 제목, 작성자/날짜, 유튜브 영상, 본문, 첨부파일, 이전/다음 글
+ * 게시글 상세: 제목·작성자·날짜 → 유튜브 영상 → 본문 → PDF(주보) → 첨부 → 이전/다음 글
  */
 import { render } from 'astro:content';
-import { slugOf, formatDate, type Post } from '../lib/posts';
 import Icon from './Icon.astro';
+import { slugOf, formatDate, isoDate, pdfOf, fileUrl, textExcerpt, type Post } from '../lib/posts';
 
 interface Props {
   post: Post;
   base: string;
+  /** 더 오래된 글 */
   prev?: Post;
+  /** 더 최신 글 */
   next?: Post;
 }
 const { post, base, prev, next } = Astro.props;
 const { Content } = await render(post);
-const pdfs = post.data.attachments.filter((a) => a.file.toLowerCase().endsWith('.pdf'));
+const pdf = pdfOf(post);
+const otherFiles = post.data.attachments.filter((a) => a !== pdf);
+// 옮겨온 주보 글은 본문이 PDF 링크 한 줄뿐이라 미리보기와 중복되므로 생략
+const norm = (s: string) => s.replace(/\s+/g, '');
+const bodyIsPdfLink = !!pdf && norm(textExcerpt(post.body, 300)) === norm(pdf.name);
+const hasBody = (post.body ?? '').trim().length > 0 && !bodyIsPdfLink;
 ---
-<article>
-  <h3 class="entry-single-title text-center">{post.data.title}</h3>
-  <table class="table">
-    <tbody>
-      <tr>
-        <td class="text-center">
-          <div class="d-flex flex-sm-column flex-md-row justify-content-around">
-            {post.data.writer && <div><span class="badge badge-pill badge-secondary">WRITER</span> {post.data.writer}</div>}
-            <div><span class="badge badge-pill badge-secondary">DATE</span> {formatDate(post.data.date)}</div>
-          </div>
-        </td>
-      </tr>
-      {post.data.youtube && (
-        <tr>
-          <td class="p-3">
-            <div class="embed-responsive embed-responsive-16by9">
-              <iframe
-                class="embed-responsive-item"
-                src={`https://www.youtube.com/embed/${post.data.youtube}?rel=0`}
-                title={post.data.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-                loading="lazy"
-              ></iframe>
-            </div>
-          </td>
-        </tr>
-      )}
-      <tr>
-        <td class="p-3">
-          <div class="py-3 post-body">
-            <Content />
-          </div>
-          {post.data.attachments.length > 0 && (
-            <div class="py-2">
-              <h6 class="text-muted">첨부파일</h6>
-              <ul class="list-unstyled mb-0">
-                {post.data.attachments.map((a) => (
-                  <li><a href={`/files/${a.file}`} target="_blank" rel="noopener"><Icon name="paperclip" size={16} /> {a.name}</a></li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {pdfs.length > 0 && (
-            <div class="py-3">
-              <iframe src={`/files/${pdfs[0].file}#view=FitH`} title={pdfs[0].name} style="width:100%;height:80vh;border:1px solid #dee2e6;" loading="lazy"></iframe>
-            </div>
-          )}
-        </td>
-      </tr>
-    </tbody>
-  </table>
+<article class="post">
+  <header class="post__header">
+    <h1 class="post__title">{post.data.title}</h1>
+    <dl class="post__meta">
+      {post.data.writer && (<><dt>작성자</dt><dd>{post.data.writer}</dd></>)}
+      <dt>날짜</dt>
+      <dd><time datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time></dd>
+    </dl>
+  </header>
 
-  {(prev || next) && (
-    <table class="table">
-      <colgroup><col width="40" /><col /></colgroup>
-      <tbody>
-        {next && (
-          <tr>
-            <td class="align-middle text-center bg-light"><a href={`${base}/${slugOf(next)}`} title="다음 글"><Icon name="arrow-up" size={18} /></a></td>
-            <td><a href={`${base}/${slugOf(next)}`}>{next.data.title}</a></td>
-          </tr>
-        )}
-        {prev && (
-          <tr>
-            <td class="align-middle text-center bg-light"><a href={`${base}/${slugOf(prev)}`} title="이전 글"><Icon name="arrow-down" size={18} /></a></td>
-            <td><a href={`${base}/${slugOf(prev)}`}>{prev.data.title}</a></td>
-          </tr>
-        )}
-      </tbody>
-    </table>
+  {post.data.youtube && (
+    <div class="media-frame post__video">
+      <iframe
+        src={`https://www.youtube.com/embed/${post.data.youtube}?rel=0`}
+        title={post.data.title}
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        loading="lazy"
+      ></iframe>
+    </div>
   )}
-  <div class="text-center">
-    <a href={base} class="btn btn-light mx-1">목록</a>
-  </div>
+
+  {hasBody && <div class="post__body"><Content /></div>}
+
+  {pdf && (
+    <section class="pdf-card" aria-label="PDF 문서">
+      <div class="pdf-card__head">
+        <Icon name="file-text" size={24} />
+        <div>
+          <strong>{pdf.name}</strong>
+          <small>PDF 문서 · 휴대전화에서는 새 창으로 여세요</small>
+        </div>
+        <div class="pdf-card__actions">
+          <a class="btn btn-primary btn-sm" href={fileUrl(pdf.file)} target="_blank" rel="noopener"><Icon name="external" size={16} /> 새 창에서 열기</a>
+          <a class="btn btn-outline-primary btn-sm" href={fileUrl(pdf.file)} download><Icon name="download" size={16} /> 다운로드</a>
+        </div>
+      </div>
+      <iframe class="pdf-card__frame d-none d-md-block" src={`${fileUrl(pdf.file)}#view=FitH`} title={pdf.name} loading="lazy"></iframe>
+    </section>
+  )}
+
+  {otherFiles.length > 0 && (
+    <div class="post__files">
+      <h2 class="h6">첨부파일</h2>
+      <ul>
+        {otherFiles.map((a) => (
+          <li><a href={fileUrl(a.file)} target="_blank" rel="noopener"><Icon name="paperclip" size={16} /> {a.name}</a></li>
+        ))}
+      </ul>
+    </div>
+  )}
 </article>
+
+{(prev || next) && (
+  <nav class="post__nav" aria-label="이전/다음 글">
+    {next ? (
+      <a class="card-tile card-tile--flat post__nav-link" rel="next" href={`${base}/${slugOf(next)}`}>
+        <span class="card-tile__eyebrow">다음 글</span>
+        <span class="post__nav-title">{next.data.title}</span>
+      </a>
+    ) : <span></span>}
+    {prev && (
+      <a class="card-tile card-tile--flat post__nav-link" rel="prev" href={`${base}/${slugOf(prev)}`}>
+        <span class="card-tile__eyebrow">이전 글</span>
+        <span class="post__nav-title">{prev.data.title}</span>
+      </a>
+    )}
+  </nav>
+)}
+<div class="text-center mt-4">
+  <a href={base} class="btn btn-outline-primary">목록</a>
+</div>

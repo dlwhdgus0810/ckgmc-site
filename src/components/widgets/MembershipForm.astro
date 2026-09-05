@@ -1,6 +1,13 @@
 ---
-import { site } from '../../data/site';
+import { site, membershipFormUrl } from '../../data/site';
+import EmbedCard from '../EmbedCard.astro';
 ---
-<p>
-  <iframe src={site.membershipFormEmbed} width="640" height="3103" title="교인등록 신청서" style="max-width:100%;border:0;" loading="lazy">로드 중…</iframe>
-</p>
+<EmbedCard
+  title="교인등록 신청서 (Google Forms)"
+  note="휴대전화에서는 새 창에서 작성하시는 것이 편합니다."
+  src={site.membershipFormEmbed}
+  openUrl={membershipFormUrl}
+  openLabel="새 창에서 신청서 열기"
+  height="min(3103px, 200vh)"
+  mobile="button-only"
+/>

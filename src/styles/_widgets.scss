@@ -1,0 +1,34 @@
+// =====================================================================
+//  위젯: 외부 임베드 카드, 지도, 연락처, 예배 시간
+// =====================================================================
+.embed-card {
+  margin-bottom: 1.5rem;
+  border: 1px solid $line;
+  border-radius: $border-radius;
+  overflow: hidden;
+  &__head {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1rem;
+    padding: 1rem 1.125rem;
+    background: $surface;
+    > div { display: flex; flex-direction: column; }
+    small { color: $ink-600; }
+  }
+  &__frame { display: block; width: 100%; border: 0; border-top: 1px solid $line; background: #fff; }
+}
+.map-card {
+  .media-frame { margin-bottom: 1rem; background: $surface; }
+  &__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1rem; }
+  address { display: inline-flex; align-items: center; gap: .4rem; margin: 0; font-weight: 600; .icon { color: $gold-700; } }
+}
+.contact-info {
+  list-style: none; margin: 0; padding: 0;
+  li {
+    display: flex; gap: .75rem; padding: .75rem 0;
+    border-bottom: 1px solid $line;
+    > .icon { flex: none; margin-top: .25rem; color: $gold-700; }
+    > div { display: flex; flex-direction: column; }
+    strong { font-size: .8125rem; color: $ink-600; font-weight: 600; }
+  }
+}
+.contact-form { max-width: 36rem; label { font-weight: 600; } }
+.service-times__time { font-size: 1.0625rem; color: $navy-900; }
