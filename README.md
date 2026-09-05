@@ -205,6 +205,10 @@ npm run admin:create -- --email admin@ckgmc.org --name 관리자 --password '8�
 ## 배포 — Cloudflare Workers (무료 플랜으로 충분)
 정적 페이지와 교인 전용 기능이 **하나의 Worker** 로 배포됩니다 (정적 파일 요청은 무료·무제한, 서버 요청은 하루 10만 건).
 
+> **현재 상태 (2026-09-05)**: 아래 1~5 단계는 끝났습니다. D1 `ckgmc` 생성·마이그레이션 완료, Worker `ckgmc-site` 배포 완료 —
+> https://ckgmc-site.ckgmc-site.workers.dev , `ADMIN_EMAILS` 시크릿 설정됨. 남은 일: 첫 관리자 만들기(6), 도메인 연결(7), CMS 워커 도메인 추가(8), 자동 배포 연결(선택).
+> 코드를 고친 뒤 다시 배포하려면 `npm run deploy` 한 줄이면 됩니다.
+
 **최초 1회**
 1. `npx wrangler login` (Cloudflare 계정 연결).
 2. DB 만들기: `npx wrangler d1 create ckgmc` → 출력된 `database_id` 를 `wrangler.jsonc` 의 `d1_databases[0].database_id` 에 넣고 커밋.
