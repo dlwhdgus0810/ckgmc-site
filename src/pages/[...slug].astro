@@ -1,0 +1,81 @@
+---
+/**
+ * 모든 서브페이지를 만드는 파일입니다. 보통은 수정할 일이 없습니다.
+ *  - /about/purpose            → src/content/pages/about/purpose.md
+ *  - /media/sermons/page/2     → 게시판 2페이지
+ *  - /media/sermons/2026-08-02-1558 → src/content/posts/sermons/2026-08-02-1558.md
+ *  - /media/series/61          → src/content/series/61.md
+ */
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import SubpageLayout from '../layouts/SubpageLayout.astro';
+import BoardList from '../components/BoardList.astro';
+import PostView from '../components/PostView.astro';
+import SeriesList from '../components/SeriesList.astro';
+import SeriesView from '../components/SeriesView.astro';
+import Widget from '../components/Widget.astro';
+import { getBoardPosts, slugOf, type Post } from '../lib/posts';
+
+export async function getStaticPaths() {
+  const pages = await getCollection('pages');
+  const series = await getCollection('series');
+  const paths: { params: { slug: string }; props: Record<string, unknown> }[] = [];
+  for (const page of pages) {
+    const base = page.id;
+    paths.push({ params: { slug: base }, props: { kind: 'page', page, pageNo: 1 } });
+    const board = page.data.board;
+    if (!board) continue;
+    if (board === 'series') {
+      for (const s of series) paths.push({ params: { slug: `${base}/${s.id}` }, props: { kind: 'series', page, series: s } });
+      continue;
+    }
+    const posts = await getBoardPosts(board);
+    const totalPages = Math.ceil(posts.length / page.data.perPage);
+    for (let n = 2; n <= totalPages; n++) {
+      paths.push({ params: { slug: `${base}/page/${n}` }, props: { kind: 'page', page, pageNo: n } });
+    }
+    posts.forEach((post, i) => {
+      paths.push({
+        params: { slug: `${base}/${slugOf(post)}` },
+        props: { kind: 'post', page, post, prev: posts[i + 1], next: posts[i - 1] },
+      });
+    });
+  }
+  return paths;
+}
+
+interface Props {
+  kind: 'page' | 'post' | 'series';
+  page: CollectionEntry<'pages'>;
+  pageNo?: number;
+  post?: Post;
+  prev?: Post;
+  next?: Post;
+  series?: CollectionEntry<'series'>;
+}
+const { kind, page, pageNo = 1, post, prev, next, series } = Astro.props;
+const base = '/' + page.id;
+const d = page.data;
+const { Content } = await render(page);
+---
+{kind === 'page' && (
+  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} description={d.description} showTitle={d.showTitle}>
+    {d.widget && d.widgetPosition === 'top' && <Widget name={d.widget} />}
+    <Content />
+    {d.widget && d.widgetPosition === 'bottom' && <Widget name={d.widget} />}
+    {d.board === 'series' ? (
+      <SeriesList base={base} />
+    ) : d.board ? (
+      <BoardList board={d.board} base={base} page={pageNo} perPage={d.perPage} />
+    ) : null}
+  </SubpageLayout>
+)}
+{kind === 'post' && post && (
+  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={post.data.title} showTitle={true}>
+    <PostView post={post} base={base} prev={prev} next={next} />
+  </SubpageLayout>
+)}
+{kind === 'series' && series && (
+  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={series.data.title} showTitle={false}>
+    <SeriesView series={series} base={base} />
+  </SubpageLayout>
+)}

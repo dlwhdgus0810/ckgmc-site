@@ -1,0 +1,47 @@
+---
+import { site } from '../../data/site';
+---
+<div class="p-3 bg-light row">
+  <div class="col-sm">
+    <h5>세례 신청</h5>
+    {site.formEndpoint ? (
+      <form action={site.formEndpoint} method="POST" id="baptize-request-form">
+        <input type="hidden" name="_subject" value="[세례 신청]" />
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="bp-name">이름 Name</label>
+            <input id="bp-name" class="form-control" name="name" type="text" required />
+          </div>
+          <div class="form-group col-md-6">
+            <label for="bp-type">신청 구분</label>
+            <select id="bp-type" class="form-control" name="type">
+              <option>세례 Baptism</option>
+              <option>유아세례 Infant Baptism</option>
+              <option>입교 Confirmation</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="bp-email">이메일 E-mail</label>
+            <input id="bp-email" class="form-control" name="email" type="email" required />
+          </div>
+          <div class="form-group col-md-6">
+            <label for="bp-phone">전화 Phone</label>
+            <input id="bp-phone" class="form-control" name="phone" type="tel" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="bp-message">남기실 말씀</label>
+          <textarea id="bp-message" class="form-control" name="message" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">신청하기</button>
+      </form>
+    ) : (
+      <p class="mb-0">
+        세례를 원하시는 분은 교역자에게 말씀해 주시거나
+        <a href={`mailto:${site.email}?subject=${encodeURIComponent('[세례 신청]')}`}>{site.email}</a>로 신청해 주세요.
+      </p>
+    )}
+  </div>
+</div>

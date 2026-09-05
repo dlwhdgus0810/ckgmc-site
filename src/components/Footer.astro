@@ -1,0 +1,35 @@
+---
+import { site } from '../data/site';
+import { footerNav } from '../data/nav';
+---
+<footer class="site-footer container-fluid bg-dark text-light py-lg-3">
+  <div class="container">
+    <div class="row justify-content-sm-center">
+      <div class="col-sm">
+        <div class="d-flex justify-content-center">
+          <ul class="nav" id="footer-menu">
+            {footerNav.map((item) => (
+              <li class="nav-item"><a class="nav-link" href={item.href}>{item.label}</a></li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm">
+        <div class="text-center"><b>&copy; {site.name} {site.nameEn}.</b> All rights reserved.</div>
+        <ul class="list-inline mb-sm-0 text-center">
+          <li class="list-inline-item text-light"><i class="fa fa-map-marker" aria-hidden="true"></i> {site.address}</li>
+          <li class="list-inline-item text-light"><i class="fa fa-envelope" aria-hidden="true"></i> {site.email}</li>
+          <li class="list-inline-item text-light"><i class="fa fa-phone" aria-hidden="true"></i> {site.phone}</li>
+          {site.social.facebook && (
+            <li class="list-inline-item text-light"><a href={site.social.facebook} target="_blank" rel="noopener" class="text-light"><i class="fa fa-facebook-official"></i> FACEBOOK</a></li>
+          )}
+          {site.social.youtube && (
+            <li class="list-inline-item text-light"><a href={site.social.youtube} target="_blank" rel="noopener" class="text-light"><i class="fa fa-youtube-play"></i> YOUTUBE</a></li>
+          )}
+        </ul>
+      </div>
+    </div>
+  </div>
+</footer>

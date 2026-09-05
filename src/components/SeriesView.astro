@@ -1,0 +1,48 @@
+---
+/**
+ * 설교 시리즈 상세: 대표 이미지 자리에 유튜브 플레이어, 아래에 에피소드 목록
+ */
+import { render, type CollectionEntry } from 'astro:content';
+interface Props { series: CollectionEntry<'series'>; base: string }
+const { series, base } = Astro.props;
+const { Content } = await render(series);
+const total = series.data.episodes.length;
+---
+<div id="series">
+  <div id="yt-player" style={`background-image:url(${series.data.thumbnail})`}>
+    <img src={series.data.thumbnail} alt="" class="thumbnail img-fluid" />
+  </div>
+  <h3 class="series-title">{series.data.title}</h3>
+  <div class="series-content mb-4"><Content /></div>
+  <div id="episodes">
+    {total === 0 && <p class="text-muted text-center">등록된 영상이 없습니다.</p>}
+    {series.data.episodes.map((ep, i) => (
+      <section class="episode">
+        <div class="episode-title">
+          <span class="badge badge-dark"><span class="current_no">{i + 1}</span> of <span class="total_count">{total}</span></span>
+          <span class="title">{ep.title}</span>
+        </div>
+        <div class="episode-control">
+          <button type="button" class="btn btn-sm btn-outline-info" data-youtube-id={ep.youtube}><i class="fa fa-play"></i> PLAY</button>
+        </div>
+      </section>
+    ))}
+  </div>
+</div>
+<div class="text-center py-4">
+  <a href={base} class="btn btn-sm btn-dark">목록으로 돌아가기</a>
+</div>
+
+<script>
+  const player = document.getElementById('yt-player');
+  document.querySelectorAll<HTMLButtonElement>('#episodes [data-youtube-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.youtubeId;
+      if (!player || !id) return;
+      player.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" title="설교 영상" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+      document.querySelectorAll('#episodes .episode.active').forEach((el) => el.classList.remove('active'));
+      btn.closest('.episode')?.classList.add('active');
+      player.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+</script>

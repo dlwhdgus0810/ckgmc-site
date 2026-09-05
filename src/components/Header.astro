@@ -1,0 +1,73 @@
+---
+import { site } from '../data/site';
+import { nav } from '../data/nav';
+
+interface Props {
+  variant?: 'front' | 'sub';
+  headerImage?: string;
+  pageTitle?: string;
+}
+const { variant = 'sub', headerImage, pageTitle } = Astro.props;
+const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const currentKey = currentPath.split('/').filter(Boolean)[0];
+const style = headerImage ? `background-image:url(${headerImage})` : undefined;
+---
+<section id="top-bar" class="py-2">
+  <div class="container">
+    <div class="row align-items-md-center">
+      <div class="col">
+        <ul class="list-inline mb-0">
+          {site.social.facebook && (
+            <li class="list-inline-item"><a href={site.social.facebook} target="_blank" rel="noopener" aria-label="Facebook"><i class="fa fa-2x fa-facebook-official"></i></a></li>
+          )}
+          {site.social.youtube && (
+            <li class="list-inline-item"><a href={site.social.youtube} target="_blank" rel="noopener" aria-label="YouTube"><i class="fa fa-2x fa-youtube-play"></i></a></li>
+          )}
+          {site.social.instagram && (
+            <li class="list-inline-item"><a href={site.social.instagram} target="_blank" rel="noopener" aria-label="Instagram"><i class="fa fa-2x fa-instagram"></i></a></li>
+          )}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<header class:list={['site-header', { frontpage: variant === 'front' }]} style={style}>
+  <div class="container-fluid">
+    <button class="mobile-navbar-toggler" type="button" aria-controls="mainNav" aria-expanded="false" aria-label="메뉴 열기">
+      <i class="fa fa-bars text-white"></i>
+    </button>
+    <div class="d-flex justify-content-between justify-content-md-center flex-lg-column">
+      <a class="navbar-brand" href="/">
+        <img src={site.logo} class="logo d-block mx-auto" alt={site.name} width="340" height="50" />
+      </a>
+    </div>
+    <nav class="navbar navbar-expand-md navbar-dark py-0 bg-transparent" id="main-navigation" aria-label="주 메뉴">
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav justify-content-center">
+          {nav.map((section) =>
+            section.items ? (
+              <li class:list={['nav-item dropdown', { active: section.key === currentKey }]}>
+                <a href="#" class="nav-link dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">{section.label}</a>
+                <div class="dropdown-menu">
+                  {section.items.map((item) => (
+                    <a class:list={['dropdown-item', { active: item.href === currentPath }]} href={item.href}>{item.label}</a>
+                  ))}
+                </div>
+              </li>
+            ) : (
+              <li class:list={['nav-item', { active: section.href === currentPath }]}>
+                <a href={section.href} class="nav-link">{section.label}</a>
+              </li>
+            )
+          )}
+        </ul>
+      </div>
+    </nav>
+  </div>
+  {variant === 'sub' && pageTitle && (
+    <div id="page-header">
+      <h1 class="page-title text-center">{pageTitle}</h1>
+    </div>
+  )}
+</header>

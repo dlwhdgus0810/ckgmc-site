@@ -1,0 +1,49 @@
+---
+/**
+ * 서브페이지 레이아웃: 배경 이미지 헤더 + 브레드크럼 + 사이드메뉴 + 본문
+ */
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { findNavItem, findSection } from '../data/nav';
+
+interface Props {
+  /** 페이지 URL (예: /about/staff). 사이드메뉴/브레드크럼의 활성 항목을 정합니다 */
+  path: string;
+  title: string;
+  subtitle?: string;
+  headerImage?: string;
+  description?: string;
+  /** 게시글 제목 등 브레드크럼 마지막 항목 */
+  leaf?: string;
+  /** 본문 상단에 "제목 <small>부제</small>" 자동 표시 여부 */
+  showTitle?: boolean;
+}
+const { path, title, subtitle, headerImage, description, leaf, showTitle = true } = Astro.props;
+const navItem = findNavItem(path);
+const hasSidebar = !!findSection(path);
+const headerTitle = navItem?.item.label ?? (subtitle ? `${title} ${subtitle}` : title);
+---
+<BaseLayout title={leaf ?? title} description={description} variant="sub" headerImage={headerImage} pageTitle={headerTitle}>
+  <Breadcrumb path={path} fallbackTitle={title} leaf={leaf} />
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <div id="content-wrap">
+          {hasSidebar && <aside><Sidebar path={path} /></aside>}
+          <main class:list={{ 'no-aside': !hasSidebar }}>
+            <div class="entry-content">
+              {showTitle && (
+                <>
+                  <h2>{title} {subtitle && <small>{subtitle}</small>}</h2>
+                  <hr />
+                </>
+              )}
+              <slot />
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

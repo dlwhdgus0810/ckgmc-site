@@ -1,0 +1,52 @@
+---
+/**
+ * 설교 시리즈 목록: 진행 중인 시리즈(카드) + 종료된 시리즈(목록)
+ */
+import { getCollection } from 'astro:content';
+import { formatDate } from '../lib/posts';
+
+interface Props { base: string }
+const { base } = Astro.props;
+const all = (await getCollection('series')).sort(
+  (a, b) => (b.data.updated ?? b.data.date).getTime() - (a.data.updated ?? a.data.date).getTime()
+);
+const current = all.filter((s) => s.data.ongoing);
+const finished = all.filter((s) => !s.data.ongoing);
+---
+<h5>진행 중인 시리즈 <small>Current Series</small></h5>
+<div class="row">
+  {current.length === 0 && <div class="col"><p class="text-muted">진행 중인 시리즈가 없습니다.</p></div>}
+  {current.map((s) => (
+    <div class="col-sm-6">
+      <a href={`${base}/${s.id}`} class="text-body">
+        <div class="card border-0 rounded-0 mb-4 series-card hover-scale">
+          <div class="card-body">
+            <div class="img-wrap position-relative border" style={`background-image:url(${s.data.thumbnail})`}></div>
+            <h4 class="series-title text-center my-3">{s.data.title}</h4>
+            <p class="text-center mb-1"><i class="fa fa-circle text-success"></i> <span class="text-primary">Detail</span></p>
+            <div class="text-center"><small class="text-muted">updated at {formatDate(s.data.updated ?? s.data.date)}</small></div>
+          </div>
+        </div>
+      </a>
+    </div>
+  ))}
+</div>
+<div class="my-4"></div>
+<h5>종료된 시리즈 <small>Finished Series</small></h5>
+<hr />
+<div id="series-contents-old">
+  {finished.map((s) => (
+    <div class="row">
+      <div class="col-4 col-md-2">
+        <div class="img-wrap my-2"><a href={`${base}/${s.id}`}><img src={s.data.thumbnail} class="border img-fluid" alt="" loading="lazy" /></a></div>
+      </div>
+      <div class="col">
+        <div class="d-flex flex-column justify-content-center my-2">
+          <h4 class="series-title my-1" style="font-size:1rem;">{s.data.title}</h4>
+          <a href={`${base}/${s.id}`}>Detail <small class="text-muted">({s.data.episodes.length}편)</small></a>
+          <div><small class="text-muted">updated at {formatDate(s.data.updated ?? s.data.date)}</small></div>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>

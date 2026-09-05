@@ -1,0 +1,27 @@
+---
+interface Props {
+  current: number;
+  total: number;
+  /** 1페이지 주소 (예: /media/sermons). n페이지는 `${base}/page/n` */
+  base: string;
+}
+const { current, total, base } = Astro.props;
+const href = (n: number) => (n <= 1 ? base : `${base}/page/${n}`);
+const window = 4;
+let start = Math.max(1, current - window);
+let end = Math.min(total, current + window);
+const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+---
+{total > 1 && (
+  <nav aria-label="페이지 이동" class="d-flex justify-content-center py-3">
+    <ul class="pagination pagination-sm mb-0">
+      <li class:list={['page-item', { disabled: current === 1 }]}><a class="page-link" href={href(1)}>처음</a></li>
+      <li class:list={['page-item', { disabled: current === 1 }]}><a class="page-link" href={href(current - 1)} aria-label="이전">&lsaquo;</a></li>
+      {pages.map((n) => (
+        <li class:list={['page-item', { active: n === current }]}><a class="page-link" href={href(n)}>{n}</a></li>
+      ))}
+      <li class:list={['page-item', { disabled: current === total }]}><a class="page-link" href={href(current + 1)} aria-label="다음">&rsaquo;</a></li>
+      <li class:list={['page-item', { disabled: current === total }]}><a class="page-link" href={href(total)}>끝</a></li>
+    </ul>
+  </nav>
+)}

@@ -1,0 +1,35 @@
+---
+import { findSection, findNavItem } from '../data/nav';
+interface Props {
+  /** 페이지 URL (예: /about/staff) */
+  path: string;
+  /** 메뉴에 없는 페이지일 때 표시할 제목 */
+  fallbackTitle?: string;
+  /** 게시글 등 하위 항목 제목 (있으면 마지막에 추가) */
+  leaf?: string;
+}
+const { path, fallbackTitle, leaf } = Astro.props;
+const section = findSection(path);
+const found = findNavItem(path);
+const pageLabel = found?.item.label ?? fallbackTitle ?? '';
+---
+<div class="container-fluid" id="page-header-bottom">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb bg-transparent">
+        <li class="breadcrumb-item"><a href="/">HOME</a></li>
+        {section && section.items && (
+          <li class="breadcrumb-item"><a href={section.items[0].href}>{section.label}</a></li>
+        )}
+        {leaf ? (
+          <>
+            <li class="breadcrumb-item"><a href={path}>{pageLabel}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{leaf}</li>
+          </>
+        ) : (
+          <li class="breadcrumb-item active" aria-current="page">{pageLabel}</li>
+        )}
+      </ol>
+    </nav>
+  </div>
+</div>

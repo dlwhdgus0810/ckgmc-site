@@ -1,0 +1,93 @@
+---
+/**
+ * 게시글 상세 보기: 제목, 작성자/날짜, 유튜브 영상, 본문, 첨부파일, 이전/다음 글
+ */
+import { render } from 'astro:content';
+import { slugOf, formatDate, type Post } from '../lib/posts';
+
+interface Props {
+  post: Post;
+  base: string;
+  prev?: Post;
+  next?: Post;
+}
+const { post, base, prev, next } = Astro.props;
+const { Content } = await render(post);
+const pdfs = post.data.attachments.filter((a) => a.file.toLowerCase().endsWith('.pdf'));
+---
+<article>
+  <h3 class="entry-single-title text-center">{post.data.title}</h3>
+  <table class="table">
+    <tbody>
+      <tr>
+        <td class="text-center">
+          <div class="d-flex flex-sm-column flex-md-row justify-content-around">
+            {post.data.writer && <div><span class="badge badge-pill badge-secondary">WRITER</span> {post.data.writer}</div>}
+            <div><span class="badge badge-pill badge-secondary">DATE</span> {formatDate(post.data.date)}</div>
+          </div>
+        </td>
+      </tr>
+      {post.data.youtube && (
+        <tr>
+          <td class="p-3">
+            <div class="embed-responsive embed-responsive-16by9">
+              <iframe
+                class="embed-responsive-item"
+                src={`https://www.youtube.com/embed/${post.data.youtube}?rel=0`}
+                title={post.data.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                loading="lazy"
+              ></iframe>
+            </div>
+          </td>
+        </tr>
+      )}
+      <tr>
+        <td class="p-3">
+          <div class="py-3 post-body">
+            <Content />
+          </div>
+          {post.data.attachments.length > 0 && (
+            <div class="py-2">
+              <h6 class="text-muted">첨부파일</h6>
+              <ul class="list-unstyled mb-0">
+                {post.data.attachments.map((a) => (
+                  <li><a href={`/files/${a.file}`} target="_blank" rel="noopener"><i class="fa fa-paperclip"></i> {a.name}</a></li>
+                ))}
+              </ul>
+            </div>
+          )}
+          {pdfs.length > 0 && (
+            <div class="py-3">
+              <iframe src={`/files/${pdfs[0].file}#view=FitH`} title={pdfs[0].name} style="width:100%;height:80vh;border:1px solid #dee2e6;" loading="lazy"></iframe>
+            </div>
+          )}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  {(prev || next) && (
+    <table class="table">
+      <colgroup><col width="40" /><col /></colgroup>
+      <tbody>
+        {next && (
+          <tr>
+            <td class="align-middle text-center bg-light"><a href={`${base}/${slugOf(next)}`} title="다음 글"><i class="fa fa-angle-up"></i></a></td>
+            <td><a href={`${base}/${slugOf(next)}`}>{next.data.title}</a></td>
+          </tr>
+        )}
+        {prev && (
+          <tr>
+            <td class="align-middle text-center bg-light"><a href={`${base}/${slugOf(prev)}`} title="이전 글"><i class="fa fa-angle-down"></i></a></td>
+            <td><a href={`${base}/${slugOf(prev)}`}>{prev.data.title}</a></td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  )}
+  <div class="text-center">
+    <a href={base} class="btn btn-light mx-1">목록</a>
+  </div>
+</article>
