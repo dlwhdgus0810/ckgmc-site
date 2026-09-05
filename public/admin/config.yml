@@ -6,7 +6,7 @@
 # =====================================================================
 backend:
   name: github
-  repo: OWNER/ckgmc-site
+  repo: dlwhdgus0810/ckgmc-site
   branch: main
   base_url: https://sveltia-cms-auth.SUBDOMAIN.workers.dev
 

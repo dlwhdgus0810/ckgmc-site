@@ -57,7 +57,7 @@ scripts/
 GitHub 계정으로 로그인해 글·사진·설정을 고치면 저장소에 커밋되고 1~2분 뒤 사이트에 반영됩니다.
 **최초 1회** 아래 설정이 필요합니다 (사이트 소유자가 직접).
 
-1. **GitHub 저장소** — 이 폴더를 GitHub 저장소(예: `jonghyunlee/ckgmc-site`)에 올립니다.
+1. **GitHub 저장소** — 이 폴더를 GitHub 저장소(`dlwhdgus0810/ckgmc-site`)에 올립니다.
 2. **로그인 워커 배포** — GitHub 로그인을 중계하는 무료 Cloudflare Worker 입니다.
    https://github.com/sveltia/sveltia-cms-auth 의 *Deploy to Cloudflare* 버튼으로 배포하면
    `https://sveltia-cms-auth.<내계정>.workers.dev` 같은 주소가 생깁니다.
