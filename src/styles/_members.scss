@@ -34,6 +34,14 @@
   }
 }
 
+.member-nav__external .icon { vertical-align: -1px; margin-left: .15rem; opacity: .7; }
+.cms-band {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.5rem;
+  padding: 1rem 1.25rem; border: 1px solid $gold; border-radius: $border-radius; background: $gold-50;
+  > div { flex: 1 1 22rem; }
+  .btn { white-space: nowrap; }
+}
+
 // 로그인 화면
 .login-card {
   max-width: 28rem;

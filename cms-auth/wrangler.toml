@@ -1,0 +1,10 @@
+# 관리 화면(Sveltia CMS)의 GitHub 로그인을 중계하는 Worker.
+# 원본: https://github.com/sveltia/sveltia-cms-auth (MIT). src/index.js 는 그대로 복사한 것입니다.
+# 배포: npm run cms-auth:deploy   → https://sveltia-cms-auth.<계정>.workers.dev
+# 변수(대시보드 또는 wrangler secret put --config cms-auth/wrangler.toml 이름):
+#   GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET  — GitHub OAuth App 값
+#   ALLOWED_DOMAINS                         — 이 워커를 쓸 수 있는 사이트 도메인 (쉼표 구분)
+name = "sveltia-cms-auth"
+main = "src/index.js"
+compatibility_date = "2026-08-01"
+keep_vars = true

@@ -1,14 +1,14 @@
 # =====================================================================
 #  Sveltia CMS 설정 — https://ckgmc.org/admin/ 관리 화면
-#  ▶ 배포 후 아래 두 값을 채워야 로그인이 됩니다 (README "콘텐츠 관리 화면" 참고)
-#     repo:      GitHub 저장소 (dlwhdgus0810/ckgmc-site — 설정됨)
-#     base_url:  sveltia-cms-auth 워커 주소 (예: https://sveltia-cms-auth.abc.workers.dev)
+#  로그인: GitHub 계정 (저장소 Collaborator 여야 함). 로그인 중계 워커는 cms-auth/ 폴더 (npm run cms-auth:deploy).
+#     repo:      GitHub 저장소 — 설정됨
+#     base_url:  sveltia-cms-auth 워커 주소 — 설정됨 (워커에 GITHUB_CLIENT_ID/SECRET 이 있어야 로그인 동작)
 # =====================================================================
 backend:
   name: github
   repo: dlwhdgus0810/ckgmc-site
   branch: main
-  base_url: https://sveltia-cms-auth.SUBDOMAIN.workers.dev
+  base_url: https://sveltia-cms-auth.ckgmc-site.workers.dev
 
 site_url: https://ckgmc.org
 display_url: https://ckgmc.org

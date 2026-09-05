@@ -67,22 +67,31 @@ scripts/
 GitHub 계정으로 로그인해 글·사진·설정을 고치면 저장소에 커밋되고 1~2분 뒤 사이트에 반영됩니다.
 **최초 1회** 아래 설정이 필요합니다 (사이트 소유자가 직접).
 
-1. **GitHub 저장소** — 이 폴더를 GitHub 저장소(`dlwhdgus0810/ckgmc-site`)에 올립니다.
-2. **로그인 워커 배포** — GitHub 로그인을 중계하는 무료 Cloudflare Worker 입니다.
-   https://github.com/sveltia/sveltia-cms-auth 의 *Deploy to Cloudflare* 버튼으로 배포하면
-   `https://sveltia-cms-auth.<내계정>.workers.dev` 같은 주소가 생깁니다.
+> **현재 상태 (2026-09-05)**: 1·2·4(ALLOWED_DOMAINS)·5 는 끝났습니다. 남은 것은 **3. GitHub OAuth App 만들기**와 그 키를 워커에 넣는 것, 그리고 6. 편집자 초대입니다.
+
+1. **GitHub 저장소** — `dlwhdgus0810/ckgmc-site` (완료).
+2. **로그인 워커** — 이 저장소의 `cms-auth/` 폴더가 그 워커입니다. `npm run cms-auth:deploy` 로 배포되어
+   `https://sveltia-cms-auth.ckgmc-site.workers.dev` 에서 동작 중 (완료).
 3. **GitHub OAuth App** — GitHub → Settings → Developer settings → OAuth Apps → *New OAuth App*
-   - Homepage URL: `https://github.com/sveltia/sveltia-cms-auth`
-   - Authorization callback URL: `<워커 주소>/callback`
-   - 생성 후 *Client ID* 와 *Client Secret* 을 복사합니다.
-4. **워커 환경 변수** — Cloudflare 대시보드 → Workers → sveltia-cms-auth → Settings → Variables
-   - `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`(암호화), `ALLOWED_DOMAINS` = `ckgmc.org,www.ckgmc.org,ckgmc-site.<내계정>.workers.dev`
-5. **config.yml 채우기** — `public/admin/config.yml` 맨 위 `repo:` 에 저장소 이름, `base_url:` 에 워커 주소를 넣고 커밋합니다.
-6. **편집자 초대** — 글을 올릴 분들을 GitHub 저장소 Collaborator(Write) 로 초대합니다.
+   - Application name: `CKGMC CMS` (아무 이름)
+   - Homepage URL: `https://ckgmc.org`
+   - Authorization callback URL: `https://sveltia-cms-auth.ckgmc-site.workers.dev/callback`
+   - 생성 후 *Client ID* 를 복사하고, *Generate a new client secret* 으로 *Client Secret* 을 만듭니다.
+4. **워커 변수** — 터미널에서 (값을 물어보면 붙여 넣기):
+   ```bash
+   npx wrangler secret put GITHUB_CLIENT_ID --config cms-auth/wrangler.toml
+   npx wrangler secret put GITHUB_CLIENT_SECRET --config cms-auth/wrangler.toml
+   ```
+   `ALLOWED_DOMAINS` = `ckgmc.org,www.ckgmc.org,ckgmc-site.ckgmc-site.workers.dev` 는 이미 설정됨.
+5. **config.yml** — `public/admin/config.yml` 의 `repo`, `base_url` 설정 완료.
+6. **편집자 초대** — 글을 올릴 분들의 GitHub 계정을 저장소 Collaborator(Write) 로 초대합니다.
+   교회 관리자(admin@ckgmc.org)도 GitHub 계정이 있어야 관리 화면에 들어올 수 있습니다 (사이트 로그인 계정과는 별개).
 7. `https://ckgmc.org/admin/` 접속 → *Sign in with GitHub* → 왼쪽 목록에서 게시판을 골라 글쓰기.
 
 관리 화면에서 할 수 있는 일: 페이지 본문 수정, 설교·주보(PDF 업로드)·자료실·부서 소식·시리즈·이야기 등록,
 메인 첫 화면 문구/사진, 예배 시간, 교회 소식 포스터, 연락처 등 **사이트 설정** 편집.
+교인 전용 기능의 관리자 화면(`/manage`) 왼쪽 메뉴와 대시보드에도 이 화면으로 가는 링크가 있습니다.
+저장 = 저장소 커밋이므로, Workers Builds(아래 "배포" 절)를 연결해 두지 않았다면 `npm run deploy` 를 실행해야 사이트에 반영됩니다.
 
 > 로컬 테스트: `npm run dev` 를 켠 뒤 Chrome 에서 `http://localhost:4321/admin/index.html` 을 열고
 > **Work with Local Repository** 를 선택하면 로그인 없이 이 폴더의 파일을 직접 편집해 볼 수 있습니다.

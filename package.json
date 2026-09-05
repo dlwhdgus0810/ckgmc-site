@@ -9,6 +9,7 @@
     "preview": "wrangler types && astro preview",
     "check": "wrangler types && astro check",
     "deploy": "npm run build && wrangler deploy",
+    "cms-auth:deploy": "wrangler deploy --config cms-auth/wrangler.toml",
     "db:migrate:local": "wrangler d1 migrations apply ckgmc --local",
     "db:migrate:remote": "wrangler d1 migrations apply ckgmc --remote",
     "admin:create": "node scripts/create-admin.mjs",

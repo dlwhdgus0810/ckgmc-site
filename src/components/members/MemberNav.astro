@@ -18,6 +18,8 @@ const manageLinks = [
   { href: '/manage/stats', label: '그룹 통계' },
   { href: '/manage/users', label: '회원 관리' },
 ];
+/** 글·사진은 별도 관리 화면(Sveltia CMS, GitHub 로그인)에서 편집 */
+const cmsLink = { href: '/admin/', label: '글·사진 관리 (CMS)' };
 const cur = (href: string) => (href === path ? 'page' : undefined);
 ---
 <nav class="section-nav member-nav" aria-label="교인 공간 메뉴">
@@ -36,6 +38,7 @@ const cur = (href: string) => (href === path ? 'page' : undefined);
       </div>
       <ul class="section-nav__list">
         {manageLinks.map((l) => <li><a href={l.href} aria-current={cur(l.href)}>{l.label}</a></li>)}
+        <li><a href={cmsLink.href} class="member-nav__external" target="_blank" rel="noopener">{cmsLink.label} <Icon name="external" size={14} /></a></li>
       </ul>
     </>
   )}
