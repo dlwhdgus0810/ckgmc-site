@@ -1,0 +1,114 @@
+---
+/** 회원 관리: 검색·상태 필터, 승인, 새 회원 추가(초기 비밀번호) */
+export const prerender = false;
+import MemberLayout from '../../../layouts/MemberLayout.astro';
+import Pager from '../../../components/members/Pager.astro';
+import StatusBadge from '../../../components/members/StatusBadge.astro';
+import { countUsers, createUser, findUserByEmail, findUserById, listUsers, updateUser, type UserFilter } from '../../../lib/auth/users';
+import { hashPassword, passwordProblem } from '../../../lib/auth/password';
+import type { Role, Status } from '../../../lib/auth/session';
+import { EMAIL_RE, formInt, formStr, formatLocal, paging, setFlash } from '../../../lib/http';
+
+const sp = Astro.url.searchParams;
+const q = (sp.get('q') ?? '').trim().slice(0, 100);
+const statusParam = sp.get('status') ?? '';
+const status = (['pending', 'active', 'disabled'] as const).find((s) => s === statusParam) ?? '';
+let error: string | null = null;
+const draft = { email: '', name: '', role: 'member', status: 'active' };
+
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData();
+  const action = formStr(fd, 'action', 20);
+  if (action === 'approve') {
+    const id = formInt(fd, 'user_id');
+    const target = id ? await findUserById(id) : null;
+    if (target && target.status === 'pending') { await updateUser(target.id, { status: 'active' }); setFlash(Astro.cookies, 'success', `${target.name} 님을 승인했습니다.`); }
+    return Astro.redirect(Astro.url.pathname + Astro.url.search, 303);
+  }
+  if (action === 'create') {
+    draft.email = formStr(fd, 'email', 200).toLowerCase();
+    draft.name = formStr(fd, 'name', 100);
+    draft.role = formStr(fd, 'role', 10) === 'admin' ? 'admin' : 'member';
+    draft.status = formStr(fd, 'status', 10) === 'pending' ? 'pending' : 'active';
+    const password = formStr(fd, 'password', 200);
+    if (!EMAIL_RE.test(draft.email)) error = '이메일 형식을 확인해 주세요.';
+    else if (!draft.name) error = '이름을 입력해 주세요.';
+    else if (await findUserByEmail(draft.email)) error = '이미 등록된 이메일입니다.';
+    else if (password && passwordProblem(password)) error = passwordProblem(password);
+    else {
+      const u = await createUser({ email: draft.email, name: draft.name, role: draft.role as Role, status: draft.status as Status, passwordHash: password ? await hashPassword(password) : null });
+      setFlash(Astro.cookies, 'success', `${u.name} 님 계정을 만들었습니다.${password ? ' 이메일과 초기 비밀번호를 전달해 주세요.' : ' 소셜 로그인으로 들어오면 이 계정에 연결됩니다.'}`);
+      return Astro.redirect(`/manage/users/${u.id}`, 303);
+    }
+  }
+}
+const filter: UserFilter = { q, status };
+const total = await countUsers(filter);
+const pg = paging(sp.get('page'), total, 30);
+const users = await listUsers(filter, pg.perPage, pg.offset);
+---
+<MemberLayout title="회원 관리" subtitle="Members" area="manage">
+  <form method="get" class="filter-bar">
+    <div class="form-group" style="flex:1 1 14rem"><label for="q">이름·이메일 검색</label><input id="q" name="q" class="form-control" value={q} placeholder="검색어" /></div>
+    <div class="form-group">
+      <label for="status">상태</label>
+      <select id="status" name="status" class="form-control">
+        <option value="">전체</option>
+        <option value="pending" selected={status === 'pending'}>승인 대기</option>
+        <option value="active" selected={status === 'active'}>활성</option>
+        <option value="disabled" selected={status === 'disabled'}>비활성</option>
+      </select>
+    </div>
+    <button type="submit" class="btn btn-primary">검색</button>
+    <a href="/manage/users" class="btn btn-link">초기화</a>
+  </form>
+
+  <p class="text-muted small">총 {total}명</p>
+  <div class="table-responsive">
+    <table class="table table-sm table-report">
+      <thead><tr><th>이름</th><th>이메일</th><th>권한 · 상태</th><th>로그인 방법</th><th class="num">보고서</th><th>최근 로그인</th><th>가입일</th><th></th></tr></thead>
+      <tbody>
+        {users.map((u) => (
+          <tr>
+            <td><a href={`/manage/users/${u.id}`}><strong>{u.name}</strong></a></td>
+            <td>{u.email}</td>
+            <td><StatusBadge role={u.role} status={u.status} /></td>
+            <td class="small text-muted">{[u.password_hash ? '비밀번호' : '', ...(u.providers ?? '').split(',').filter(Boolean)].filter(Boolean).join(', ') || '—'}</td>
+            <td class="num">{u.cell_count + u.care_count}</td>
+            <td>{formatLocal(u.last_login_at) || '—'}</td>
+            <td>{formatLocal(u.created_at, false)}</td>
+            <td class="text-right">
+              {u.status === 'pending' && (
+                <form method="post" class="d-inline">
+                  <input type="hidden" name="action" value="approve" />
+                  <input type="hidden" name="user_id" value={u.id} />
+                  <button type="submit" class="btn btn-success btn-sm">승인</button>
+                </form>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+  <Pager paging={pg} />
+
+  <section class="mt-5" aria-labelledby="add-user">
+    <h2 id="add-user" class="h5 mb-3">새 회원 추가</h2>
+    <p class="small text-muted">소셜 계정이 없는 분은 여기서 계정을 만들고 초기 비밀번호를 알려 주세요. 비밀번호를 비워 두면 같은 이메일의 소셜 로그인으로 들어올 때 이 계정에 연결됩니다.</p>
+    <form method="post" class="form-narrow" novalidate>
+      <input type="hidden" name="action" value="create" />
+      {error && <div class="alert alert-danger" role="alert">{error}</div>}
+      <div class="form-row">
+        <div class="form-group col-md-6"><label for="new-email">이메일 <span class="text-danger">*</span></label><input id="new-email" name="email" type="email" class="form-control" value={draft.email} required /></div>
+        <div class="form-group col-md-6"><label for="new-name">이름 <span class="text-danger">*</span></label><input id="new-name" name="name" class="form-control" value={draft.name} required /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-4"><label for="new-role">권한</label><select id="new-role" name="role" class="form-control"><option value="member" selected={draft.role === 'member'}>교인</option><option value="admin" selected={draft.role === 'admin'}>관리자</option></select></div>
+        <div class="form-group col-md-4"><label for="new-status">상태</label><select id="new-status" name="status" class="form-control"><option value="active" selected={draft.status === 'active'}>활성</option><option value="pending" selected={draft.status === 'pending'}>승인 대기</option></select></div>
+        <div class="form-group col-md-4"><label for="new-password">초기 비밀번호 <span class="text-muted small">(선택, 8자 이상)</span></label><input id="new-password" name="password" type="text" class="form-control" autocomplete="off" /></div>
+      </div>
+      <button type="submit" class="btn btn-primary">회원 추가</button>
+    </form>
+  </section>
+</MemberLayout>

@@ -1,0 +1,60 @@
+---
+/** 그룹 통계: 연도별 그룹 요약 + 월별 평균 출석 (원본 사이트에서 "준비 중"이던 기능) */
+export const prerender = false;
+import MemberLayout from '../../layouts/MemberLayout.astro';
+import { groupYearStats, monthlyStats, reportYears } from '../../lib/reports';
+import { todayLocal } from '../../lib/http';
+
+const years = await reportYears();
+const thisYear = todayLocal().slice(0, 4);
+if (!years.includes(thisYear)) years.unshift(thisYear);
+const param = Astro.url.searchParams.get('year') ?? '';
+const year = /^\d{4}$/.test(param) ? param : thisYear;
+const [summary, monthly] = await Promise.all([groupYearStats(year), monthlyStats(year)]);
+const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
+const cell = new Map(monthly.map((m) => [`${m.group_id}|${m.ym}`, m]));
+---
+<MemberLayout title="그룹 통계" subtitle="Statistics" area="manage">
+  <form method="get" class="filter-bar">
+    <div class="form-group">
+      <label for="year">연도</label>
+      <select id="year" name="year" class="form-control" onchange="this.form.submit()">
+        {years.map((y) => <option value={y} selected={y === year}>{y}년</option>)}
+      </select>
+    </div>
+    <noscript><button type="submit" class="btn btn-primary">보기</button></noscript>
+  </form>
+
+  <h2 class="h5 mb-3">{year}년 그룹별 요약</h2>
+  <div class="table-responsive mb-5">
+    <table class="table table-sm table-report">
+      <thead><tr><th>D그룹</th><th class="num">보고서</th><th class="num">평균 출석</th><th class="num">결석 합계</th><th>최근 모임</th></tr></thead>
+      <tbody>
+        {summary.map((s) => (
+          <tr class:list={{ 'text-muted': s.reports === 0 }}>
+            <td><a href={`/manage/cell-reports?group=${s.group_id}&from=${year}-01-01&to=${year}-12-31`}>{s.group_name}</a></td>
+            <td class="num">{s.reports}</td>
+            <td class="num">{s.reports ? s.avg_attendance : '—'}</td>
+            <td class="num">{s.reports ? s.total_absent : '—'}</td>
+            <td>{s.last_date ?? '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="h5 mb-3">월별 평균 출석 <span class="text-muted small font-weight-normal">(괄호 안은 보고서 수)</span></h2>
+  <div class="table-responsive">
+    <table class="table table-sm table-report text-nowrap">
+      <thead><tr><th>D그룹</th>{months.map((m) => <th class="num">{Number(m.slice(5))}월</th>)}</tr></thead>
+      <tbody>
+        {summary.map((s) => (
+          <tr>
+            <td>{s.group_name}</td>
+            {months.map((m) => { const c = cell.get(`${s.group_id}|${m}`); return <td class="num">{c ? <>{c.avg_attendance} <span class="text-muted small">({c.reports})</span></> : <span class="text-muted">·</span>}</td>; })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</MemberLayout>

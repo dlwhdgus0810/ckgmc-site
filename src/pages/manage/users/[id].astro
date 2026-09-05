@@ -1,0 +1,115 @@
+---
+/** 회원 상세: 이름·권한·상태 수정, 비밀번호 재설정, 모든 기기 로그아웃, 삭제(보고서가 없을 때만) */
+export const prerender = false;
+import MemberLayout from '../../../layouts/MemberLayout.astro';
+import NotFound from '../../../components/members/NotFound.astro';
+import StatusBadge from '../../../components/members/StatusBadge.astro';
+import { deleteUser, getUserDetail, updateUser } from '../../../lib/auth/users';
+import { hashPassword, passwordProblem } from '../../../lib/auth/password';
+import { countSessions, destroyUserSessions, type Role, type Status } from '../../../lib/auth/session';
+import { formStr, formatLocal, setFlash } from '../../../lib/http';
+
+const me = Astro.locals.user!;
+const id = Number(Astro.params.id);
+const target = Number.isInteger(id) ? await getUserDetail(id) : null;
+if (!target) Astro.response.status = 404;
+const isSelf = target?.id === me.id;
+let error: string | null = null;
+
+if (target && Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData();
+  const action = formStr(fd, 'action', 20);
+  if (action === 'save') {
+    const name = formStr(fd, 'name', 100);
+    const role = (formStr(fd, 'role', 10) === 'admin' ? 'admin' : 'member') as Role;
+    const statusRaw = formStr(fd, 'status', 10);
+    const status = ((['pending', 'active', 'disabled'] as const).find((s) => s === statusRaw) ?? target.status) as Status;
+    if (!name) error = '이름을 입력해 주세요.';
+    else if (isSelf && (role !== 'admin' || status !== 'active')) error = '자기 자신의 관리자 권한이나 활성 상태는 바꿀 수 없습니다.';
+    else {
+      await updateUser(target.id, { name, role, status });
+      if (status === 'disabled') await destroyUserSessions(target.id);
+      setFlash(Astro.cookies, 'success', '회원 정보를 저장했습니다.');
+      return Astro.redirect(`/manage/users/${target.id}`, 303);
+    }
+  } else if (action === 'password') {
+    const pw = formStr(fd, 'password', 200);
+    const problem = passwordProblem(pw);
+    if (problem) error = problem;
+    else {
+      await updateUser(target.id, { password_hash: await hashPassword(pw) });
+      if (!isSelf) await destroyUserSessions(target.id);
+      setFlash(Astro.cookies, 'success', '비밀번호를 재설정했습니다. 새 비밀번호를 본인에게 전달해 주세요.');
+      return Astro.redirect(`/manage/users/${target.id}`, 303);
+    }
+  } else if (action === 'logout-all') {
+    await destroyUserSessions(target.id);
+    setFlash(Astro.cookies, 'success', '모든 기기에서 로그아웃했습니다.');
+    return Astro.redirect(isSelf ? '/login' : `/manage/users/${target.id}`, 303);
+  } else if (action === 'delete' && !isSelf) {
+    if (await deleteUser(target.id)) { setFlash(Astro.cookies, 'success', `${target.name} 님 계정을 삭제했습니다.`); return Astro.redirect('/manage/users', 303); }
+    error = '보고서를 낸 회원은 삭제할 수 없습니다. 대신 비활성으로 바꾸세요.';
+  }
+}
+const sessions = target ? await countSessions(target.id) : 0;
+const canDelete = !!target && !isSelf && target.cell_count === 0 && target.care_count === 0;
+---
+<MemberLayout title="회원 정보" subtitle="Member" area="manage">
+  {!target ? <NotFound back="/manage/users" backLabel="회원 목록으로" /> : (
+    <>
+      <p><a href="/manage/users" class="btn btn-outline-secondary btn-sm">← 회원 목록</a></p>
+      {error && <div class="alert alert-danger" role="alert">{error}</div>}
+
+      <dl class="report-detail">
+        <dt>이메일</dt><dd>{target.email}</dd>
+        <dt>권한 · 상태</dt><dd><StatusBadge role={target.role} status={target.status} /></dd>
+        <dt>로그인 방법</dt><dd>{[target.password_hash ? '비밀번호' : '', ...(target.providers ?? '').split(',').filter(Boolean)].filter(Boolean).join(', ') || '아직 없음'}</dd>
+        <dt>보고서</dt><dd>D그룹 {target.cell_count}건 · 일대일 {target.care_count}건</dd>
+        <dt>최근 로그인</dt><dd>{formatLocal(target.last_login_at) || '—'} <span class="text-muted small">(로그인 중인 기기 {sessions})</span></dd>
+        <dt>가입일</dt><dd>{formatLocal(target.created_at)}</dd>
+      </dl>
+
+      <form method="post" class="form-narrow mb-5" novalidate>
+        <input type="hidden" name="action" value="save" />
+        <h2 class="h5 mb-3">정보 수정</h2>
+        <div class="form-row">
+          <div class="form-group col-md-4"><label for="name">이름</label><input id="name" name="name" class="form-control" value={target.name} required /></div>
+          <div class="form-group col-md-4"><label for="role">권한</label>
+            <select id="role" name="role" class="form-control" disabled={isSelf}><option value="member" selected={target.role === 'member'}>교인</option><option value="admin" selected={target.role === 'admin'}>관리자</option></select>
+            {isSelf && <input type="hidden" name="role" value="admin" />}
+          </div>
+          <div class="form-group col-md-4"><label for="status">상태</label>
+            <select id="status" name="status" class="form-control" disabled={isSelf}>
+              <option value="pending" selected={target.status === 'pending'}>승인 대기</option>
+              <option value="active" selected={target.status === 'active'}>활성</option>
+              <option value="disabled" selected={target.status === 'disabled'}>비활성 (로그인 불가)</option>
+            </select>
+            {isSelf && <input type="hidden" name="status" value="active" />}
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">저장</button>
+      </form>
+
+      <div class="row">
+        <div class="col-md-6 mb-4">
+          <form method="post" novalidate>
+            <input type="hidden" name="action" value="password" />
+            <h2 class="h6">비밀번호 재설정</h2>
+            <div class="form-group"><input name="password" type="text" class="form-control" placeholder="새 비밀번호 (8자 이상)" autocomplete="off" required minlength="8" /></div>
+            <button type="submit" class="btn btn-outline-primary btn-sm">재설정</button>
+          </form>
+        </div>
+        <div class="col-md-6 mb-4">
+          <h2 class="h6">기타</h2>
+          <form method="post" class="d-inline"><input type="hidden" name="action" value="logout-all" /><button type="submit" class="btn btn-outline-secondary btn-sm">모든 기기에서 로그아웃</button></form>
+          {!isSelf && (
+            <form method="post" class="d-inline ml-2" onsubmit="return confirm('이 회원을 삭제할까요?')">
+              <input type="hidden" name="action" value="delete" />
+              <button type="submit" class="btn btn-outline-danger btn-sm" disabled={!canDelete} title={canDelete ? '' : '보고서가 있는 회원은 삭제할 수 없습니다'}>계정 삭제</button>
+            </form>
+          )}
+        </div>
+      </div>
+    </>
+  )}
+</MemberLayout>

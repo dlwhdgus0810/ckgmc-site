@@ -1,0 +1,53 @@
+---
+/** 교인 공간 왼쪽 메뉴 (관리자는 관리 메뉴가 더 보임). 표현은 SectionNav 와 같은 스타일을 씁니다. */
+import Icon from '../Icon.astro';
+import { isAdmin } from '../../lib/auth/session';
+const user = Astro.locals.user;
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const memberLinks = [
+  { href: '/members', label: '마이페이지' },
+  { href: '/members/cell-report', label: 'D그룹 리더 보고서' },
+  { href: '/members/care-report', label: '일대일 양육보고서' },
+  { href: '/members/password', label: '비밀번호' },
+];
+const manageLinks = [
+  { href: '/manage', label: '대시보드' },
+  { href: '/manage/cell-reports', label: '리더 보고서' },
+  { href: '/manage/care-reports', label: '일대일 양육보고서' },
+  { href: '/manage/groups', label: 'D그룹 관리' },
+  { href: '/manage/stats', label: '그룹 통계' },
+  { href: '/manage/users', label: '회원 관리' },
+];
+const cur = (href: string) => (href === path ? 'page' : undefined);
+---
+<nav class="section-nav member-nav" aria-label="교인 공간 메뉴">
+  <div class="section-nav__title">
+    <strong>교인 공간</strong>
+    <span>Members</span>
+  </div>
+  <ul class="section-nav__list">
+    {memberLinks.map((l) => <li><a href={l.href} aria-current={cur(l.href)}>{l.label}</a></li>)}
+  </ul>
+  {isAdmin(user) && (
+    <>
+      <div class="section-nav__title member-nav__title--admin">
+        <strong>관리자</strong>
+        <span>Admin</span>
+      </div>
+      <ul class="section-nav__list">
+        {manageLinks.map((l) => <li><a href={l.href} aria-current={cur(l.href)}>{l.label}</a></li>)}
+      </ul>
+    </>
+  )}
+  {user && (
+    <div class="member-nav__user">
+      <div class="member-nav__who">
+        {user.avatar_url ? <img src={user.avatar_url} alt="" width="32" height="32" /> : <span class="member-nav__initial" aria-hidden="true">{user.name.slice(0, 1)}</span>}
+        <div><strong>{user.name}</strong><small>{user.email}</small></div>
+      </div>
+      <form method="post" action="/auth/logout">
+        <button type="submit" class="btn btn-outline-secondary btn-sm"><Icon name="arrow-right" size={16} /> 로그아웃</button>
+      </form>
+    </div>
+  )}
+</nav>

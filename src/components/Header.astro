@@ -54,6 +54,7 @@ const [welcomeCta, givingCta] = headerCtas;
       <div class="site-nav__ctas">
         {welcomeCta && <a class="site-nav__cta" href={welcomeCta.href}>{welcomeCta.label}</a>}
         {givingCta && <a class="btn btn-gold btn-sm" href={givingCta.href}>{givingCta.label}</a>}
+        <a class="site-nav__cta site-nav__account" href="/login" data-account-link>로그인</a>
         <ul class="site-nav__social">
           <li><a href={site.social.facebook} target="_blank" rel="noopener" aria-label="페이스북 (새 창)"><Icon name="facebook" size={18} /></a></li>
           <li><a href={site.social.youtube} target="_blank" rel="noopener" aria-label="유튜브 (새 창)"><Icon name="youtube" size={18} /></a></li>
@@ -63,3 +64,11 @@ const [welcomeCta, givingCta] = headerCtas;
     </nav>
   </div>
 </header>
+<script>
+  // 정적 페이지라 서버는 로그인 여부를 모릅니다. 로그인 시 발급되는 ck_auth 쿠키(값 없음)로 링크만 바꿉니다.
+  const link = document.querySelector<HTMLAnchorElement>('[data-account-link]');
+  if (link && document.cookie.split('; ').some((c) => c.startsWith('ck_auth='))) {
+    link.textContent = '마이페이지';
+    link.href = '/members';
+  }
+</script>

@@ -1,7 +1,7 @@
 ---
 /** 푸터: 교회 정보 · 예배 시간 · 바로가기 · SNS/헌금 + 하단 저작권 */
 import { site, telHref, mapsDirectionsUrl, liveUrl } from '../data/site';
-import { footerNav, footerQuickLinks } from '../data/nav';
+import { footerMemberLinks, footerNav, footerQuickLinks } from '../data/nav';
 import Icon from './Icon.astro';
 const year = new Date().getFullYear();
 ---
@@ -32,6 +32,10 @@ const year = new Date().getFullYear();
         <h2 class="site-footer__heading">바로가기</h2>
         <ul class="site-footer__links">
           {footerQuickLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        </ul>
+        <h2 class="site-footer__heading mt-4">교인 전용</h2>
+        <ul class="site-footer__links">
+          {footerMemberLinks.map((l) => <li><a href={l.href} rel="nofollow">{l.label}</a></li>)}
         </ul>
       </div>
       <div class="col-md-6 col-lg-3">

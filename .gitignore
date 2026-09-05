@@ -5,3 +5,7 @@ dist/
 npm-debug.log*
 .env
 *.log
+# Cloudflare
+.wrangler/
+.dev.vars
+worker-configuration.d.ts

@@ -1,0 +1,8 @@
+---
+/** 직전 요청이 남긴 알림을 한 번 보여줍니다 (src/lib/http.ts setFlash) */
+import { takeFlash } from '../../lib/http';
+const flash = takeFlash(Astro.cookies);
+---
+{flash && (
+  <div class={`alert alert-${flash.type} flash`} role={flash.type === 'danger' ? 'alert' : 'status'}>{flash.text}</div>
+)}

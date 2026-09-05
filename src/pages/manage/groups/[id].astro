@@ -1,0 +1,67 @@
+---
+/** D그룹 수정 · 활성/비활성 · 삭제(보고서가 없을 때만) */
+export const prerender = false;
+import MemberLayout from '../../../layouts/MemberLayout.astro';
+import NotFound from '../../../components/members/NotFound.astro';
+import { deleteGroup, getGroup, updateGroup } from '../../../lib/reports';
+import { formInt, formStr, setFlash } from '../../../lib/http';
+
+const id = Number(Astro.params.id);
+const group = Number.isInteger(id) ? await getGroup(id) : null;
+if (!group) Astro.response.status = 404;
+let error: string | null = null;
+
+if (group && Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData();
+  const action = formStr(fd, 'action', 20);
+  if (action === 'delete') {
+    if (await deleteGroup(group.id)) { setFlash(Astro.cookies, 'success', `"${group.name}" 그룹을 삭제했습니다.`); return Astro.redirect('/manage/groups', 303); }
+    error = '보고서가 있는 그룹은 삭제할 수 없습니다. 대신 비활성으로 바꾸세요.';
+  } else {
+    const name = formStr(fd, 'name', 100);
+    if (!name) error = '그룹 이름을 입력해 주세요.';
+    else {
+      await updateGroup(group.id, { name, leaders: formStr(fd, 'leaders', 100), age: formStr(fd, 'age', 100), meeting_time: formStr(fd, 'meeting_time', 100), focus: formStr(fd, 'focus', 200), description: formStr(fd, 'description', 1000), sort_order: formInt(fd, 'sort_order') ?? 0, is_active: fd.get('is_active') === '1' ? 1 : 0 });
+      setFlash(Astro.cookies, 'success', '그룹 정보를 저장했습니다.');
+      return Astro.redirect('/manage/groups', 303);
+    }
+  }
+}
+---
+<MemberLayout title="D그룹 수정" subtitle="Edit Group" area="manage">
+  {!group ? <NotFound back="/manage/groups" backLabel="그룹 목록으로" /> : (
+    <>
+      <p><a href="/manage/groups" class="btn btn-outline-secondary btn-sm">← 그룹 목록</a></p>
+      <form method="post" class="form-narrow" novalidate>
+        {error && <div class="alert alert-danger" role="alert">{error}</div>}
+        <input type="hidden" name="action" value="save" />
+        <div class="form-row">
+          <div class="form-group col-md-6"><label for="name">그룹 이름 <span class="text-danger">*</span></label><input id="name" name="name" class="form-control" value={group.name} required /></div>
+          <div class="form-group col-md-6"><label for="leaders">리더</label><input id="leaders" name="leaders" class="form-control" value={group.leaders} /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group col-md-4"><label for="age">대상</label><input id="age" name="age" class="form-control" value={group.age} /></div>
+          <div class="form-group col-md-4"><label for="meeting_time">모임 시간</label><input id="meeting_time" name="meeting_time" class="form-control" value={group.meeting_time} /></div>
+          <div class="form-group col-md-4"><label for="focus">모임 성격</label><input id="focus" name="focus" class="form-control" value={group.focus} /></div>
+        </div>
+        <div class="form-group"><label for="description">소개</label><textarea id="description" name="description" class="form-control" rows="2">{group.description}</textarea></div>
+        <div class="form-row align-items-end">
+          <div class="form-group col-sm-4"><label for="sort_order">정렬 순서</label><input id="sort_order" name="sort_order" type="number" class="form-control" value={group.sort_order} /></div>
+          <div class="form-group col-sm-8">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" checked={!!group.is_active} />
+              <label class="form-check-label" for="is_active">활성 (보고서 작성 시 선택 가능)</label>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">저장</button>
+      </form>
+      <hr class="my-4" />
+      <form method="post" onsubmit="return confirm('이 그룹을 삭제할까요?')">
+        <input type="hidden" name="action" value="delete" />
+        <p class="small text-muted mb-2">보고서 {group.report_count ?? 0}건. 보고서가 있으면 삭제 대신 비활성으로 바꾸세요.</p>
+        <button type="submit" class="btn btn-outline-danger btn-sm" disabled={(group.report_count ?? 0) > 0}>그룹 삭제</button>
+      </form>
+    </>
+  )}
+</MemberLayout>

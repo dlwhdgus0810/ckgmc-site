@@ -1,0 +1,154 @@
+---
+/** D그룹 리더 보고서 작성 (원본 사이트의 8개 항목 그대로) */
+export const prerender = false;
+import MemberLayout from '../../layouts/MemberLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { createCellReport, listGroups, SCORES, type Absentee } from '../../lib/reports';
+import { formInt, formList, formStr, isValidDate, setFlash, todayLocal } from '../../lib/http';
+
+const user = Astro.locals.user!;
+const groups = await listGroups(true);
+
+const values = { group_id: '', meeting_date: todayLocal(), attendance: '', newcomers: '', mood_score: '', prep_score: '', reflection: '', visits: '', visit_requests: '' };
+let absentees: Absentee[] = [];
+const errors: string[] = [];
+
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData();
+  for (const k of Object.keys(values) as (keyof typeof values)[]) values[k] = formStr(fd, k);
+  const names = formList(fd, 'absentee_name', 100);
+  const reasons = formList(fd, 'absentee_reason', 300);
+  absentees = names.map((name, i) => ({ name, reason: reasons[i] ?? '' })).filter((a) => a.name || a.reason);
+
+  const groupId = formInt(fd, 'group_id');
+  if (!groupId || !groups.some((g) => g.id === groupId)) errors.push('D그룹을 선택해 주세요.');
+  if (!isValidDate(values.meeting_date)) errors.push('모임 날짜를 확인해 주세요.');
+  const attendance = formInt(fd, 'attendance');
+  if (attendance === null || attendance < 0 || attendance > 500) errors.push('출석 인원을 입력해 주세요.');
+  const score = (k: 'mood_score' | 'prep_score') => {
+    if (values[k] === '') return null;
+    const n = formInt(fd, k);
+    if (n === null || n < 0 || n > 10) { errors.push('자체평가 점수는 0~10 사이여야 합니다.'); return null; }
+    return n;
+  };
+  const mood = score('mood_score');
+  const prep = score('prep_score');
+  if (absentees.some((a) => !a.name)) errors.push('결석자 이름이 비어 있는 줄이 있습니다.');
+
+  if (errors.length === 0) {
+    const id = await createCellReport({
+      group_id: groupId!, user_id: user.id, meeting_date: values.meeting_date, attendance: attendance!,
+      absentees: JSON.stringify(absentees), newcomers: values.newcomers, mood_score: mood, prep_score: prep,
+      reflection: values.reflection, visits: values.visits, visit_requests: values.visit_requests,
+    });
+    setFlash(Astro.cookies, 'success', '보고서가 제출되었습니다. 수고하셨습니다!');
+    return Astro.redirect(`/members/cell-reports/${id}`, 303);
+  }
+}
+while (absentees.length < 3) absentees.push({ name: '', reason: '' });
+---
+<MemberLayout title="D그룹 리더 보고서" subtitle="Small Group Leader Report">
+  {groups.length === 0 ? (
+    <div class="alert alert-warning">등록된 D그룹이 없습니다. 관리자에게 그룹 등록을 요청해 주세요.{user.role === 'admin' && <> <a href="/manage/groups">D그룹 관리로 이동</a></>}</div>
+  ) : (
+    <form method="post" class="form-narrow report-form" novalidate>
+      {errors.length > 0 && (
+        <div class="alert alert-danger" role="alert">
+          <ul class="mb-0 pl-3">{errors.map((e) => <li>{e}</li>)}</ul>
+        </div>
+      )}
+
+      <div class="form-row">
+        <div class="form-group col-md-6">
+          <label for="group_id">1. D그룹 선택</label>
+          <select id="group_id" name="group_id" class="form-control" required>
+            <option value="">선택...</option>
+            {groups.map((g) => <option value={g.id} selected={values.group_id === String(g.id)}>{g.name}{g.leaders && ` (${g.leaders})`}</option>)}
+          </select>
+        </div>
+        <div class="form-group col-md-3">
+          <label for="meeting_date">2. 모임 날짜</label>
+          <input id="meeting_date" name="meeting_date" type="date" class="form-control" value={values.meeting_date} required />
+        </div>
+        <div class="form-group col-md-3">
+          <label for="attendance">3. 출석 인원</label>
+          <input id="attendance" name="attendance" type="number" min="0" max="500" inputmode="numeric" class="form-control" value={values.attendance} required />
+        </div>
+      </div>
+
+      <fieldset class="form-group absentee-rows">
+        <legend class="col-form-label pt-0 font-weight-bold">4. 결석자 명단 및 사유</legend>
+        <div id="absentee-list">
+          {absentees.map((a, i) => (
+            <div class="form-row absentee-row">
+              <div class="col-4"><label class="sr-only" for={`absentee_name_${i}`}>이름</label><input id={`absentee_name_${i}`} name="absentee_name" class="form-control" placeholder="이름" value={a.name} /></div>
+              <div class="col-8"><label class="sr-only" for={`absentee_reason_${i}`}>사유</label><input id={`absentee_reason_${i}`} name="absentee_reason" class="form-control" placeholder="사유" value={a.reason} /></div>
+            </div>
+          ))}
+        </div>
+        <button type="button" class="btn btn-outline-secondary btn-sm mt-2" id="add-absentee">+ 줄 추가</button>
+      </fieldset>
+
+      <div class="form-group">
+        <label for="newcomers">5. 새가족 현황</label>
+        <p class="small text-muted mb-1">D그룹에 최근 편입되신 분의 적응 정도와 영적 상태 혹은 특이사항</p>
+        <textarea id="newcomers" name="newcomers" class="form-control" rows="3">{values.newcomers}</textarea>
+      </div>
+
+      <fieldset class="form-group">
+        <legend class="col-form-label pt-0 font-weight-bold">6. D그룹/그룹 리더 자체평가</legend>
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            <label for="mood_score">그룹의 전반적인 분위기</label>
+            <p class="small text-muted mb-1">0 (이보다 나쁠 수 없다) ~ 10 (이보다 좋을 수 없다)</p>
+            <select id="mood_score" name="mood_score" class="form-control">
+              <option value="">선택</option>
+              {SCORES.map((s) => <option value={s} selected={values.mood_score === String(s)}>{s}</option>)}
+            </select>
+          </div>
+          <div class="form-group col-md-6">
+            <label for="prep_score">그룹 리더로서의 모임 준비 정도</label>
+            <p class="small text-muted mb-1">0 (전혀 준비를 못 함) ~ 10 (최선을 다했다)</p>
+            <select id="prep_score" name="prep_score" class="form-control">
+              <option value="">선택</option>
+              {SCORES.map((s) => <option value={s} selected={values.prep_score === String(s)}>{s}</option>)}
+            </select>
+          </div>
+        </div>
+        <label for="reflection">그룹 모임에서 가장 좋았던 점이 있다면? 그리고 개선할 점이 있다면 무엇입니까?</label>
+        <textarea id="reflection" name="reflection" class="form-control" rows="4">{values.reflection}</textarea>
+      </fieldset>
+
+      <div class="form-group">
+        <label for="visits">7. 그룹 리더님의 심방활동</label>
+        <p class="small text-muted mb-1">심방활동(전화, 방문)이 있었다면 알려주세요 (심방일자/이름/내용)</p>
+        <textarea id="visits" name="visits" class="form-control" rows="3">{values.visits}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="visit_requests">8. 심방 요청</label>
+        <p class="small text-muted mb-1">목회자가 심방해야 할 멤버들이 있다면 알려주세요.</p>
+        <textarea id="visit_requests" name="visit_requests" class="form-control" rows="3">{values.visit_requests}</textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg"><Icon name="check-circle" size={20} /> 보고서 제출하기</button>
+    </form>
+  )}
+</MemberLayout>
+<script>
+  // 결석자 줄 추가
+  const list = document.getElementById('absentee-list');
+  document.getElementById('add-absentee')?.addEventListener('click', () => {
+    const last = list?.querySelector<HTMLElement>('.absentee-row:last-child');
+    if (!list || !last) return;
+    const row = last.cloneNode(true) as HTMLElement;
+    const n = list.children.length;
+    row.querySelectorAll<HTMLInputElement>('input').forEach((input) => {
+      input.value = '';
+      input.id = input.id.replace(/\d+$/, String(n));
+    });
+    row.querySelectorAll<HTMLLabelElement>('label').forEach((label) => { label.htmlFor = label.htmlFor.replace(/\d+$/, String(n)); });
+    list.appendChild(row);
+    row.querySelector<HTMLInputElement>('input')?.focus();
+  });
+</script>

@@ -1,6 +1,7 @@
-# GitHub Pages 수동 배포 (예비용). 기본 배포는 Cloudflare Pages 가 GitHub push 를 감지해 자동으로 합니다.
+# GitHub Pages 수동 배포 (예비용). 기본 배포는 Cloudflare Workers 입니다 (README "배포" 절).
+# 주의: GitHub Pages 에는 정적 페이지만 올라갑니다. 로그인·보고서 기능(/login, /members, /manage)과 옛 주소 리다이렉트는 동작하지 않습니다.
 # 사용하려면 저장소 Settings → Pages → Source 를 "GitHub Actions" 로 두고 Actions 탭에서 이 워크플로를 실행하세요.
-name: Deploy to GitHub Pages (manual)
+name: Deploy to GitHub Pages (manual, static only)
 on:
   workflow_dispatch:
 permissions:
@@ -12,9 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: withastro/action@v3
+      - uses: actions/setup-node@v5
         with:
-          node-version: 22
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/client
   deploy:
     needs: build
     runs-on: ubuntu-latest

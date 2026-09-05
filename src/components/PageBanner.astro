@@ -12,15 +12,17 @@ interface Props {
   path: string;
   leaf?: string;
   parentHref?: string;
+  /** 현재 위치에 표시할 상위 항목 이름 (기본: title). 예: 교인 공간 > D그룹 리더 보고서 */
+  crumbTitle?: string;
 }
-const { title, subtitle, image, heading = 'h1', path, leaf, parentHref } = Astro.props;
+const { title, subtitle, image, heading = 'h1', path, leaf, parentHref, crumbTitle } = Astro.props;
 const Tag = heading;
 ---
 <div class:list={['page-banner', { 'page-banner--image': !!image }]}>
   {image && <img class="page-banner__img" src={image} alt="" loading="eager" decoding="async" />}
   <div class="page-banner__scrim" aria-hidden="true"></div>
   <div class="container page-banner__content">
-    <Breadcrumb path={path} fallbackTitle={title} leaf={leaf} parentHref={parentHref} />
+    <Breadcrumb path={path} fallbackTitle={crumbTitle ?? title} leaf={leaf} parentHref={parentHref} />
     {subtitle && <p class="page-banner__eyebrow">{subtitle}</p>}
     <Tag class="page-banner__title">{title}</Tag>
   </div>

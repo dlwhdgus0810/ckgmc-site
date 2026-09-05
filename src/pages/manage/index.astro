@@ -1,0 +1,89 @@
+---
+/** 관리자 대시보드: 요약 숫자, 승인 대기 회원(바로 승인), 최근 보고서 */
+export const prerender = false;
+import MemberLayout from '../../layouts/MemberLayout.astro';
+import { dashboardCounts, listCareReports, listCellReports } from '../../lib/reports';
+import { findUserById, listPendingUsers, updateUser } from '../../lib/auth/users';
+import { formInt, formStr, formatLocal, setFlash, todayLocal } from '../../lib/http';
+
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData();
+  if (formStr(fd, 'action', 20) === 'approve') {
+    const id = formInt(fd, 'user_id');
+    const target = id ? await findUserById(id) : null;
+    if (target && target.status === 'pending') {
+      await updateUser(target.id, { status: 'active' });
+      setFlash(Astro.cookies, 'success', `${target.name} 님을 승인했습니다.`);
+    }
+  }
+  return Astro.redirect('/manage', 303);
+}
+const month = todayLocal().slice(0, 7);
+const [counts, pending, cells, cares] = await Promise.all([dashboardCounts(month), listPendingUsers(10), listCellReports({}, 5), listCareReports({}, 5)]);
+---
+<MemberLayout title="관리자 대시보드" subtitle="Dashboard" area="manage">
+  <div class="stat-grid">
+    <div class="stat"><span class="stat__label">이달 D그룹 보고서</span><span class="stat__value">{counts.cellMonth}</span><span class="stat__sub">전체 {counts.cellTotal}건</span></div>
+    <div class="stat"><span class="stat__label">이달 양육보고서</span><span class="stat__value">{counts.careMonth}</span><span class="stat__sub">전체 {counts.careTotal}건</span></div>
+    <div class="stat"><span class="stat__label">활성 D그룹</span><span class="stat__value">{counts.groups}</span><span class="stat__sub"><a href="/manage/groups">그룹 관리</a></span></div>
+    <div class="stat"><span class="stat__label">활성 회원</span><span class="stat__value">{counts.activeUsers}</span><span class="stat__sub"><a href="/manage/users">회원 관리</a></span></div>
+    <div class:list={['stat', { 'stat--warn': counts.pendingUsers > 0 }]}><span class="stat__label">승인 대기</span><span class="stat__value">{counts.pendingUsers}</span><span class="stat__sub"><a href="/manage/users?status=pending">대기 목록</a></span></div>
+  </div>
+
+  {pending.length > 0 && (
+    <section class="mb-5" aria-labelledby="pending-heading">
+      <h2 id="pending-heading" class="h5 mb-3">승인 대기 회원</h2>
+      <div class="table-responsive">
+        <table class="table table-sm table-report">
+          <thead><tr><th>이름</th><th>이메일</th><th>가입일</th><th></th></tr></thead>
+          <tbody>
+            {pending.map((u) => (
+              <tr>
+                <td><a href={`/manage/users/${u.id}`}>{u.name}</a></td>
+                <td>{u.email}</td>
+                <td>{formatLocal(u.created_at)}</td>
+                <td class="text-right">
+                  <form method="post" class="d-inline">
+                    <input type="hidden" name="action" value="approve" />
+                    <input type="hidden" name="user_id" value={u.id} />
+                    <button type="submit" class="btn btn-success btn-sm">교인으로 승인</button>
+                  </form>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p class="small text-muted">모르는 사람이면 승인하지 말고 회원 관리에서 비활성화하세요.</p>
+    </section>
+  )}
+
+  <div class="row">
+    <div class="col-lg-6 mb-4">
+      <h2 class="h5 mb-3">최근 D그룹 리더 보고서 <a class="small font-weight-normal ml-2" href="/manage/cell-reports">전체 보기</a></h2>
+      {cells.length === 0 ? <p class="text-muted">아직 보고서가 없습니다.</p> : (
+        <ul class="list-unstyled mb-0">
+          {cells.map((r) => (
+            <li class="py-2 border-bottom">
+              <a href={`/members/cell-reports/${r.id}`}><strong>{r.group_name}</strong> · {r.meeting_date}</a>
+              <div class="small text-muted">{r.reporter_name} · 출석 {r.attendance} · 결석 {JSON.parse(r.absentees || '[]').length}{r.comment_count > 0 && ` · 답글 ${r.comment_count}`}</div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+    <div class="col-lg-6 mb-4">
+      <h2 class="h5 mb-3">최근 일대일 양육보고서 <a class="small font-weight-normal ml-2" href="/manage/care-reports">전체 보기</a></h2>
+      {cares.length === 0 ? <p class="text-muted">아직 보고서가 없습니다.</p> : (
+        <ul class="list-unstyled mb-0">
+          {cares.map((r) => (
+            <li class="py-2 border-bottom">
+              <a href={`/members/care-reports/${r.id}`}><strong>{r.disciple_name}</strong> {r.week}주차 · {r.care_date}</a>
+              <div class="small text-muted">{r.department} · 바나바 {r.barnabas_name}{r.comment_count > 0 && ` · 답글 ${r.comment_count}`}</div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </div>
+</MemberLayout>

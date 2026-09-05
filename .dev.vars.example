@@ -1,0 +1,13 @@
+# 로컬 개발용 환경 변수. 이 파일을 .dev.vars 로 복사해 값을 채우세요 (.dev.vars 는 git 에 올라가지 않음).
+# 배포 환경에서는 Cloudflare 대시보드(Workers → Settings → Variables) 또는 `npx wrangler secret put 이름` 으로 넣습니다.
+
+# 이 이메일로 로그인하면 자동으로 관리자가 됩니다 (쉼표로 여러 개)
+ADMIN_EMAILS=admin@example.com
+
+# 소셜 로그인 (나중에 연결). 비워 두면 로그인 화면에 버튼이 나타나지 않습니다.
+# Google Cloud Console → OAuth 클라이언트 → 승인된 리디렉션 URI: https://<도메인>/auth/google/callback
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+# Meta for Developers → Facebook 로그인 → 유효한 OAuth 리디렉션 URI: https://<도메인>/auth/facebook/callback
+FACEBOOK_CLIENT_ID=
+FACEBOOK_CLIENT_SECRET=

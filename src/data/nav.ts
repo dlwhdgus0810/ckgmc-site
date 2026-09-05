@@ -45,6 +45,13 @@ export const footerQuickLinks: NavItem[] = [
   { label: '교인등록', href: '/next-steps/membership' },
 ];
 
+/** 푸터 "교인 전용" 링크 (로그인 필요) */
+export const footerMemberLinks: NavItem[] = [
+  { label: 'D그룹 리더 보고서', href: '/members/cell-report' },
+  { label: '일대일 양육보고서', href: '/members/care-report' },
+  { label: '로그인 · 마이페이지', href: '/members' },
+];
+
 /** 푸터 하단 정책 링크 */
 export const footerNav: NavItem[] = [
   { label: '개인정보활용 및 보호정책', href: '/privacy-policy' },

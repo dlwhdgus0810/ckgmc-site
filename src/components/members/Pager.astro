@@ -1,0 +1,23 @@
+---
+/** 목록 페이지 나누기 (검색 조건 유지) */
+import { pageHref, type Paging } from '../../lib/http';
+interface Props { paging: Paging }
+const { paging } = Astro.props;
+const url = Astro.url;
+const around = [paging.page - 2, paging.page - 1, paging.page, paging.page + 1, paging.page + 2].filter((p) => p >= 1 && p <= paging.pages);
+---
+{paging.pages > 1 && (
+  <nav aria-label="페이지" class="mt-3">
+    <ul class="pagination pagination-sm mb-0">
+      <li class:list={['page-item', { disabled: paging.page === 1 }]}><a class="page-link" href={pageHref(url, paging.page - 1)} aria-label="이전">‹</a></li>
+      {around[0] > 1 && <li class="page-item"><a class="page-link" href={pageHref(url, 1)}>1</a></li>}
+      {around[0] > 2 && <li class="page-item disabled"><span class="page-link">…</span></li>}
+      {around.map((p) => (
+        <li class:list={['page-item', { active: p === paging.page }]}><a class="page-link" href={pageHref(url, p)} aria-current={p === paging.page ? 'page' : undefined}>{p}</a></li>
+      ))}
+      {around[around.length - 1] < paging.pages - 1 && <li class="page-item disabled"><span class="page-link">…</span></li>}
+      {around[around.length - 1] < paging.pages && <li class="page-item"><a class="page-link" href={pageHref(url, paging.pages)}>{paging.pages}</a></li>}
+      <li class:list={['page-item', { disabled: paging.page === paging.pages }]}><a class="page-link" href={pageHref(url, paging.page + 1)} aria-label="다음">›</a></li>
+    </ul>
+  </nav>
+)}

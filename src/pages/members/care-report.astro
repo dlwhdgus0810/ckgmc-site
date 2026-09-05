@@ -1,0 +1,107 @@
+---
+/** 일대일 양육보고서 작성 */
+export const prerender = false;
+import MemberLayout from '../../layouts/MemberLayout.astro';
+import Icon from '../../components/Icon.astro';
+import { createCareReport, CURRICULA, DEPARTMENTS, MAX_WEEK } from '../../lib/reports';
+import { formInt, formStr, isValidDate, setFlash, todayLocal } from '../../lib/http';
+
+const user = Astro.locals.user!;
+const values = { department: '', barnabas_name: user.name, disciple_name: '', care_date: todayLocal(), week: '', curriculum: '', attended_last_sunday: '', response: '', prayer: '', notes: '' };
+const errors: string[] = [];
+
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData();
+  for (const k of Object.keys(values) as (keyof typeof values)[]) values[k] = formStr(fd, k);
+  if (!(DEPARTMENTS as readonly string[]).includes(values.department)) errors.push('부서를 선택해 주세요.');
+  if (!values.barnabas_name) errors.push('바나바 이름을 입력해 주세요.');
+  if (!values.disciple_name) errors.push('양육 대상자 이름을 입력해 주세요.');
+  if (!isValidDate(values.care_date)) errors.push('양육 날짜를 확인해 주세요.');
+  const week = formInt(fd, 'week');
+  if (week === null || week < 1 || week > MAX_WEEK) errors.push('교육 주차를 선택해 주세요.');
+  if (!(CURRICULA as readonly string[]).includes(values.curriculum)) errors.push('양육 교재를 선택해 주세요.');
+  const attended = values.attended_last_sunday === '1' ? 1 : values.attended_last_sunday === '0' ? 0 : null;
+  if (attended === null) errors.push('지난주 새가족 출석 여부를 선택해 주세요.');
+
+  if (errors.length === 0) {
+    const id = await createCareReport({
+      user_id: user.id, department: values.department, barnabas_name: values.barnabas_name, disciple_name: values.disciple_name,
+      care_date: values.care_date, week: week!, curriculum: values.curriculum, attended_last_sunday: attended,
+      response: values.response, prayer: values.prayer, notes: values.notes,
+    });
+    setFlash(Astro.cookies, 'success', '양육보고서가 제출되었습니다. 수고하셨습니다!');
+    return Astro.redirect(`/members/care-reports/${id}`, 303);
+  }
+}
+---
+<MemberLayout title="일대일 양육보고서" subtitle="One-to-one Care Report">
+  <form method="post" class="form-narrow report-form" novalidate>
+    {errors.length > 0 && (
+      <div class="alert alert-danger" role="alert"><ul class="mb-0 pl-3">{errors.map((e) => <li>{e}</li>)}</ul></div>
+    )}
+    <div class="form-row">
+      <div class="form-group col-md-4">
+        <label for="department">부서 선택</label>
+        <select id="department" name="department" class="form-control" required>
+          <option value="">부서 선택...</option>
+          {DEPARTMENTS.map((d) => <option value={d} selected={values.department === d}>{d}</option>)}
+        </select>
+      </div>
+      <div class="form-group col-md-4">
+        <label for="barnabas_name">바나바 이름</label>
+        <input id="barnabas_name" name="barnabas_name" class="form-control" value={values.barnabas_name} required />
+      </div>
+      <div class="form-group col-md-4">
+        <label for="disciple_name">양육 대상자 이름</label>
+        <input id="disciple_name" name="disciple_name" class="form-control" value={values.disciple_name} required />
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group col-md-4">
+        <label for="care_date">양육 날짜</label>
+        <input id="care_date" name="care_date" type="date" class="form-control" value={values.care_date} required />
+      </div>
+      <div class="form-group col-md-3">
+        <label for="week">교육 주차</label>
+        <select id="week" name="week" class="form-control" required>
+          <option value="">선택</option>
+          {Array.from({ length: MAX_WEEK }, (_, i) => i + 1).map((w) => <option value={w} selected={values.week === String(w)}>{w}주차</option>)}
+        </select>
+      </div>
+      <div class="form-group col-md-5">
+        <label for="curriculum">양육 교재</label>
+        <select id="curriculum" name="curriculum" class="form-control" required>
+          <option value="">선택...</option>
+          {CURRICULA.map((c) => <option value={c} selected={values.curriculum === c}>{c}</option>)}
+        </select>
+      </div>
+    </div>
+
+    <fieldset class="form-group">
+      <legend class="col-form-label pt-0 font-weight-bold">지난주 새가족 출석 여부</legend>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="attended_last_sunday" id="attended-yes" value="1" checked={values.attended_last_sunday === '1'} required />
+        <label class="form-check-label" for="attended-yes">출석함</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="attended_last_sunday" id="attended-no" value="0" checked={values.attended_last_sunday === '0'} />
+        <label class="form-check-label" for="attended-no">불출석</label>
+      </div>
+    </fieldset>
+
+    <div class="form-group">
+      <label for="response">양육 대상자의 반응은 어땠나요?</label>
+      <textarea id="response" name="response" class="form-control" rows="4">{values.response}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="prayer">기도 제목</label>
+      <textarea id="prayer" name="prayer" class="form-control" rows="3">{values.prayer}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="notes">보고사항 및 건의사항</label>
+      <textarea id="notes" name="notes" class="form-control" rows="3">{values.notes}</textarea>
+    </div>
+    <p class="small text-muted">보고서에 대한 답변은 마이페이지의 보고서 상세에서 확인할 수 있습니다.</p>
+    <button type="submit" class="btn btn-primary btn-lg"><Icon name="check-circle" size={20} /> 보고서 제출하기</button>
+  </form>
+</MemberLayout>

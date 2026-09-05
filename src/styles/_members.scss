@@ -1,0 +1,125 @@
+// =====================================================================
+//  교인 공간 · 관리자 화면 (로그인 필요 페이지)
+// =====================================================================
+.member-main .flash { margin-bottom: 1.5rem; }
+.pre-line { white-space: pre-line; }
+.form-narrow { max-width: 42rem; }
+
+// 왼쪽 메뉴에 붙는 사용자 정보·로그아웃
+.member-nav {
+  &__title--admin { margin-top: 1.25rem; }
+  &__user {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border: 1px solid $line;
+    border-radius: $border-radius;
+    background: $surface;
+    form { margin-top: .75rem; }
+  }
+  &__who {
+    display: flex; align-items: center; gap: .625rem;
+    img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex: none; }
+    div { display: flex; flex-direction: column; min-width: 0; }
+    strong { font-size: .9375rem; }
+    small { color: $ink-600; font-size: .75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  }
+  &__initial {
+    display: inline-flex; width: 32px; height: 32px; align-items: center; justify-content: center; flex: none;
+    border-radius: 50%; background: $navy; color: #fff; font-weight: 700;
+  }
+  @include media-breakpoint-down(md) {
+    &__title--admin { display: none; }
+    &__user { display: none; }
+    .section-nav__list + .section-nav__list { margin-top: .5rem; }
+  }
+}
+
+// 로그인 화면
+.login-card {
+  max-width: 28rem;
+  margin: 0 auto;
+  padding: 2rem;
+  border: 1px solid $line;
+  border-radius: $border-radius-lg;
+  background: #fff;
+  &__divider {
+    display: flex; align-items: center; gap: .75rem; margin: 1.5rem 0; color: $ink-600; font-size: .8125rem;
+    &::before, &::after { content: ''; flex: 1; border-top: 1px solid $line; }
+  }
+  .btn-provider {
+    width: 100%; justify-content: center; gap: .625rem; margin-bottom: .625rem;
+    background: #fff; border: 1px solid $line; color: $ink-900; font-weight: 600;
+    &:hover { background: $surface; }
+  }
+}
+
+// 요약 카드 (대시보드)
+.stat-grid {
+  display: grid; gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  margin-bottom: 2rem;
+}
+.stat {
+  padding: 1rem 1.125rem;
+  border: 1px solid $line;
+  border-radius: $border-radius;
+  background: #fff;
+  &__label { display: block; font-size: .8125rem; color: $ink-600; }
+  &__value { display: block; font-size: 1.75rem; font-weight: 700; color: $navy-900; line-height: 1.2; }
+  &__sub { font-size: .8125rem; color: $ink-600; }
+  &--warn { border-color: $gold; background: $gold-50; }
+}
+
+// 보고서 상세: 항목/값
+.report-detail {
+  display: grid;
+  grid-template-columns: minmax(7rem, max-content) 1fr;
+  gap: .625rem 1.25rem;
+  margin: 0 0 1.5rem;
+  padding: 1.25rem;
+  border: 1px solid $line;
+  border-radius: $border-radius;
+  background: #fff;
+  dt { font-weight: 600; color: $ink-600; font-size: .9375rem; }
+  dd { margin: 0; }
+  @include media-breakpoint-down(xs) { grid-template-columns: 1fr; dt { margin-top: .5rem; } }
+}
+.score {
+  display: inline-flex; align-items: center; gap: .5rem;
+  &__bar { width: 8rem; height: .5rem; border-radius: 999px; background: $line; overflow: hidden; }
+  &__fill { display: block; height: 100%; background: $navy; }
+}
+
+// 답글
+.comments { margin-top: 2rem; }
+.comments__list { list-style: none; margin: 0; padding: 0; }
+.comment {
+  padding: .875rem 1rem;
+  border: 1px solid $line;
+  border-radius: $border-radius;
+  background: #fff;
+  & + & { margin-top: .625rem; }
+  &--admin { background: $navy-50; border-color: transparent; }
+  &__meta { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .375rem; font-size: .875rem; time { color: $ink-600; } }
+  &__body { font-size: .9375rem; }
+}
+
+// 결석자 행 (이름 + 사유)
+.absentee-rows .form-row + .form-row { margin-top: .5rem; }
+
+// 표
+.table-report {
+  font-size: .9375rem;
+  th { white-space: nowrap; font-weight: 600; color: $ink-600; border-top: 0; }
+  td { vertical-align: middle; }
+  tbody tr:hover { background: $surface; }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+}
+.filter-bar {
+  display: flex; flex-wrap: wrap; align-items: flex-end; gap: .75rem 1rem;
+  margin-bottom: 1.25rem; padding: 1rem; border-radius: $border-radius; background: $surface;
+  .form-group { margin: 0; min-width: 9rem; }
+  label { display: block; font-size: .8125rem; color: $ink-600; margin-bottom: .25rem; }
+  .form-control { min-height: 40px; }
+}
+.dev-login { border: 1px dashed $danger; border-radius: $border-radius; padding: 1rem; margin-top: 1.5rem; background: #fff8f8; }

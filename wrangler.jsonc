@@ -1,0 +1,24 @@
+// Cloudflare Workers 설정 (배포 · 로컬 개발 공용)
+// - 정적 페이지는 그대로 정적 파일로, 교인/관리자 기능(/members, /manage, /auth, /login)만 서버에서 실행됩니다.
+// - 처음 배포 전: `npx wrangler d1 create ckgmc` 로 만든 database_id 를 아래에 넣고
+//   `npm run db:migrate:remote` 로 테이블을 만드세요. (README "교인 전용 기능" 절 참고)
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ckgmc-site",
+  "main": "@astrojs/cloudflare/entrypoints/server",
+  "compatibility_date": "2026-08-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "./dist", "binding": "ASSETS" },
+  // 대시보드에서 넣은 환경 변수/시크릿을 배포 때 지우지 않음
+  "keep_vars": true,
+  "observability": { "enabled": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ckgmc",
+      // TODO: `npx wrangler d1 create ckgmc` 결과의 database_id 로 교체
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

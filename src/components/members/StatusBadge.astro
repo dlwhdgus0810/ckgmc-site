@@ -1,0 +1,8 @@
+---
+import { ROLE_LABEL, STATUS_LABEL, type Role, type Status } from '../../lib/auth/session';
+interface Props { status?: Status; role?: Role }
+const { status, role } = Astro.props;
+const statusClass: Record<Status, string> = { pending: 'badge-warning', active: 'badge-success', disabled: 'badge-secondary' };
+---
+{role && <span class:list={['badge', role === 'admin' ? 'badge-primary' : 'badge-light border']}>{ROLE_LABEL[role]}</span>}
+{status && <span class:list={['badge', statusClass[status]]}>{STATUS_LABEL[status]}</span>}

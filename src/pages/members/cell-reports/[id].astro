@@ -1,0 +1,83 @@
+---
+/** D그룹 리더 보고서 상세 + 답글. 보고자 본인과 관리자만 볼 수 있습니다. */
+export const prerender = false;
+import MemberLayout from '../../../layouts/MemberLayout.astro';
+import Comments from '../../../components/members/Comments.astro';
+import NotFound from '../../../components/members/NotFound.astro';
+import { addComment, deleteCellReport, deleteComment, getCellReport, listComments, parseAbsentees } from '../../../lib/reports';
+import { isAdmin } from '../../../lib/auth/session';
+import { formInt, formStr, formatLocal, koreanDate, setFlash } from '../../../lib/http';
+
+const user = Astro.locals.user!;
+const admin = isAdmin(user);
+const id = Number(Astro.params.id);
+const report = Number.isInteger(id) ? await getCellReport(id) : null;
+const canView = !!report && (report.user_id === user.id || admin);
+if (!canView) Astro.response.status = 404;
+
+if (canView && report && Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData();
+  const action = formStr(fd, 'action', 30);
+  if (action === 'comment') {
+    const body = formStr(fd, 'body', 4000);
+    if (body) { await addComment('cell', report.id, user.id, body); setFlash(Astro.cookies, 'success', '답글을 남겼습니다.'); }
+    return Astro.redirect(`/members/cell-reports/${report.id}#comments-heading`, 303);
+  }
+  if (action === 'delete-comment' && admin) {
+    const cid = formInt(fd, 'comment_id');
+    if (cid) await deleteComment(cid);
+    return Astro.redirect(`/members/cell-reports/${report.id}#comments-heading`, 303);
+  }
+  if (action === 'delete' && admin) {
+    await deleteCellReport(report.id);
+    setFlash(Astro.cookies, 'success', '보고서를 삭제했습니다.');
+    return Astro.redirect('/manage/cell-reports', 303);
+  }
+}
+const comments = canView && report ? await listComments('cell', report.id) : [];
+const absentees = report ? parseAbsentees(report.absentees) : [];
+const back = admin && report?.user_id !== user.id ? { href: '/manage/cell-reports', label: '리더 보고서 목록' } : { href: '/members', label: '마이페이지' };
+---
+<MemberLayout title="D그룹 리더 보고서" subtitle="Small Group Leader Report" area={admin && report?.user_id !== user.id ? 'manage' : 'members'}>
+  {!canView || !report ? <NotFound back={back.href} backLabel={back.label} /> : (
+    <>
+      <div class="d-flex flex-wrap align-items-center justify-content-between mb-3" style="gap:.5rem">
+        <h2 class="h4 mb-0">{report.group_name} · {koreanDate(report.meeting_date)}</h2>
+        <a href={back.href} class="btn btn-outline-secondary btn-sm">{back.label}</a>
+      </div>
+
+      <dl class="report-detail">
+        <dt>D그룹</dt><dd>{report.group_name}</dd>
+        <dt>모임 날짜</dt><dd>{koreanDate(report.meeting_date)}</dd>
+        <dt>보고자</dt><dd>{report.reporter_name} <span class="text-muted small">({report.reporter_email})</span></dd>
+        <dt>출석 / 결석</dt><dd><strong>{report.attendance}</strong>명 출석 · {absentees.length}명 결석</dd>
+        <dt>결석자 및 사유</dt>
+        <dd>{absentees.length === 0 ? <span class="text-muted">없음</span> : (
+          <ul class="mb-0 pl-3">{absentees.map((a) => <li><strong>{a.name}</strong>{a.reason && <> — {a.reason}</>}</li>)}</ul>
+        )}</dd>
+        <dt>새가족 현황</dt><dd class="pre-line">{report.newcomers || <span class="text-muted">—</span>}</dd>
+        <dt>그룹 분위기</dt>
+        <dd>{report.mood_score === null ? <span class="text-muted">—</span> : (
+          <span class="score"><span class="score__bar"><span class="score__fill" style={`width:${report.mood_score * 10}%`}></span></span>{report.mood_score} / 10</span>
+        )}</dd>
+        <dt>모임 준비</dt>
+        <dd>{report.prep_score === null ? <span class="text-muted">—</span> : (
+          <span class="score"><span class="score__bar"><span class="score__fill" style={`width:${report.prep_score * 10}%`}></span></span>{report.prep_score} / 10</span>
+        )}</dd>
+        <dt>좋았던 점 / 개선할 점</dt><dd class="pre-line">{report.reflection || <span class="text-muted">—</span>}</dd>
+        <dt>리더 심방활동</dt><dd class="pre-line">{report.visits || <span class="text-muted">—</span>}</dd>
+        <dt>심방 요청</dt><dd class="pre-line">{report.visit_requests || <span class="text-muted">—</span>}</dd>
+        <dt>제출일</dt><dd><time datetime={report.created_at}>{formatLocal(report.created_at)}</time></dd>
+      </dl>
+
+      {admin && (
+        <form method="post" class="text-right" onsubmit="return confirm('이 보고서와 답글을 모두 삭제할까요? 되돌릴 수 없습니다.')">
+          <input type="hidden" name="action" value="delete" />
+          <button type="submit" class="btn btn-outline-danger btn-sm">보고서 삭제</button>
+        </form>
+      )}
+
+      <Comments comments={comments} canDelete={admin} />
+    </>
+  )}
+</MemberLayout>

@@ -1,0 +1,69 @@
+---
+/** 일대일 양육보고서 상세 + 답글. 보고자 본인과 관리자만 볼 수 있습니다. */
+export const prerender = false;
+import MemberLayout from '../../../layouts/MemberLayout.astro';
+import Comments from '../../../components/members/Comments.astro';
+import NotFound from '../../../components/members/NotFound.astro';
+import { addComment, deleteCareReport, deleteComment, getCareReport, listComments } from '../../../lib/reports';
+import { isAdmin } from '../../../lib/auth/session';
+import { formInt, formStr, formatLocal, koreanDate, setFlash } from '../../../lib/http';
+
+const user = Astro.locals.user!;
+const admin = isAdmin(user);
+const id = Number(Astro.params.id);
+const report = Number.isInteger(id) ? await getCareReport(id) : null;
+const canView = !!report && (report.user_id === user.id || admin);
+if (!canView) Astro.response.status = 404;
+
+if (canView && report && Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData();
+  const action = formStr(fd, 'action', 30);
+  if (action === 'comment') {
+    const body = formStr(fd, 'body', 4000);
+    if (body) { await addComment('care', report.id, user.id, body); setFlash(Astro.cookies, 'success', '답글을 남겼습니다.'); }
+    return Astro.redirect(`/members/care-reports/${report.id}#comments-heading`, 303);
+  }
+  if (action === 'delete-comment' && admin) {
+    const cid = formInt(fd, 'comment_id');
+    if (cid) await deleteComment(cid);
+    return Astro.redirect(`/members/care-reports/${report.id}#comments-heading`, 303);
+  }
+  if (action === 'delete' && admin) {
+    await deleteCareReport(report.id);
+    setFlash(Astro.cookies, 'success', '보고서를 삭제했습니다.');
+    return Astro.redirect('/manage/care-reports', 303);
+  }
+}
+const comments = canView && report ? await listComments('care', report.id) : [];
+const back = admin && report?.user_id !== user.id ? { href: '/manage/care-reports', label: '양육보고서 목록' } : { href: '/members', label: '마이페이지' };
+---
+<MemberLayout title="일대일 양육보고서" subtitle="One-to-one Care Report" area={admin && report?.user_id !== user.id ? 'manage' : 'members'}>
+  {!canView || !report ? <NotFound back={back.href} backLabel={back.label} /> : (
+    <>
+      <div class="d-flex flex-wrap align-items-center justify-content-between mb-3" style="gap:.5rem">
+        <h2 class="h4 mb-0">{report.disciple_name} · {report.week}주차 · {koreanDate(report.care_date)}</h2>
+        <a href={back.href} class="btn btn-outline-secondary btn-sm">{back.label}</a>
+      </div>
+      <dl class="report-detail">
+        <dt>부서</dt><dd>{report.department}</dd>
+        <dt>바나바</dt><dd>{report.barnabas_name}</dd>
+        <dt>양육 대상자</dt><dd>{report.disciple_name}</dd>
+        <dt>양육 날짜</dt><dd>{koreanDate(report.care_date)}</dd>
+        <dt>교육 주차 · 교재</dt><dd>{report.week}주차 · {report.curriculum}</dd>
+        <dt>지난주 출석</dt><dd>{report.attended_last_sunday === 1 ? <span class="badge badge-success">출석함</span> : report.attended_last_sunday === 0 ? <span class="badge badge-secondary">불출석</span> : '—'}</dd>
+        <dt>대상자의 반응</dt><dd class="pre-line">{report.response || <span class="text-muted">—</span>}</dd>
+        <dt>기도 제목</dt><dd class="pre-line">{report.prayer || <span class="text-muted">—</span>}</dd>
+        <dt>보고·건의사항</dt><dd class="pre-line">{report.notes || <span class="text-muted">—</span>}</dd>
+        <dt>보고자</dt><dd>{report.reporter_name} <span class="text-muted small">({report.reporter_email})</span></dd>
+        <dt>제출일</dt><dd><time datetime={report.created_at}>{formatLocal(report.created_at)}</time></dd>
+      </dl>
+      {admin && (
+        <form method="post" class="text-right" onsubmit="return confirm('이 보고서와 답글을 모두 삭제할까요? 되돌릴 수 없습니다.')">
+          <input type="hidden" name="action" value="delete" />
+          <button type="submit" class="btn btn-outline-danger btn-sm">보고서 삭제</button>
+        </form>
+      )}
+      <Comments comments={comments} canDelete={admin} />
+    </>
+  )}
+</MemberLayout>

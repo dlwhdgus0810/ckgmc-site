@@ -1,0 +1,42 @@
+---
+/** 보고서 답글 목록 + 작성 폼. 관리자 답글은 표시가 다릅니다. */
+import Icon from '../Icon.astro';
+import { formatLocal } from '../../lib/http';
+import type { Comment } from '../../lib/reports';
+interface Props { comments: Comment[]; canDelete?: boolean }
+const { comments, canDelete = false } = Astro.props;
+---
+<section class="comments" aria-labelledby="comments-heading">
+  <h2 id="comments-heading" class="h5 mb-3">답글 <span class="text-muted">({comments.length})</span></h2>
+  {comments.length === 0 ? (
+    <p class="text-muted">아직 답글이 없습니다.</p>
+  ) : (
+    <ol class="comments__list">
+      {comments.map((c) => (
+        <li class:list={['comment', { 'comment--admin': c.author_role === 'admin' }]}>
+          <div class="comment__meta">
+            <strong>{c.author_name}</strong>
+            {c.author_role === 'admin' && <span class="badge badge-primary">관리자</span>}
+            <time datetime={c.created_at}>{formatLocal(c.created_at)}</time>
+            {canDelete && (
+              <form method="post" class="ml-auto" onsubmit="return confirm('이 답글을 삭제할까요?')">
+                <input type="hidden" name="action" value="delete-comment" />
+                <input type="hidden" name="comment_id" value={c.id} />
+                <button type="submit" class="btn btn-link btn-sm text-danger p-0">삭제</button>
+              </form>
+            )}
+          </div>
+          <p class="comment__body pre-line mb-0">{c.body}</p>
+        </li>
+      ))}
+    </ol>
+  )}
+  <form method="post" class="comment-form mt-3">
+    <input type="hidden" name="action" value="comment" />
+    <div class="form-group">
+      <label for="comment-body">답글 쓰기</label>
+      <textarea id="comment-body" name="body" class="form-control" rows="3" required maxlength="4000" placeholder="보고자와 관리자만 볼 수 있습니다."></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary btn-sm"><Icon name="mail" size={16} /> 답글 등록</button>
+  </form>
+</section>

@@ -1,0 +1,62 @@
+---
+/** D그룹 관리: 목록 + 새 그룹 추가 */
+export const prerender = false;
+import MemberLayout from '../../../layouts/MemberLayout.astro';
+import { createGroup, listGroups } from '../../../lib/reports';
+import { formInt, formStr, setFlash } from '../../../lib/http';
+
+let error: string | null = null;
+if (Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData();
+  const name = formStr(fd, 'name', 100);
+  if (!name) error = '그룹 이름을 입력해 주세요.';
+  else {
+    await createGroup({ name, leaders: formStr(fd, 'leaders', 100), age: formStr(fd, 'age', 100), meeting_time: formStr(fd, 'meeting_time', 100), focus: formStr(fd, 'focus', 200), description: formStr(fd, 'description', 1000), sort_order: formInt(fd, 'sort_order') ?? 0, is_active: 1 });
+    setFlash(Astro.cookies, 'success', `"${name}" 그룹을 추가했습니다.`);
+    return Astro.redirect('/manage/groups', 303);
+  }
+}
+const groups = await listGroups(false);
+---
+<MemberLayout title="D그룹 관리" subtitle="Small Groups" area="manage">
+  {groups.length === 0 ? <p class="text-muted">등록된 그룹이 없습니다. 아래에서 첫 그룹을 추가하세요.</p> : (
+    <div class="table-responsive mb-4">
+      <table class="table table-sm table-report">
+        <thead><tr><th>그룹</th><th>리더</th><th>대상</th><th>모임 시간</th><th>성격</th><th class="num">보고서</th><th>최근 보고</th><th>상태</th></tr></thead>
+        <tbody>
+          {groups.map((g) => (
+            <tr class:list={{ 'text-muted': !g.is_active }}>
+              <td><a href={`/manage/groups/${g.id}`}><strong>{g.name}</strong></a></td>
+              <td>{g.leaders}</td>
+              <td>{g.age}</td>
+              <td>{g.meeting_time}</td>
+              <td>{g.focus}</td>
+              <td class="num">{g.report_count ?? 0}</td>
+              <td>{g.last_report ?? '—'}</td>
+              <td>{g.is_active ? <span class="badge badge-success">활성</span> : <span class="badge badge-secondary">비활성</span>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+
+  <section aria-labelledby="add-group">
+    <h2 id="add-group" class="h5 mb-3">그룹 추가</h2>
+    <form method="post" class="form-narrow" novalidate>
+      {error && <div class="alert alert-danger" role="alert">{error}</div>}
+      <div class="form-row">
+        <div class="form-group col-md-6"><label for="name">그룹 이름 <span class="text-danger">*</span></label><input id="name" name="name" class="form-control" required placeholder="예: 임마누엘 D그룹" /></div>
+        <div class="form-group col-md-6"><label for="leaders">리더 <span class="text-muted small">(보고서 선택지에 함께 표시)</span></label><input id="leaders" name="leaders" class="form-control" placeholder="예: 홍길동/김영희" /></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group col-md-4"><label for="age">대상</label><input id="age" name="age" class="form-control" placeholder="예: 나이 제한 없음 / 청년" /></div>
+        <div class="form-group col-md-4"><label for="meeting_time">모임 시간</label><input id="meeting_time" name="meeting_time" class="form-control" placeholder="예: 매주 금 7:30pm" /></div>
+        <div class="form-group col-md-4"><label for="focus">모임 성격</label><input id="focus" name="focus" class="form-control" placeholder="예: 교제/말씀 나눔" /></div>
+      </div>
+      <div class="form-group"><label for="description">소개</label><textarea id="description" name="description" class="form-control" rows="2"></textarea></div>
+      <div class="form-group" style="max-width:10rem"><label for="sort_order">정렬 순서</label><input id="sort_order" name="sort_order" type="number" class="form-control" value="0" /></div>
+      <button type="submit" class="btn btn-primary">그룹 추가</button>
+    </form>
+  </section>
+</MemberLayout>
