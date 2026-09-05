@@ -1,0 +1,13 @@
+---
+/** 섹션 제목 블록: 영문 eyebrow + 한국어 h2 + 오른쪽 "더 보기" 링크 */
+import Icon from './Icon.astro';
+interface Props { id: string; eyebrow?: string; title: string; more?: { href: string; label: string } }
+const { id, eyebrow, title, more } = Astro.props;
+---
+<div class="section__header">
+  <div>
+    {eyebrow && <span class="section__eyebrow">{eyebrow}</span>}
+    <h2 id={id} class="section__title">{title}</h2>
+  </div>
+  {more && <a class="section__more" href={more.href}>{more.label} <Icon name="arrow-right" size={16} /></a>}
+</div>

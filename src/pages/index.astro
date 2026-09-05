@@ -1,219 +1,51 @@
 ---
-/** 메인 화면 */
+/** 메인 화면 — 각 섹션은 src/components/home/ 에 있습니다. 문구·사진·예배 시간은 src/data/site.json 에서 고칩니다 */
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Icon from '../components/Icon.astro';
-import { site, quickLinks, links } from '../data/site';
-const slides = site.notices; // 과도기: Phase 4 에서 교회 소식 카드로 교체
-import { getBoardPosts, slugOf, excerptOf, thumbnailOf, formatLongDate, formatStoryDate, textExcerpt } from '../lib/posts';
+import Hero from '../components/home/Hero.astro';
+import InfoStrip from '../components/home/InfoStrip.astro';
+import NoticeCards from '../components/home/NoticeCards.astro';
+import ThisWeek from '../components/home/ThisWeek.astro';
+import SeriesRow from '../components/home/SeriesRow.astro';
+import MinistryGrid from '../components/home/MinistryGrid.astro';
+import StoryGrid from '../components/home/StoryGrid.astro';
+import NewcomerBand from '../components/home/NewcomerBand.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import { site } from '../data/site';
+import { getBoardPosts } from '../lib/posts';
 
-const sermons = (await getBoardPosts('sermons')).slice(0, 2);
-const bulletins = (await getBoardPosts('bulletins')).slice(0, 2);
-const resources = (await getBoardPosts('resources')).slice(0, 4);
+const [sermon] = await getBoardPosts('sermons');
+const [bulletin] = await getBoardPosts('bulletins');
+const [resource] = await getBoardPosts('resources');
 
 const allSeries = (await getCollection('series')).sort(
   (a, b) => (b.data.updated ?? b.data.date).getTime() - (a.data.updated ?? a.data.date).getTime()
 );
-const ongoing = allSeries.filter((s) => s.data.ongoing).slice(0, 3);
-const series = ongoing.length ? ongoing : allSeries.slice(0, 2);
+const ongoing = allSeries.filter((s) => s.data.ongoing);
+const series = (ongoing.length ? ongoing : allSeries).slice(0, 3);
+
+const ministries = (await getCollection('pages', (p) => p.id.startsWith('ministries/') && !p.data.hideFromNav))
+  .sort((a, b) => a.data.order - b.data.order)
+  .slice(0, 6);
 
 const stories = (await getCollection('stories')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
-const STORY_INITIAL = 12;
-const storyExcerpt = (body: string | undefined) => textExcerpt(body, 130);
 ---
 <BaseLayout description={site.description}>
-  <div class="hero-slider" id="frontSlider">
-    <div class="hero-track">
-      {slides.map((s, i) => (
-        <div class:list={['hero-slide', { active: i === 0 }]}>
-          {s.href ? (
-            <a href={s.href}><img src={s.image} alt={s.alt} loading={i === 0 ? 'eager' : 'lazy'} /></a>
-          ) : (
-            <img src={s.image} alt={s.alt} loading={i === 0 ? 'eager' : 'lazy'} />
-          )}
-        </div>
-      ))}
-    </div>
-    {slides.length > 1 && (
-      <div class="hero-indicators" role="group" aria-label="슬라이드 선택">
-        {slides.map((_, i) => <button type="button" class:list={{ active: i === 0 }} data-slide-to={i} aria-label={`${i + 1}번째 슬라이드`}></button>)}
-      </div>
-    )}
-  </div>
-
   <main id="main" tabindex="-1">
-    <div id="quick-link" class="py-3">
-      <div class="container">
-        <div class="row">
-          {quickLinks.map((q) => (
-            <div class="col-6 col-sm-3">
-              <a href={q.href}>
-                <img src={q.icon} alt="" class="d-block mx-auto quick-link-icon" />
-                <h4 class="text-center"><b>{q.title}</b><br /><small>{q.subtitle}</small></h4>
-              </a>
-            </div>
-          ))}
+    <Hero />
+    <InfoStrip />
+    <NoticeCards notices={site.notices} />
+    <ThisWeek sermon={sermon} bulletin={bulletin} resource={resource} />
+    <SeriesRow series={series} />
+    <MinistryGrid pages={ministries} />
+    {stories.length > 0 && (
+      <section class="section section--surface" aria-labelledby="stories-title">
+        <div class="container">
+          <SectionHeader id="stories-title" eyebrow="Our Story" title="우리 교회 이야기" more={{ href: '/story', label: '모든 이야기' }} />
+          <StoryGrid stories={stories} limit={8} />
         </div>
-      </div>
-    </div>
-
-    <div id="latest-series" class="py-5 bg-light">
-      <h3 class="display-4 mb-5 text-center"><b>SERIES SERMONS</b></h3>
-      <div class="container-fluid">
-        <div id="series-wrap">
-          {series.map((s) => (
-            <div class="card item mx-2 rounded-0 border-0 bg-transparent hover-scale">
-              <a href={`/media/series/${s.id}`}>
-                <div class="latest-sermon-card-img" style={`background-image:url(${s.data.thumbnail})`}></div>
-              </a>
-              <div class="card-body" style="min-height:150px;">
-                <a href={`/media/series/${s.id}`} class="text-body">
-                  <h5 class="card-title text-center">{s.data.title}</h5>
-                  <p class="card-text text-center"><span class="text-info">more</span></p>
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    <div id="sermons-and-songs-section" class="py-3 py-lg-5 bg-white">
-      <h3 class="display-4 mb-3 text-center"><b>Sermons &amp; Bulletins</b></h3>
-      <div class="container">
-        <div class="row justify-content-center">
-          <div class="col-sm-6">
-            <div class="row justify-content-center">
-              {sermons.map((p) => (
-                <div class="col-sm-6">
-                  <div class="card my-3 front-card border-0">
-                    <a href={`/media/sermons/${slugOf(p)}`}>
-                      <div class="thumbnail" style={`background-image:url(${thumbnailOf(p)})`}></div>
-                      <div class="card-body text-center" style="min-height:160px;">
-                        <p class="card-title">{p.data.title}</p>
-                        <p class="card-text text-center"><small><span class="text-success">YouTube 설교</span><br /><span class="text-muted">{formatLongDate(p.data.date)}</span></small></p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <div class="row justify-content-center">
-              {bulletins.map((p) => (
-                <div class="col-sm-6">
-                  <div class="card my-3 front-card border-0">
-                    <a href={`/media/bulletins/${slugOf(p)}`}>
-                      <div class="thumbnail" style={`background-image:url(${thumbnailOf(p)})`}></div>
-                      <div class="card-body text-center" style="min-height:160px;">
-                        <p class="card-title">{p.data.title}</p>
-                        <p class="card-text text-center"><small><span class="text-success">주보(bulletins)</span><br /><span class="text-muted">{formatLongDate(p.data.date)}</span></small></p>
-                      </div>
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div id="latest-section" class="py-3 py-lg-5">
-      <h3 class="display-4 mb-3 text-center"><b>ARTICLES</b></h3>
-      <div class="container">
-        <div class="row justify-content-center">
-          {resources.map((p) => (
-            <div class="col-6 col-sm-3">
-              <div class="card my-3 front-card border-0">
-                <a href={`/media/resources/${slugOf(p)}`}>
-                  <div class="thumbnail" style={`background-image:url(${thumbnailOf(p)})`}></div>
-                  <div class="card-body text-center" style="min-height:160px;">
-                    <p class="card-title">{p.data.title}</p>
-                    <p class="text-justify card-text card-excerpt">{excerptOf(p, 60)}</p>
-                    <p class="card-text text-left"><small><span class="text-success">Resources</span>{p.data.writer && <> / <span class="text-muted">{p.data.writer}</span></>}<br /><span class="text-muted">{formatLongDate(p.data.date)}</span></small></p>
-                  </div>
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    <div id="our-story" class="py-5">
-      <div class="container">
-        <h3 class="display-4 text-center"><b>OUR STORY</b></h3>
-        <div id="story-feed" class="my-4">
-          {stories.map((s, i) => (
-            <figure class:list={['hover-scale', { 'is-hidden': i >= STORY_INITIAL }]}>
-              <a href={`/story/${s.id}`}>
-                {s.data.image ? <img src={s.data.image} alt="" loading="lazy" /> : <div class="bg-light" style="aspect-ratio:4/3"></div>}
-              </a>
-              <figcaption>
-                <p class="mb-2"><small class="text-muted"><Icon name="calendar" size={14} /> {formatStoryDate(s.data.date)}</small></p>
-                <a href={`/story/${s.id}`}><p class="card-text">{storyExcerpt(s.body)}</p></a>
-              </figcaption>
-            </figure>
-          ))}
-        </div>
-        {stories.length > STORY_INITIAL && (
-          <div class="my-3 text-center">
-            <button id="more-posts" type="button" class="btn btn-lg btn-outline-primary">More Old Posts</button>
-          </div>
-        )}
-        <div class="text-center">
-          <a href={site.social.facebook} target="_blank" rel="noopener" class="text-muted"><Icon name="facebook" size={16} /> 페이스북에서 더 보기</a>
-        </div>
-      </div>
-    </div>
-
-    <div id="related-organization" class="py-5">
-      <h3 class="display-4 mb-3 text-center"><b>LINKS</b></h3>
-      <div class="container">
-        <div class="banner-links py-3">
-          {links.map((l) => (
-            <a href={l.href} target="_blank" rel="noopener" class="hover-scale" title={l.title}>
-              <img src={l.image} alt={l.title} class="img-fluid" loading="lazy" />
-            </a>
-          ))}
-        </div>
-      </div>
-    </div>
+      </section>
+    )}
+    <NewcomerBand />
   </main>
-
-  <script>
-    // 메인 슬라이드: 5초마다 자동 전환, 아래 막대를 누르면 해당 슬라이드로 이동
-    const slides = Array.from(document.querySelectorAll<HTMLElement>('.hero-slide'));
-    const dots = Array.from(document.querySelectorAll<HTMLElement>('.hero-indicators button'));
-    let current = 0;
-    let timer: number | undefined;
-    const go = (n: number) => {
-      slides[current]?.classList.remove('active');
-      dots[current]?.classList.remove('active');
-      current = (n + slides.length) % slides.length;
-      slides[current]?.classList.add('active');
-      dots[current]?.classList.add('active');
-    };
-    const start = () => {
-      if (slides.length > 1) timer = window.setInterval(() => go(current + 1), 5000);
-    };
-    dots.forEach((d, i) =>
-      d.addEventListener('click', () => {
-        go(i);
-        window.clearInterval(timer);
-        start();
-      })
-    );
-    start();
-
-    // OUR STORY: 더 보기 버튼
-    const more = document.getElementById('more-posts');
-    more?.addEventListener('click', () => {
-      const hidden = Array.from(document.querySelectorAll('#story-feed figure.is-hidden'));
-      hidden.slice(0, 8).forEach((f) => f.classList.remove('is-hidden'));
-      if (hidden.length <= 8) more.remove();
-    });
-  </script>
 </BaseLayout>

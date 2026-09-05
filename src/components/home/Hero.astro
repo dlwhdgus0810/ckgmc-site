@@ -1,0 +1,18 @@
+---
+/** 메인 첫 화면: 교회 사진 + 환영 문구 + 버튼 2개 (내용은 site.json 의 hero) */
+import { site } from '../../data/site';
+const h = site.hero;
+---
+<section class="hero on-dark" aria-labelledby="hero-title">
+  <img class="hero__img" src={h.image} alt={h.alt} fetchpriority="high" loading="eager" decoding="async" />
+  <div class="hero__scrim" aria-hidden="true"></div>
+  <div class="container hero__content">
+    {h.eyebrow && <p class="hero__eyebrow">{h.eyebrow}</p>}
+    <h1 id="hero-title" class="hero__title">{h.headline}</h1>
+    {h.subline && <p class="hero__sub">{h.subline}</p>}
+    <div class="hero__actions">
+      <a class="btn btn-light btn-lg" href={h.primary.href}>{h.primary.label}</a>
+      <a class="btn btn-outline-light btn-lg" href={h.secondary.href}>{h.secondary.label}</a>
+    </div>
+  </div>
+</section>

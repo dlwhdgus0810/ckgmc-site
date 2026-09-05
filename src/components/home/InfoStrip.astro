@@ -1,0 +1,34 @@
+---
+/** 히어로 아래 정보 띠: 예배 시간 3개 + 주소 + YouTube Live */
+import { site, mapsDirectionsUrl, liveUrl } from '../../data/site';
+import Icon from '../Icon.astro';
+const times = site.serviceTimes.slice(0, 3);
+---
+<section class="info-strip" aria-label="예배 시간과 오시는 길">
+  <div class="container">
+    <div class="info-strip__card">
+      {times.map((s) => (
+        <div class="info-strip__cell">
+          <Icon name="clock" size={22} class="info-strip__icon" />
+          <div>
+            <strong>{s.name}</strong>
+            <span>{s.time}</span>
+            {s.place && <small>{s.place}</small>}
+          </div>
+        </div>
+      ))}
+      <div class="info-strip__cell">
+        <Icon name="map-pin" size={22} class="info-strip__icon" />
+        <div>
+          <strong>오시는 길</strong>
+          <a href={mapsDirectionsUrl} target="_blank" rel="noopener">{site.address}</a>
+          <a class="info-strip__more" href="/about/directions">지도 보기 <Icon name="arrow-right" size={14} /></a>
+        </div>
+      </div>
+      <div class="info-strip__cell info-strip__cell--action">
+        <a class="btn btn-primary" href={liveUrl} target="_blank" rel="noopener"><Icon name="youtube" size={18} /> YouTube Live<span class="sr-only"> (새 창)</span></a>
+        <a class="info-strip__more" href="/media/sermons">지난 예배 영상 <Icon name="arrow-right" size={14} /></a>
+      </div>
+    </div>
+  </div>
+</section>

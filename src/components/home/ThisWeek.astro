@@ -1,0 +1,88 @@
+---
+/** 이번 주: 최신 설교(클릭 시 영상 재생) + 이번 주 주보(PDF) + 소그룹 나눔지 */
+import SectionHeader from '../SectionHeader.astro';
+import Icon from '../Icon.astro';
+import { slugOf, excerptOf, thumbnailOf, pdfOf, fileUrl, formatKoreanDate, isoDate, type Post } from '../../lib/posts';
+interface Props { sermon?: Post; bulletin?: Post; resource?: Post }
+const { sermon, bulletin, resource } = Astro.props;
+const pdf = bulletin ? pdfOf(bulletin) : undefined;
+---
+<section class="section" aria-labelledby="thisweek-title">
+  <div class="container">
+    <SectionHeader id="thisweek-title" eyebrow="This Week" title="이번 주" more={{ href: '/media/sermons', label: '모든 설교' }} />
+    <div class="row">
+      <div class="col-lg-7 mb-4 mb-lg-0">
+        {sermon ? (
+          <article class="card-tile this-week__sermon">
+            <div class="card-tile__media video-poster" data-youtube={sermon.data.youtube} data-title={sermon.data.title}>
+              <img src={thumbnailOf(sermon)} alt="" width="1280" height="720" loading="lazy" />
+              {sermon.data.youtube && (
+                <button type="button" class="video-poster__play" aria-label={`설교 영상 재생: ${sermon.data.title}`}>
+                  <Icon name="play" size={30} />
+                </button>
+              )}
+            </div>
+            <div class="card-tile__body">
+              <span class="card-tile__eyebrow">최신 설교</span>
+              <h3 class="card-tile__title h5"><a href={`/media/sermons/${slugOf(sermon)}`}>{sermon.data.title}</a></h3>
+              <p class="card-tile__meta"><time datetime={isoDate(sermon.data.date)}>{formatKoreanDate(sermon.data.date)}</time></p>
+            </div>
+          </article>
+        ) : (
+          <p class="text-muted">등록된 설교가 없습니다.</p>
+        )}
+      </div>
+      <div class="col-lg-5 stack">
+        <article class="card-tile card-tile--flat">
+          <div class="card-tile__body">
+            <span class="card-tile__eyebrow">이번 주 주보</span>
+            {bulletin ? (
+              <>
+                <h3 class="card-tile__title h5"><a href={`/media/bulletins/${slugOf(bulletin)}`}>{bulletin.data.title}</a></h3>
+                <p class="card-tile__meta"><time datetime={isoDate(bulletin.data.date)}>{formatKoreanDate(bulletin.data.date)}</time></p>
+                <div class="this-week__actions">
+                  {pdf && <a class="btn btn-primary btn-sm" href={fileUrl(pdf.file)} target="_blank" rel="noopener"><Icon name="file-text" size={16} /> 주보 보기 (PDF)</a>}
+                  <a class="btn btn-link btn-sm" href="/media/bulletins">지난 주보</a>
+                </div>
+              </>
+            ) : (
+              <p class="text-muted mb-0">등록된 주보가 없습니다.</p>
+            )}
+          </div>
+        </article>
+        <article class="card-tile card-tile--flat">
+          <div class="card-tile__body">
+            <span class="card-tile__eyebrow">소그룹 나눔지</span>
+            {resource ? (
+              <>
+                <h3 class="card-tile__title h5"><a href={`/media/resources/${slugOf(resource)}`}>{resource.data.title}</a></h3>
+                <p class="card-tile__text">{excerptOf(resource, 120)}</p>
+                <p class="card-tile__meta"><time datetime={isoDate(resource.data.date)}>{formatKoreanDate(resource.data.date)}</time> · <a href="/media/resources">자료실</a></p>
+              </>
+            ) : (
+              <p class="text-muted mb-0">등록된 자료가 없습니다.</p>
+            )}
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // 재생 버튼을 누르면 그 자리에 유튜브 플레이어를 넣습니다 (누르기 전에는 유튜브 스크립트를 불러오지 않음)
+  document.querySelectorAll<HTMLElement>('.video-poster').forEach((box) => {
+    const btn = box.querySelector<HTMLButtonElement>('.video-poster__play');
+    const id = box.dataset.youtube;
+    if (!btn || !id) return;
+    btn.addEventListener('click', () => {
+      const iframe = document.createElement('iframe');
+      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+      iframe.title = box.dataset.title ?? '설교 영상';
+      iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
+      iframe.setAttribute('allowfullscreen', '');
+      box.replaceChildren(iframe);
+      box.classList.add('is-playing');
+    });
+  });
+</script>

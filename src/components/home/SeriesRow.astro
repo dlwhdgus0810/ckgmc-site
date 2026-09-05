@@ -1,0 +1,29 @@
+---
+/** 진행 중인 설교 시리즈 카드 */
+import type { CollectionEntry } from 'astro:content';
+import SectionHeader from '../SectionHeader.astro';
+import { formatDate } from '../../lib/posts';
+interface Props { series: CollectionEntry<'series'>[] }
+const { series } = Astro.props;
+---
+{series.length > 0 && (
+  <section class="section section--surface" aria-labelledby="series-title">
+    <div class="container">
+      <SectionHeader id="series-title" eyebrow="Sermon Series" title="설교 시리즈" more={{ href: '/media/series', label: '모든 시리즈' }} />
+      <div class="row">
+        {series.map((s) => (
+          <div class="col-md-6 col-lg-4 mb-4">
+            <a class="card-tile" href={`/media/series/${s.id}`}>
+              <div class="card-tile__media"><img src={s.data.thumbnail} alt="" loading="lazy" width="960" height="540" /></div>
+              <div class="card-tile__body">
+                <span class="card-tile__eyebrow">{s.data.ongoing ? '진행 중' : '지난 시리즈'}</span>
+                <h3 class="card-tile__title h5">{s.data.title}</h3>
+                <p class="card-tile__meta">{s.data.episodes.length}편 · {formatDate(s.data.updated ?? s.data.date)}</p>
+              </div>
+            </a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+)}

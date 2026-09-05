@@ -1,0 +1,29 @@
+---
+/** 교회 소식 포스터 (site.json 의 notices). 비어 있으면 섹션 자체를 그리지 않습니다 */
+import SectionHeader from '../SectionHeader.astro';
+import type { SiteConfig } from '../../data/site';
+interface Props { notices: SiteConfig['notices'] }
+const { notices } = Astro.props;
+---
+{notices.length > 0 && (
+  <section class="section section--surface" aria-labelledby="notices-title">
+    <div class="container">
+      <SectionHeader id="notices-title" eyebrow="Announcements" title="교회 소식" />
+      <div class="notice-grid">
+        {notices.map((n) => {
+          const inner = (
+            <>
+              <div class="card-tile__media"><img src={n.image} alt={n.alt} loading="lazy" width="1600" height="500" /></div>
+              {n.title && <div class="card-tile__body"><p class="card-tile__title">{n.title}</p></div>}
+            </>
+          );
+          return n.href ? (
+            <a class="card-tile card-tile--poster" href={n.href}>{inner}</a>
+          ) : (
+            <div class="card-tile card-tile--poster">{inner}</div>
+          );
+        })}
+      </div>
+    </div>
+  </section>
+)}
