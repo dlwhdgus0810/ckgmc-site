@@ -4,6 +4,9 @@ subtitle: "X-Youth"
 headerImage: /images/headers/ministries-youth.png
 board: youth
 showTitle: false
+order: 20
+image: "/images/pages/em-youth.jpg"
+description: "중고등학생이 하나님의 자녀로서 정체성을 세워가는 X-Youth"
 ---
 <p><img class="img-fluid d-block my-1 mx-auto" src="/images/pages/em-youth.jpg" alt="청소년부"></p>
 <h2>청소년부 <small>X-Youth</small></h2>

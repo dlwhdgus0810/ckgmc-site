@@ -2,6 +2,7 @@
 title: "예배 안내"
 subtitle: "Our Services"
 headerImage: /images/headers/about-services.png
+order: 50
 ---
 <article id="worship-service">
 <div class="row">

@@ -52,31 +52,13 @@ export function thumbnailOf(post: Post): string {
   return '/images/thumbnail-default.jpg';
 }
 
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+/** 첨부파일 경로: `/` 나 `http` 로 시작하면 그대로, 아니면 public/files/ 안의 파일로 봅니다 */
+export function fileUrl(file: string): string {
+  return /^(\/|https?:)/.test(file) ? file : `/files/${file}`;
+}
+/** 첫 번째 PDF 첨부 (주보 미리보기용) */
+export function pdfOf(post: Post): { name: string; file: string } | undefined {
+  return post.data.attachments.find((a) => a.file.toLowerCase().endsWith('.pdf'));
+}
 
-/** 2026-08-29 형식 */
-export function formatDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${y}-${m}-${day}`;
-}
-/** 2026-08-29 22:50 형식 */
-export function formatDateTime(d: Date): string {
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  return `${formatDate(d)} ${hh}:${mm}`;
-}
-/** Saturday 29 August 2026 형식 (메인 화면 카드) */
-export function formatLongDate(d: Date): string {
-  return `${DAYS[d.getDay()]} ${String(d.getDate()).padStart(2, '0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-}
-/** 24 April 2026 형식 */
-export function formatStoryDate(d: Date): string {
-  return `${String(d.getDate()).padStart(2, '0')} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
-}
-/** 30일 이내 글이면 NEW 배지 */
-export function isNew(d: Date, now = new Date()): boolean {
-  return now.getTime() - d.getTime() < 30 * 24 * 3600 * 1000;
-}
+export { formatDate, formatDateTime, formatKoreanDate, formatLongDate, formatStoryDate, isoDate, isNew } from './dates';

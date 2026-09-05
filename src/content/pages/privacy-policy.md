@@ -1,5 +1,6 @@
 ---
 title: "개인정보 활용 및 보호 정책"
+hideFromNav: true
 ---
 <article>
 <section id="pinfo">

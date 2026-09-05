@@ -2,6 +2,7 @@
 title: "국내 선교"
 subtitle: "Domestic Mission"
 headerImage: /images/headers/missions-domestic.png
+order: 10
 ---
 <article id="mission">
 <h3>교회를 세우는 느헤미야 운동</h3>

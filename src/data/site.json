@@ -1,0 +1,58 @@
+{
+  "name": "캔사스중앙글로벌감리교회",
+  "nameEn": "Central Korean Global Methodist Church of Kansas",
+  "description": "캔자스시티 오버랜드파크의 한인 교회, 캔사스중앙글로벌감리교회입니다. 주일예배 오전 9:30·11:00, English Service 11:00, 금요성령집회 저녁 8:00.",
+  "address": "9400 Nall Ave. Overland Park, KS 66207",
+  "mapQuery": "9400 Nall Ave, Overland Park, KS 66207",
+  "phone": "+1 913-649-2488",
+  "email": "mchrissong@gmail.com",
+  "logo": "/images/logo.png",
+  "ogImage": "/images/og-default.jpg",
+  "social": {
+    "facebook": "https://www.facebook.com/ckgmckc",
+    "youtube": "https://youtube.com/@ckgmc",
+    "instagram": "https://www.instagram.com/central_kgmc/"
+  },
+  "youtubeChannelId": "UCpUFVi7PAUsJySVorgbadxQ",
+  "liveUrl": "https://youtube.com/@ckgmc/live",
+  "giving": {
+    "url": "https://ckgmc.churchtrac.com/give",
+    "embed": "https://ckgmc.churchtrac.com/give/embed"
+  },
+  "membershipFormEmbed": "https://docs.google.com/forms/d/e/1FAIpQLSfucF16fd_sQuAYPZN6Mq2jLaiWbX-WjLg7MywkTFf5u6OcMA/viewform?embedded=true",
+  "newFamilyFormUrl": "https://forms.gle/1YSckhKR3hkLQJv86",
+  "formEndpoint": "https://formsubmit.co/mchrissong@gmail.com",
+  "formThanksPath": "/thanks",
+  "hero": {
+    "image": "/images/pages/young-adult.jpg",
+    "alt": "캔사스중앙글로벌감리교회 성도들이 함께 모여 웃고 있는 모습",
+    "eyebrow": "Central Korean Global Methodist Church of Kansas",
+    "headline": "예수님과 친밀히 동행하는 교회",
+    "subline": "이 땅의 한 사람, 한 영혼을 그리스도의 참된 제자로 세워가는 캔자스시티 한인 공동체입니다.",
+    "primary": { "label": "예배 안내", "href": "/about/services" },
+    "secondary": { "label": "처음 오셨나요?", "href": "/welcome" }
+  },
+  "serviceTimes": [
+    { "name": "주일예배 (한국어)", "time": "주일 오전 9:30 · 11:00", "place": "1부 도서관 · 2부 본당 & YouTube Live" },
+    { "name": "English Service", "time": "Sunday 11:00 AM", "place": "1층 친교실 (Fellowship Hall)" },
+    { "name": "헤세드 금요성령집회", "time": "금요일 저녁 8:00", "place": "본당 & YouTube Live", "note": "매월 넷째 금요일은 모이지 않습니다" },
+    { "name": "새벽기도회", "time": "월–금 오전 6:00", "place": "본당 및 Zoom" }
+  ],
+  "notices": [
+    { "image": "/images/slides/slide-1.jpg", "alt": "청년부 수련회 9월 6–7일 Springfield, MO — Prayerful House", "title": "청년부 수련회 9/6–7", "href": "/ministries/young-adult" },
+    { "image": "/images/slides/slide-2.jpg", "alt": "새로운 주일 설교 시리즈 Who We Are — 그리스도인과 웨슬리안의 정체성, 2026년 6월 14일부터", "title": "새 설교 시리즈 Who We Are", "href": "/media/series/61" },
+    { "image": "/images/slides/slide-3.jpg", "alt": "교회 안내 포스터", "title": "" },
+    { "image": "/images/slides/slide-4.jpg", "alt": "교회 안내 포스터", "title": "" }
+  ],
+  "quickLinks": [
+    { "title": "교회 소개", "subtitle": "About Us", "icon": "/images/icons/front-icon-1.png", "href": "/about/purpose" },
+    { "title": "예배시간 안내", "subtitle": "Our Services", "icon": "/images/icons/front-icon-2.png", "href": "/about/services" },
+    { "title": "오시는 길", "subtitle": "Way to Us", "icon": "/images/icons/front-icon-3.png", "href": "/about/directions" },
+    { "title": "섬기는 이들", "subtitle": "Pastors & Staff", "icon": "/images/icons/front-icon-4.png", "href": "/about/staff" }
+  ],
+  "links": [
+    { "title": "위지엠 (예수동행일기)", "image": "/images/links/journalwithjesus.jpeg", "href": "http://journalwithjesus.org/home" },
+    { "title": "캔사스 청년&청장년 연합집회", "image": "/images/links/kansas-united.jpeg", "href": "https://www.facebook.com/%EC%BA%94%EC%82%AC%EC%8A%A4-%EC%B2%AD%EB%85%84%EC%B2%AD%EC%9E%A5%EB%85%84-%EC%97%B0%ED%95%A9%EC%A7%91%ED%9A%8C-741591112706959/" },
+    { "title": "THE JOSHUA GENERATION", "image": "/images/links/jgen.jpeg", "href": "http://www.j-gen.org/" }
+  ]
+}

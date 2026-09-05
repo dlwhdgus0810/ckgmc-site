@@ -1,5 +1,5 @@
 ---
-import { findSection, findNavItem } from '../data/nav';
+import { getNav, findSection, findNavItem, sectionLabel } from '../lib/nav';
 interface Props {
   /** 페이지 URL (예: /about/staff) */
   path: string;
@@ -11,8 +11,9 @@ interface Props {
   parentHref?: string;
 }
 const { path, fallbackTitle, leaf, parentHref = path } = Astro.props;
-const section = findSection(path);
-const found = findNavItem(path);
+const nav = await getNav();
+const section = findSection(nav, path);
+const found = findNavItem(nav, path);
 const pageLabel = found?.item.label ?? fallbackTitle ?? '';
 ---
 <div class="container-fluid" id="page-header-bottom">
@@ -21,7 +22,7 @@ const pageLabel = found?.item.label ?? fallbackTitle ?? '';
       <ol class="breadcrumb bg-transparent">
         <li class="breadcrumb-item"><a href="/">HOME</a></li>
         {section && section.items && (
-          <li class="breadcrumb-item"><a href={section.items[0].href}>{section.label}</a></li>
+          <li class="breadcrumb-item"><a href={section.items[0].href}>{sectionLabel(section)}</a></li>
         )}
         {leaf ? (
           <>

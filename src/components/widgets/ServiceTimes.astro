@@ -1,0 +1,20 @@
+---
+/** 예배 시간 목록 (site.json 의 serviceTimes) — 메인 화면·처음 오셨나요 페이지·푸터에서 사용 */
+import { site } from '../../data/site';
+interface Props { compact?: boolean }
+const { compact = false } = Astro.props;
+---
+<div class:list={['service-times row', { 'service-times--compact': compact }]}>
+  {site.serviceTimes.map((s) => (
+    <div class="col-sm-6 col-lg-3 mb-3">
+      <div class="card-tile card-tile--flat h-100">
+        <div class="card-tile__body">
+          <span class="card-tile__eyebrow">{s.name}</span>
+          <strong class="service-times__time">{s.time}</strong>
+          {s.place && <span class="text-muted">{s.place}</span>}
+          {s.note && <small class="text-muted">{s.note}</small>}
+        </div>
+      </div>
+    </div>
+  ))}
+</div>

@@ -3,6 +3,7 @@ title: "말씀 묵상"
 subtitle: "Quiet Time"
 headerImage: /images/headers/next-steps-quiet-time.jpeg
 showTitle: false
+order: 60
 ---
 <blockquote class="p-3 bg-light">
 <p class="lead mb-0">본 교회는 연합감리교회의 말씀 묵상집인 "기쁨의 언덕으로"를 사용하여 매일 말씀 묵상을 합니다.</p>

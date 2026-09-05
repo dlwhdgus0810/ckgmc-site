@@ -1,5 +1,6 @@
 ---
 title: "이용 약관"
+hideFromNav: true
 ---
 <section id="term">
 <h3>제 1 조 약관의 목적</h3>

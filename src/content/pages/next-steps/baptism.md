@@ -3,6 +3,7 @@ title: "세례식"
 subtitle: "Baptism"
 headerImage: /images/headers/next-steps-baptism.png
 widget: baptism
+order: 40
 ---
 <article id="baptize">
 <div class="row p-3 pt-4 bg-light mb-4">

@@ -3,6 +3,9 @@ title: "여선교회"
 subtitle: "Women Ministry"
 headerImage: /images/headers/ministries-women.png
 showTitle: false
+order: 50
+image: "/images/pages/women.jpg"
+description: "만 40세 이상 여성 성도들의 섬김과 교제, 여선교회"
 ---
 <p>본 교회 여선교회는 만 40세 이상 혹은 결혼한 여성분들을 위한 선교회입니다.</p>
 <p><img class="img-fluid d-block my-1 mx-auto" src="/images/pages/women.jpg" alt="여선교회"></p>

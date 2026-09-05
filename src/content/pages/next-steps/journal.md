@@ -3,6 +3,7 @@ title: "예수동행일기"
 subtitle: "Journal with Jesus"
 headerImage: /images/headers/next-steps-journal.jpeg
 showTitle: false
+order: 20
 ---
 <div class="row">
 <div class="col-sm-5"><img class="img-fluid mb-4" src="/images/pages/journal-with-jesus.jpeg" alt="예수동행일기"></div>

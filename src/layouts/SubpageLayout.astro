@@ -5,7 +5,7 @@
 import BaseLayout from './BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
 import Sidebar from '../components/Sidebar.astro';
-import { findNavItem, findSection } from '../data/nav';
+import { getNav, findNavItem, findSection } from '../lib/nav';
 
 interface Props {
   /** 페이지 URL (예: /about/staff). 사이드메뉴/브레드크럼의 활성 항목을 정합니다 */
@@ -22,8 +22,9 @@ interface Props {
   showTitle?: boolean;
 }
 const { path, title, subtitle, headerImage, description, leaf, parentHref, showTitle = true } = Astro.props;
-const navItem = findNavItem(path);
-const hasSidebar = !!findSection(path);
+const nav = await getNav();
+const navItem = findNavItem(nav, path);
+const hasSidebar = !!findSection(nav, path);
 const headerTitle = navItem?.item.label ?? (subtitle ? `${title} ${subtitle}` : title);
 ---
 <BaseLayout title={leaf ?? title} description={description} variant="sub" headerImage={headerImage} pageTitle={headerTitle}>

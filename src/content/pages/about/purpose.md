@@ -2,6 +2,7 @@
 title: "우리 교회의 사명"
 subtitle: "Our Purpose"
 headerImage: /images/headers/about-purpose.png
+order: 10
 ---
 <article id="vision">
 <div class="p-3 rounded bg-light my-4">

@@ -1,7 +1,8 @@
 ---
 /** 없는 주소로 들어왔을 때 보여주는 페이지 (Cloudflare Pages / GitHub Pages 가 404.html 을 자동으로 사용) */
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { nav } from '../data/nav';
+import { getNav, sectionLabel } from '../lib/nav';
+const nav = await getNav();
 ---
 <BaseLayout title="페이지를 찾을 수 없습니다" variant="sub" pageTitle="페이지를 찾을 수 없습니다">
   <main id="main" tabindex="-1" class="container py-5 text-center">
@@ -11,7 +12,7 @@ import { nav } from '../data/nav';
     <div class="row justify-content-center mt-5 text-left">
       {nav.filter((s) => s.items).map((s) => (
         <div class="col-6 col-md-2 mb-4">
-          <h6 class="text-primary">{s.label}</h6>
+          <h6 class="text-primary">{sectionLabel(s)}</h6>
           <ul class="list-unstyled small">
             {s.items!.map((i) => <li><a href={i.href} class="text-body">{i.label}</a></li>)}
           </ul>

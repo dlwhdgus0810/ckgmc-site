@@ -3,6 +3,9 @@ title: "헤세드 워십"
 subtitle: "Hesed Ministry"
 headerImage: /images/headers/ministries-hesed.png
 showTitle: false
+order: 70
+image: "/images/pages/hesed-team.png"
+description: "금요성령집회와 주일예배를 찬양으로 섬기는 예배팀"
 ---
 <p>헤세드 워십은 본 교회의 예배(찬양)팀입니다.<br>
 헤세드(hesed)라는 이름처럼 변함없고 신실하시며 실패하지 않으시는 하나님의 사랑을 찬양하는 예배팀입니다.</p>

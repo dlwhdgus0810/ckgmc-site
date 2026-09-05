@@ -2,6 +2,10 @@
 title: "남선교회 (믿음으로 사는 남자들)"
 subtitle: "Men Living by Faith"
 headerImage: /images/headers/ministries-men.png
+order: 40
+menuTitle: "남선교회 Men Living by Faith"
+image: "/images/pages/men.jpg"
+description: "40세 이상 남성들이 믿음으로 사는 삶을 함께 배우고 섬기는 공동체"
 ---
 <div class="row">
 <div class="col-sm-7"><img class="img-fluid d-block my-1 mx-auto" src="/images/pages/men.jpg" alt="남선교회"></div>

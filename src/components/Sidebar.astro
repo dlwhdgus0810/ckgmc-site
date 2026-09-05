@@ -1,13 +1,13 @@
 ---
-import { findSection } from '../data/nav';
+import { getNav, findSection, sectionLabel } from '../lib/nav';
 interface Props { path: string }
 const { path } = Astro.props;
-const section = findSection(path);
+const section = findSection(await getNav(), path);
 ---
 {section && section.items && (
   <div class="mb-3">
-    <nav class="nav sidemenu flex-column" aria-label={section.label}>
-      <h3 class="sidemenu-title mb-0 text-center">{section.label}</h3>
+    <nav class="nav sidemenu flex-column" aria-label={sectionLabel(section)}>
+      <h3 class="sidemenu-title mb-0 text-center">{sectionLabel(section)}</h3>
       {section.items.map((item, i) => (
         <div class:list={['nav-item', { 'border-bottom': i < section.items!.length - 1 }]}>
           <a href={item.href} class:list={['nav-link', { active: item.href === path }]}>{item.label}</a>

@@ -1,7 +1,7 @@
 ---
-import { site } from '../../data/site';
+import { site, mapEmbedUrl, mapsDirectionsUrl } from '../../data/site';
 ---
 <div class="embed-responsive embed-responsive-16by9 mb-3">
-  <iframe style="border:0;" src={site.mapEmbed} allowfullscreen loading="lazy" title="찾아오시는 길 지도"></iframe>
+  <iframe style="border:0;" src={mapEmbedUrl} allowfullscreen loading="lazy" title="찾아오시는 길 지도"></iframe>
 </div>
-<p>{site.address}</p>
+<p><address class="mb-2">{site.address}</address><a class="btn btn-outline-primary btn-sm" href={mapsDirectionsUrl} target="_blank" rel="noopener">Google 지도로 길찾기</a></p>

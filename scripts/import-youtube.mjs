@@ -2,7 +2,7 @@
 /**
  * 유튜브 채널의 최신 영상을 영상 설교 게시판(src/content/posts/sermons)에 자동으로 추가합니다.
  *
- *   npm run import:youtube            # src/data/site.ts 의 youtubeChannelId 사용
+ *   npm run import:youtube            # src/data/site.json 의 youtubeChannelId 사용
  *   npm run import:youtube -- UCxxxx  # 다른 채널 ID 지정
  *
  * 유튜브 RSS 피드(API 키 불필요)를 읽어 최근 15개 영상 중 아직 없는 것만 새 마크다운 파일로 만듭니다.
@@ -14,11 +14,10 @@ import { join } from 'node:path';
 const DIR = 'src/content/posts/sermons';
 let channelId = process.argv[2];
 if (!channelId) {
-  const src = readFileSync('src/data/site.ts', 'utf8');
-  channelId = src.match(/youtubeChannelId:\s*'([^']+)'/)?.[1];
+  channelId = JSON.parse(readFileSync('src/data/site.json', 'utf8')).youtubeChannelId;
 }
 if (!channelId) {
-  console.error('유튜브 채널 ID를 찾을 수 없습니다. src/data/site.ts 의 youtubeChannelId 를 확인하세요.');
+  console.error('유튜브 채널 ID를 찾을 수 없습니다. src/data/site.json 의 youtubeChannelId 를 확인하세요.');
   process.exit(1);
 }
 

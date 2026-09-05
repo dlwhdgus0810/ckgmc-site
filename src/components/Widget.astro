@@ -4,7 +4,8 @@ import BaptismForm from './widgets/BaptismForm.astro';
 import MembershipForm from './widgets/MembershipForm.astro';
 import Offering from './widgets/Offering.astro';
 import Map from './widgets/Map.astro';
-interface Props { name: 'contact' | 'baptism' | 'membership' | 'offering' | 'map' }
+import ServiceTimes from './widgets/ServiceTimes.astro';
+interface Props { name: 'contact' | 'baptism' | 'membership' | 'offering' | 'map' | 'service-times' }
 const { name } = Astro.props;
 ---
 {name === 'contact' && <ContactForm />}
@@ -12,3 +13,4 @@ const { name } = Astro.props;
 {name === 'membership' && <MembershipForm />}
 {name === 'offering' && <Offering />}
 {name === 'map' && <Map />}
+{name === 'service-times' && <ServiceTimes />}

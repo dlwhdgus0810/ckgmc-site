@@ -1,6 +1,6 @@
 ---
 import { site } from '../data/site';
-import { nav } from '../data/nav';
+import { getNav, sectionLabel } from '../lib/nav';
 
 interface Props {
   variant?: 'front' | 'sub';
@@ -8,6 +8,7 @@ interface Props {
   pageTitle?: string;
 }
 const { variant = 'sub', headerImage, pageTitle } = Astro.props;
+const nav = await getNav();
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const currentKey = currentPath.split('/').filter(Boolean)[0];
 const style = headerImage ? `background-image:url(${headerImage})` : undefined;
@@ -48,7 +49,7 @@ const style = headerImage ? `background-image:url(${headerImage})` : undefined;
           {nav.map((section) =>
             section.items ? (
               <li class:list={['nav-item dropdown', { active: section.key === currentKey }]}>
-                <a href="#" class="nav-link dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">{section.label}</a>
+                <a href="#" class="nav-link dropdown-toggle" role="button" aria-haspopup="true" aria-expanded="false">{sectionLabel(section)}</a>
                 <div class="dropdown-menu">
                   {section.items.map((item) => (
                     <a class:list={['dropdown-item', { active: item.href === currentPath }]} href={item.href}>{item.label}</a>
@@ -57,7 +58,7 @@ const style = headerImage ? `background-image:url(${headerImage})` : undefined;
               </li>
             ) : (
               <li class:list={['nav-item', { active: section.href === currentPath }]}>
-                <a href={section.href} class="nav-link">{section.label}</a>
+                <a href={section.href} class="nav-link">{sectionLabel(section)}</a>
               </li>
             )
           )}

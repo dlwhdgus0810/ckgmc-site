@@ -3,6 +3,7 @@ title: "섬기는 이들"
 subtitle: "Our Pastors & Staff"
 headerImage: /images/headers/about-staff.png
 showTitle: false
+order: 40
 ---
 <div class="text-center">
 <img class="img-fluid d-block my-1 mx-auto" src="/images/staff/pastoral-team.png" alt="목회팀">

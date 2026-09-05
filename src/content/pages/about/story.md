@@ -2,6 +2,7 @@
 title: "우리 교회의 이야기"
 subtitle: "Our Story"
 headerImage: /images/headers/about-story.png
+order: 20
 ---
 <article id="church-story">
 <div class="row">

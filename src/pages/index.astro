@@ -2,7 +2,8 @@
 /** 메인 화면 */
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { site, slides, quickLinks, links } from '../data/site';
+import { site, quickLinks, links } from '../data/site';
+const slides = site.notices; // 과도기: Phase 4 에서 교회 소식 카드로 교체
 import { getBoardPosts, slugOf, excerptOf, thumbnailOf, formatLongDate, formatStoryDate, textExcerpt } from '../lib/posts';
 
 const sermons = (await getBoardPosts('sermons')).slice(0, 2);

@@ -2,6 +2,7 @@
 title: "해외선교"
 subtitle: "Oversea Mission"
 headerImage: /images/headers/missions-oversea.jpeg
+order: 20
 ---
 <article id="mission">
 <div class="row">

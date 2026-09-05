@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
+import { parseWallClock } from './lib/dates';
 
 /**
  * 일반 페이지 (src/content/pages/**.md)
@@ -15,8 +16,16 @@ const pages = defineCollection({
     subtitle: z.string().optional(),
     /** 헤더 배경 이미지 (public/ 기준 경로). 없으면 단색 배경 */
     headerImage: z.string().optional(),
-    /** 본문 위에 "제목 <small>부제</small>" 헤딩을 자동으로 표시할지 */
+    /** 상단 배너에 제목을 표시할지 (게시글처럼 본문이 제목을 가진 경우 false) */
     showTitle: z.boolean().default(true),
+    /** 메뉴에 표시할 짧은 이름 (없으면 "제목 부제목") */
+    menuTitle: z.string().optional(),
+    /** 같은 섹션 안에서의 메뉴 순서 (작을수록 위) */
+    order: z.number().default(999),
+    /** 메뉴에서 숨김 (정책 페이지 등) */
+    hideFromNav: z.boolean().default(false),
+    /** 메인 화면 사역 소개 카드 등에 쓰는 대표 사진 (없으면 headerImage) */
+    image: z.string().optional(),
     /** 이 페이지 아래에 게시판을 붙일 때 게시판 키 (src/content/posts/<키>/ 폴더 이름). 'series'는 설교 시리즈 전용 */
     board: z.string().optional(),
     /** 게시판 한 페이지에 보여줄 글 수 */
@@ -24,7 +33,7 @@ const pages = defineCollection({
     /** 검색엔진/SNS 공유용 설명 */
     description: z.string().optional(),
     /** 본문에 붙일 특수 기능: 문의 폼, 세례 신청 폼, 교인등록 구글폼, 온라인 헌금, 지도 */
-    widget: z.enum(['contact', 'baptism', 'membership', 'offering', 'map']).optional(),
+    widget: z.enum(['contact', 'baptism', 'membership', 'offering', 'map', 'service-times']).optional(),
     /** 위젯을 본문 위/아래 어디에 둘지 */
     widgetPosition: z.enum(['top', 'bottom']).default('bottom'),
   }),
@@ -38,7 +47,10 @@ const posts = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/posts' }),
   schema: z.object({
     title: z.string(),
-    date: z.coerce.date(),
+    /** 작성 시각. `2026-08-29T22:50` 처럼 적은 그대로 표시됩니다 */
+    date: z.preprocess(parseWallClock, z.coerce.date()),
+    /** 게시판 키 (폴더 이름과 같음; CMS 용) */
+    board: z.string().optional(),
     writer: z.string().optional(),
     /** 목록 썸네일 이미지 (public/ 기준). 없으면 유튜브 썸네일 → 기본 이미지 순으로 사용 */
     thumbnail: z.string().optional(),
@@ -62,8 +74,8 @@ const series = defineCollection({
     thumbnail: z.string(),
     /** 진행 중인 시리즈면 true — 메인 화면과 "진행 중인 시리즈"에 표시 */
     ongoing: z.boolean().default(false),
-    date: z.coerce.date(),
-    updated: z.coerce.date().optional(),
+    date: z.preprocess(parseWallClock, z.coerce.date()),
+    updated: z.preprocess(parseWallClock, z.coerce.date().optional()),
     episodes: z.array(z.object({ title: z.string(), youtube: z.string() })).default([]),
   }),
 });
@@ -75,7 +87,7 @@ const stories = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/stories' }),
   schema: z.object({
     title: z.string().optional(),
-    date: z.coerce.date(),
+    date: z.preprocess(parseWallClock, z.coerce.date()),
     image: z.string().optional(),
     /** 앨범 사진들 (첫 번째가 대표 이미지) */
     images: z.array(z.string()).default([]),

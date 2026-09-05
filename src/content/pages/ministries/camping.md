@@ -4,6 +4,9 @@ subtitle: "Camping Ministry"
 headerImage: /images/headers/ministries-camping.jpeg
 board: camping
 showTitle: false
+order: 80
+image: "/images/pages/camping.jpeg"
+description: "전 세대가 자연 속에서 교제하는 1박 2일 캠핑"
 ---
 <div class="row">
 <div class="col-sm-6"><a href="/images/pages/camping.jpeg" target="_blank"><img class="img-fluid" src="/images/pages/camping.jpeg" alt="캠핑 미니스트리"></a></div>

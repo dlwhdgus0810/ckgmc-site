@@ -3,6 +3,7 @@ title: "지역 사회 섬김"
 subtitle: "Serving the Community"
 headerImage: /images/headers/missions-community.png
 board: community
+order: 30
 ---
 <article id="mission">
 <div class="row">
