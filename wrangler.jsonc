@@ -16,8 +16,7 @@
     {
       "binding": "DB",
       "database_name": "ckgmc",
-      // TODO: `npx wrangler d1 create ckgmc` 결과의 database_id 로 교체
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "bb6d7f73-66d1-4f3c-bd96-ac2e409a069d",
       "migrations_dir": "migrations"
     }
   ]
