@@ -30,6 +30,7 @@
     div + div { margin-top: .75rem; }
     dt { font-weight: 600; color: #fff; }
     dd { margin: 0; color: rgba(#fff, .7); font-size: .875rem; }
+    dd small { display: block; margin-top: .125rem; font-size: .8125rem; color: rgba(#fff, .55); }
   }
   &__links, &__social, &__policy { list-style: none; margin: 0; padding: 0; }
   &__links li + li, &__social li + li { margin-top: .5rem; }

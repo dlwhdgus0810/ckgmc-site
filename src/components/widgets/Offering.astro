@@ -1,12 +1,19 @@
 ---
+/**
+ * 온라인 헌금(ChurchTrac) 임베드. ChurchTrac 은 https://ckgmc.org 에서만 iframe 을 허용하므로(frame-ancestors)
+ * 정식 도메인에서만 폼을 보여주고, 임시 주소(workers.dev)나 www 에서는 "새 창에서 헌금하기" 버튼만 보입니다.
+ */
 import { site } from '../../data/site';
 import EmbedCard from '../EmbedCard.astro';
+const host = Astro.site?.hostname ?? 'ckgmc.org';
 ---
 <EmbedCard
   title="온라인 헌금 (ChurchTrac)"
   note="아래 폼이 보이지 않으면 버튼을 눌러 새 창에서 진행해 주세요."
+  blockedNote="헌금 폼은 ckgmc.org 에서 바로 표시됩니다. 여기서는 버튼을 눌러 새 창에서 진행해 주세요."
   src={site.giving.embed}
   openUrl={site.giving.url}
   openLabel="ChurchTrac에서 헌금하기"
   height="640px"
+  allowedHosts={[host]}
 />

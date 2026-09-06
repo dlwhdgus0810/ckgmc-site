@@ -29,7 +29,7 @@ order: 60
 <dt><span class="no">6</span> One Verse</dt>
 <dd>우리 영혼이 생명을 누리고 예수님처럼 한 구절의 말씀의 검(sword)을 사용하여 마귀의 시험을 물리칠 수 있게 됩니다.</dd>
 <dt><span class="no">7</span> Meditation Question</dt>
-<dd>주님께서도 제자들에게 많은 질문을 던지셨습니다. 질문을 우리를 적극적으로 반응하게 하고, 주님 말씀에 관심을 갖게 합니다.</dd>
+<dd>주님께서도 제자들에게 많은 질문을 던지셨습니다. 질문은 우리를 적극적으로 반응하게 하고, 주님 말씀에 관심을 갖게 합니다.</dd>
 </dl>
 </div>
 <div class="col-sm-3"><img class="img-fluid" src="/images/pages/pleasant-hill.jpeg" alt="기쁨의 언덕으로"></div>
@@ -59,3 +59,7 @@ order: 60
 <dd>자신의 One Verse를 카톡이나 SNS를 통해 가까운 친구들과 나누는 것도 성경을 완독하고, 꾸준히 묵상하는데 도움이 됩니다.</dd>
 </dl>
 <div class="my-4">* '기쁨의 언덕으로' 묵상집을 구매하기 원하시는 분은 교역자에게 문의해주시기 바랍니다.</div>
+<div class="mt-4 p-3 border rounded bg-light">
+<p class="mb-2"><strong>묵상집·모임 문의</strong> — '기쁨의 언덕으로' 묵상집 구매와 말씀 묵상 모임은 교회로 문의해 주세요. 이번 주 소그룹 나눔지는 자료실에 있습니다.</p>
+<a class="btn btn-primary btn-sm" href="/about/contact">문의하기</a> <a class="btn btn-outline-primary btn-sm" href="/media/resources">소그룹 나눔지 보기</a>
+</div>

@@ -5,7 +5,7 @@ headerImage: /images/headers/offering.jpeg
 widget: offering
 widgetPosition: top
 ---
-<p>궁금하신 사항은 교역자 또는 msong@ckgmc.org로 문의주시기 바랍니다.</p>
+<p>궁금하신 사항은 교역자 또는 <a href="mailto:msong@ckgmc.org">msong@ckgmc.org</a>로 문의주시기 바랍니다.</p>
 <div class="my-4"></div>
 <h4>십일조란 무엇입니까? What is tithing?</h4>
 <hr>

@@ -5,7 +5,7 @@
   position: relative;
   display: flex;
   align-items: flex-end;
-  min-height: clamp(150px, 20vw, 250px);
+  min-height: clamp(128px, 18vw, 220px);
   background: linear-gradient(135deg, $navy-700, $navy-900);
   color: #fff;
   --focus-ring: #fff;

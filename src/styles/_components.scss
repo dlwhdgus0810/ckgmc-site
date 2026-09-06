@@ -17,8 +17,9 @@
     transform: translateY(-3px);
     box-shadow: 0 .75rem 1.5rem rgba($navy-900, .12);
   }
-  a { color: inherit; }
-  a:hover { color: $navy; text-decoration: none; }
+  // 카드 안 링크는 카드 글자색을 따르되, 버튼(.btn)은 제외 — 아니면 남색 버튼 위에 검정 글씨가 됨
+  a:not(.btn) { color: inherit; }
+  a:not(.btn):hover { color: $navy; text-decoration: none; }
 
   &__media {
     position: relative;
@@ -141,6 +142,8 @@
 }
 .btn-lg { min-height: 52px; }
 .btn-sm { min-height: 36px; }
+// 터치 기기(휴대전화·태블릿)에서는 작은 버튼도 손가락 크기(44px)를 확보
+@media (pointer: coarse) { .btn-sm { min-height: 44px; } }
 .btn-gold {
   @include button-variant($gold, $gold, $hover-background: $gold-700, $hover-border: $gold-700);
   color: $ink-900;

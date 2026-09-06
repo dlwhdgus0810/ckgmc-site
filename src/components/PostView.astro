@@ -5,7 +5,7 @@
  */
 import { render } from 'astro:content';
 import Icon from './Icon.astro';
-import { slugOf, formatDate, isoDate, pdfOf, fileUrl, textExcerpt, titleParts, displayTitle, splitDescription, type Post } from '../lib/posts';
+import { slugOf, formatKoreanDate, displayDate, dateTimeAttr, pdfOf, fileUrl, textExcerpt, titleParts, displayTitle, splitDescription, type Post } from '../lib/posts';
 
 interface Props {
   post: Post;
@@ -33,7 +33,7 @@ const metaItems = [t.service, t.preacher ?? post.data.writer].filter(Boolean) as
     <h1 class="post__title">{t.title}</h1>
     <p class="post__meta">
       {metaItems.map((m) => <span>{m}</span>)}
-      <time datetime={isoDate(post.data.date)}>{t.date ?? formatDate(post.data.date)}</time>
+      <time datetime={dateTimeAttr(post)}>{formatKoreanDate(displayDate(post), true)}</time>
     </p>
   </header>
 

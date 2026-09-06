@@ -1,0 +1,23 @@
+---
+/** 섹션 목록 페이지(/about, /media, /ministries …)의 하위 페이지 카드 — 메뉴 순서 그대로 (메인의 사역 소개와 같은 카드) */
+import type { CollectionEntry } from 'astro:content';
+interface Props { pages: CollectionEntry<'pages'>[] }
+const { pages } = Astro.props;
+---
+<div class="row ministry-grid">
+  {pages.map((p) => {
+    const img = p.data.image ?? p.data.headerImage;
+    return (
+      <div class="col-6 col-lg-4 mb-3 mb-md-4">
+        <a class="card-tile card-tile--portrait" href={'/' + p.id}>
+          {img && <div class="card-tile__media"><img src={img} alt="" loading="lazy" width="1200" height="900" /></div>}
+          <div class="card-tile__body">
+            {p.data.subtitle && <span class="card-tile__eyebrow">{p.data.subtitle}</span>}
+            <h2 class="card-tile__title h5">{p.data.title}</h2>
+            {p.data.description && <p class="card-tile__text">{p.data.description}</p>}
+          </div>
+        </a>
+      </div>
+    );
+  })}
+</div>

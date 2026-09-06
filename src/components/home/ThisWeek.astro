@@ -2,7 +2,7 @@
 /** 이번 주: 최신 설교(클릭 시 영상 재생) + 이번 주 주보(PDF) + 소그룹 나눔지 */
 import SectionHeader from '../SectionHeader.astro';
 import Icon from '../Icon.astro';
-import { slugOf, excerptOf, thumbAttrs, pdfOf, fileUrl, formatKoreanDate, isoDate, titleParts, type Post } from '../../lib/posts';
+import { slugOf, excerptOf, thumbAttrs, pdfOf, fileUrl, formatKoreanDate, isoDate, titleParts, displayDate, dateTimeAttr, type Post } from '../../lib/posts';
 interface Props { sermon?: Post; bulletin?: Post; resource?: Post }
 const { sermon, bulletin, resource } = Astro.props;
 const pdf = bulletin ? pdfOf(bulletin) : undefined;
@@ -26,7 +26,7 @@ const st = sermon ? titleParts(sermon) : undefined;
             <div class="card-tile__body">
               <span class="card-tile__eyebrow">최신 설교{st?.service && ` · ${st.service}`}</span>
               <h3 class="card-tile__title h5"><a href={`/media/sermons/${slugOf(sermon)}`}>{st?.title ?? sermon.data.title}</a></h3>
-              <p class="card-tile__meta">{st?.preacher && <span>{st.preacher}</span>}<time datetime={isoDate(sermon.data.date)}>{formatKoreanDate(sermon.data.date)}</time></p>
+              <p class="card-tile__meta">{st?.preacher && <span>{st.preacher}</span>}<time datetime={dateTimeAttr(sermon)}>{formatKoreanDate(displayDate(sermon), true)}</time></p>
             </div>
           </article>
         ) : (

@@ -14,20 +14,24 @@
     align-items: center;
     justify-content: space-between;
     gap: 1.5rem;
+    @media (max-width: 359.98px) { gap: 1rem; }
     min-height: $header-height;
     @include media-breakpoint-up(lg) { min-height: $header-height-lg; }
   }
   &__brand {
     display: inline-flex;
     align-items: center;
-    flex: none;
-    img { display: block; height: 34px; width: auto; }
-    @include media-breakpoint-up(lg) { img { height: 40px; } }
+    flex: 0 1 auto;   // 아주 좁은 화면(≤320px)에서는 로고가 줄어들고 메뉴 버튼(44px)은 그대로
+    min-width: 0;
+    img { display: block; height: 34px; width: auto; max-width: 100%; object-fit: contain; object-position: left center; }
+    @include media-breakpoint-up(lg) { img { height: 36px; } }
+    @include media-breakpoint-up(xl) { img { height: 40px; } }
   }
 }
 
 .nav-toggle {
   display: inline-flex;
+  flex: none;
   align-items: center;
   justify-content: center;
   width: 44px;
@@ -131,6 +135,9 @@
     align-items: center;
     gap: 1.25rem;
     &__list { display: flex; align-items: center; gap: .125rem; }
+    // 데스크톱 헤더에서는 SNS 아이콘을 생략합니다 (푸터·모바일 메뉴에 있음).
+    // 1200px 이상에서도 컨테이너는 1140px 이라 메뉴 5개 + 강조 링크 + 아이콘까지는 들어가지 않습니다.
+    &__social { display: none; }
     &__item { position: relative; }
     &__link {
       padding: .55rem .7rem;
@@ -180,9 +187,11 @@
       &.is-signed-in::after { content: ''; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: $gold; box-shadow: 0 0 0 2px $navy-900; }
     }
   }
+  // 992~1199px: 컨테이너가 960px 이라 더 촘촘하게 (텍스트 강조 링크는 생략, 금색 헌금 버튼은 유지)
   @include media-breakpoint-between(lg, lg) {
     &__link { padding: .55rem .5rem; font-size: .875rem; }
-    &__social, &__cta { display: none; }
+    &__cta { display: none; }
+    &__ctas { gap: .5rem; padding-left: .75rem; }
   }
 }
 body.drawer-open { overflow: hidden; }

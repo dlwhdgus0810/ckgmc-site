@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { formatDate, isoDate } from './dates';
 
 export type Post = CollectionEntry<'posts'>;
 
@@ -11,9 +12,9 @@ export function slugOf(post: Post): string {
   return post.id.split('/').slice(1).join('/');
 }
 
-/** 특정 게시판의 글을 최신순으로 반환 */
+/** 특정 게시판의 글을 최신순으로 반환 (hidden: true 인 글은 목록·홈·주소·사이트맵 모두에서 제외) */
 export async function getBoardPosts(board: string): Promise<Post[]> {
-  const all = await getCollection('posts', (p) => p.id.startsWith(board + '/'));
+  const all = await getCollection('posts', (p) => p.id.startsWith(board + '/') && !p.data.hidden);
   return all.sort((a, b) => b.data.date.getTime() - a.data.date.getTime() || b.id.localeCompare(a.id));
 }
 
@@ -29,10 +30,21 @@ export function decodeEntities(s: string): string {
     .replace(/&amp;/g, '&');
 }
 
+/** HTML → 태그를 없애고 공백을 정리한 순수 텍스트 */
+export function plainText(html: string | undefined): string {
+  return decodeEntities((html ?? '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+}
+const truncate = (text: string, length: number) => (text.length > length ? text.slice(0, length) + '...' : text);
 /** HTML 본문에서 태그를 제거하고 앞부분만 잘라 요약을 만듭니다 */
 export function textExcerpt(html: string | undefined, length: number): string {
-  const text = decodeEntities((html ?? '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
-  return text.length > length ? text.slice(0, length) + '...' : text;
+  return truncate(plainText(html), length);
+}
+/** 이야기 요약: 페이스북에서 옮긴 글은 본문 첫 줄이 제목과 같으므로 그 부분은 빼고 자릅니다 */
+export function storyExcerpt(story: CollectionEntry<'stories'>, length = 90): string {
+  let text = plainText(story.body);
+  const title = (story.data.title ?? '').replace(/\s+/g, ' ').trim();
+  if (title && text.startsWith(title)) text = text.slice(title.length).replace(/^[\s|·:\-–—]+/, '');
+  return truncate(text, length);
 }
 
 /** 게시글 요약: excerpt 필드 → 본문 앞부분 → 첨부파일 이름 순 */
@@ -75,7 +87,7 @@ export function pdfOf(post: Post): { name: string; file: string } | undefined {
   return post.data.attachments.find((a) => a.file.toLowerCase().endsWith('.pdf'));
 }
 
-export { formatDate, formatDateTime, formatKoreanDate, formatLongDate, formatStoryDate, isoDate, isNew } from './dates';
+export { formatDate, formatKoreanDate, isoDate, isNew } from './dates';
 
 // ── 설교 제목 나누기 ────────────────────────────────────────────────
 /** 유튜브 제목처럼 `예배 종류 | 설교 제목 | 설교자 | 날짜` 로 이어진 제목을 나눕니다 */
@@ -105,6 +117,22 @@ export function titleParts(post: Post): ParsedTitle {
   return PARSED_BOARDS.has(boardOf(post)) ? parseSermonTitle(post.data.title) : { title: post.data.title, raw: post.data.title };
 }
 export const displayTitle = (post: Post) => titleParts(post).title;
+
+// ── 표시 날짜 ────────────────────────────────────────────────────────
+// 유튜브에서 자동 등록된 설교의 `date` 는 업로드 시각이고, 제목 끝의 `2026.09.04` 가 실제 예배 날짜입니다.
+// 홈·목록·상세가 같은 날짜를 보여주도록 예배 날짜를 우선하고, 없으면 게시 시각을 씁니다.
+/** 제목에 적힌 예배 날짜(2026.08.16 / 2026.8.16 (일) …)를 Date(UTC 자정)로. 없으면 undefined */
+export function serviceDate(post: Post): Date | undefined {
+  const m = titleParts(post).date?.match(/^(\d{4})[.\-/]\s?(\d{1,2})[.\-/]\s?(\d{1,2})/);
+  return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])) : undefined;
+}
+/** 화면에 보여줄 날짜: 예배 날짜 → 없으면 게시 시각 */
+export const displayDate = (post: Post): Date => serviceDate(post) ?? post.data.date;
+/** <time datetime> 값: 예배 날짜면 날짜만, 아니면 게시 시각(분 단위) */
+export const dateTimeAttr = (post: Post): string => {
+  const s = serviceDate(post);
+  return s ? formatDate(s) : isoDate(post.data.date);
+};
 
 // ── 유튜브 설명 접기 ─────────────────────────────────────────────────
 const DIVIDER = /<p>\s*(?:[─—–_=-]\s*){8,}<\/p>|<hr\s*\/?>/i;

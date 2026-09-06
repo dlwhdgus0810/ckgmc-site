@@ -121,7 +121,7 @@ GitHub 계정이 있는 개발자는 [Sveltia CMS](https://sveltiacms.app) 화�
 
 ### 사이트 설정 (`src/data/site.json`)
 교회 이름·주소·전화·이메일·SNS, 예배 시간(`serviceTimes`), 메인 첫 화면(`hero`: 사진·제목·소개·버튼),
-이번 주 말씀(`verse`), 다가오는 일정(`events`: 날짜가 지나면 자동 숨김, 메인에 3개), 교회 소식 포스터(`notices`, `alt` 필수),
+이번 주 말씀(`verse`), 다가오는 일정(`events`: 날짜가 지나면 자동 숨김, 메인에 3개), 교회 소식 포스터(`notices`, `alt` 필수, `until` 로 표시 마감일, `href` 가 없으면 원본 이미지를 새 창으로 엶),
 협력 단체 배너(`links`), 문의 폼 주소(`formEndpoint`). 모두 콘텐츠 관리 → 사이트 설정에서 편집할 수 있습니다.
 잘못된 값이 있으면 빌드가 실패하면서 어느 항목인지 알려줍니다.
 
@@ -157,10 +157,13 @@ youtube: "KH6vXZN1nfw"            # 유튜브 영상 ID (선택) → 영상·썸
 attachments:                      # 첨부 (선택). public/files/ 에 넣고 이름을 적음
   - name: "20260830 주일예배 주보.pdf"
     file: "20260830.pdf"          # 또는 /files/20260830.pdf
+hidden: true                      # (선택) 사이트에서 숨김. 중복 영상처럼 지우면 유튜브 자동 등록이 다시 만드는 글에 사용
 ---
 <p>본문</p>
 ```
 주보는 첨부 PDF 가 글 페이지 안에서 바로 보이고(데스크톱), 휴대전화에서는 "새 창에서 열기" 버튼으로 열립니다.
+화면에는 날짜만 표시됩니다(시각은 정렬용). 유튜브에서 자동 등록된 설교는 `date`(업로드 시각) 대신 제목 끝의 예배 날짜(`… | 2026.09.04`)를 보여줍니다.
+본문 `<img>` 에는 빌드 때 실제 픽셀 크기(width/height)가 자동으로 붙습니다 (`src/lib/markdown-img-size.mjs`).
 
 ### 설교 시리즈 (`src/content/series/<이름>.md`)
 `title`, `thumbnail`, `ongoing`(진행 중이면 메인에 표시), `date`, `updated`, `episodes: [{title, youtube}]`.
@@ -249,6 +252,9 @@ npm run admin:create -- --email admin@ckgmc.org --name 관리자 --password '8�
 5. 대시보드 → Workers & Pages → ckgmc-site → Settings → Variables and Secrets 에 `ADMIN_EMAILS` (와 소셜 로그인 키) 추가.
 6. 첫 관리자 만들기 (위 "교인 전용 기능" 절).
 7. Settings → Domains & Routes 에서 `ckgmc.org`, `www.ckgmc.org` 연결.
+   - **온라인헌금 임베드는 `https://ckgmc.org` 에서만 표시됩니다.** ChurchTrac 이 `frame-ancestors https://ckgmc.org` 로 그 주소만 허용하기 때문에
+     workers.dev 임시 주소와 `www.ckgmc.org` 에서는 "ChurchTrac에서 헌금하기" 버튼만 보입니다 (`src/components/widgets/Offering.astro` 의 `allowedHosts`).
+     Cloudflare → Rules → Redirect Rules 에 `www.ckgmc.org/*` → `https://ckgmc.org/$1` (301) 을 추가하거나, ChurchTrac 설정에서 www 주소도 허용하세요.
 8. 관리 화면(CMS) 로그인 워커의 `ALLOWED_DOMAINS` 에 위 도메인과 `ckgmc-site.<내계정>.workers.dev` 를 넣습니다.
 
 **push 할 때마다 자동 배포**: `.github/workflows/deploy-cloudflare.yml` 이 main 커밋마다 빌드·배포합니다.

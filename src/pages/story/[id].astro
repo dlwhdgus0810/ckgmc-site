@@ -2,7 +2,7 @@
 /** 우리 교회 이야기(OUR STORY) 상세 페이지: /story/<파일이름> */
 import { getCollection, render } from 'astro:content';
 import SubpageLayout from '../../layouts/SubpageLayout.astro';
-import { formatStoryDate } from '../../lib/posts';
+import { formatKoreanDate } from '../../lib/posts';
 import Icon from '../../components/Icon.astro';
 
 export async function getStaticPaths() {
@@ -15,16 +15,22 @@ export async function getStaticPaths() {
 const { story, prev, next } = Astro.props;
 const { Content } = await render(story);
 const images = story.data.images.length ? story.data.images : story.data.image ? [story.data.image] : [];
+// 대표 사진의 실제 크기 (빌드 시 계산, 없으면 속성 생략)
+const lead = images[0] ? __IMAGE_SIZES__[images[0]] : undefined;
 ---
 <SubpageLayout path="/story" parentHref="/story" title="우리 교회 이야기" subtitle="Our Story" headerImage="/images/headers/about.jpg" leaf={story.data.title} >
   <article class="story">
-    <p><small class="text-muted"><Icon name="calendar" size={14} /> {formatStoryDate(story.data.date)}</small></p>
-    {images[0] && <img src={images[0]} alt="" class="img-fluid w-100 mb-4" />}
+    <p><small class="text-muted"><Icon name="calendar" size={14} /> {formatKoreanDate(story.data.date, true)}</small></p>
+    {images[0] && <img src={images[0]} alt="" class="img-fluid w-100 mb-4" {...(lead ?? {})} />}
     <div class="story-body"><Content /></div>
     {images.length > 1 && (
       <div class="row mt-4">
-        {images.slice(1).map((img) => (
-          <div class="col-6 col-md-4 mb-3"><a href={img} target="_blank" rel="noopener"><img src={img} alt="" class="img-fluid" loading="lazy" /></a></div>
+        {images.slice(1).map((img, i) => (
+          <div class="col-6 col-md-4 mb-3">
+            <a class="story__thumb" href={img} target="_blank" rel="noopener" aria-label={`사진 ${i + 2} / ${images.length} 크게 보기 (새 창)`}>
+              <img src={img} alt="" loading="lazy" width="1000" height="750" />
+            </a>
+          </div>
         ))}
       </div>
     )}

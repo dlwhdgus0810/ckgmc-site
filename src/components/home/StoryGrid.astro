@@ -1,7 +1,7 @@
 ---
 /** 우리 교회 이야기 카드 그리드 (메인: 8개, /story: 전체) */
 import type { CollectionEntry } from 'astro:content';
-import { formatStoryDate, isoDate, textExcerpt } from '../../lib/posts';
+import { formatKoreanDate, isoDate, storyExcerpt } from '../../lib/posts';
 interface Props { stories: CollectionEntry<'stories'>[]; limit?: number }
 const { stories, limit } = Astro.props;
 const list = limit ? stories.slice(0, limit) : stories;
@@ -13,9 +13,9 @@ const list = limit ? stories.slice(0, limit) : stories;
         {s.data.image ? <img src={s.data.image} alt="" loading="lazy" width="1000" height="750" /> : <div class="story-grid__placeholder" aria-hidden="true"></div>}
       </div>
       <div class="card-tile__body">
-        <p class="card-tile__meta"><time datetime={isoDate(s.data.date)}>{formatStoryDate(s.data.date)}</time></p>
+        <p class="card-tile__meta"><time datetime={isoDate(s.data.date)}>{formatKoreanDate(s.data.date)}</time></p>
         <h3 class="card-tile__title h6">{s.data.title}</h3>
-        <p class="card-tile__text">{textExcerpt(s.body, 90)}</p>
+        <p class="card-tile__text">{storyExcerpt(s, 90)}</p>
       </div>
     </a>
   ))}

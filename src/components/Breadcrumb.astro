@@ -16,14 +16,18 @@ const nav = await getNav();
 const section = findSection(nav, path);
 const found = findNavItem(nav, path);
 const pageLabel = found?.item.label ?? fallbackTitle ?? '';
+// 섹션 목록 페이지(/ministries 등) 자체에서는 섹션 이름이 곧 현재 위치
+const isSectionIndex = !!section && path.replace(/\/$/, '') === '/' + section.key;
 ---
 <nav aria-label="현재 위치" class="crumbs">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="/">HOME</a></li>
-    {section?.items && (
-      <li class="breadcrumb-item"><a href={section.items[0].href}>{section.label}</a></li>
+    {section?.items && !isSectionIndex && (
+      <li class="breadcrumb-item"><a href={'/' + section.key}>{section.label}</a></li>
     )}
-    {leaf ? (
+    {isSectionIndex ? (
+      <li class="breadcrumb-item active" aria-current="page">{section!.label}</li>
+    ) : leaf ? (
       <>
         <li class="breadcrumb-item"><a href={parentHref}>{pageLabel}</a></li>
         <li class="breadcrumb-item active" aria-current="page">{leaf}</li>

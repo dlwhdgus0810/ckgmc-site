@@ -2,7 +2,7 @@
 /** 설교 시리즈 상세: 플레이어 + 소개 + 에피소드 목록 (재생 버튼으로 영상 전환) */
 import { render, type CollectionEntry } from 'astro:content';
 import Icon from './Icon.astro';
-import { formatDate } from '../lib/posts';
+import { formatKoreanDate } from '../lib/posts';
 
 interface Props { series: CollectionEntry<'series'>; base: string }
 const { series, base } = Astro.props;
@@ -13,7 +13,7 @@ const hasContent = (series.body ?? '').trim().length > 0;
 <article class="series">
   <header class="series__header">
     <h1 class="series__title">{series.data.title}</h1>
-    <p class="card-tile__meta">{total}편 · {formatDate(series.data.updated ?? series.data.date)} 업데이트</p>
+    <p class="card-tile__meta">{total}편 · {formatKoreanDate(series.data.updated ?? series.data.date)} 업데이트</p>
   </header>
 
   <div id="yt-player" class="media-frame series__player" aria-live="polite">

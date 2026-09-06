@@ -16,7 +16,7 @@ export const GET: APIRoute = async () => {
       path: p.filePath ?? '', title: p.data.title, order: p.data.order,
       note: [p.data.subtitle, p.data.hideFromNav ? '메뉴 숨김' : ''].filter(Boolean).join(' · '),
     })),
-    ...posts.map((p) => ({ collection: p.id.split('/')[0], path: p.filePath ?? '', title: p.data.title, date: isoDate(p.data.date), note: p.data.writer ?? '' })),
+    ...posts.map((p) => ({ collection: p.id.split('/')[0], path: p.filePath ?? '', title: p.data.title, date: isoDate(p.data.date), note: [p.data.writer, p.data.hidden ? '숨김' : ''].filter(Boolean).join(' · ') })),
     ...series.map((s) => ({ collection: 'series', path: s.filePath ?? '', title: s.data.title, date: isoDate(s.data.date), note: `${s.data.episodes.length}편${s.data.ongoing ? ' · 진행 중' : ''}` })),
     ...stories.map((s) => ({ collection: 'stories', path: s.filePath ?? '', title: s.data.title ?? '(제목 없음)', date: isoDate(s.data.date), note: `사진 ${s.data.images.length}장` })),
   ].filter((e) => e.path);

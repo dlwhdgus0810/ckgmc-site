@@ -5,6 +5,7 @@
  *  - /media/sermons/page/2     → 게시판 2페이지
  *  - /media/sermons/2026-08-02-1558 → src/content/posts/sermons/2026-08-02-1558.md
  *  - /media/series/61          → src/content/series/61.md
+ *  - /ministries               → 섹션 목록 (src/data/nav.ts 의 섹션마다 자동 생성, 같은 주소의 페이지 파일이 없을 때)
  */
 import { getCollection, render, type CollectionEntry } from 'astro:content';
 import SubpageLayout from '../layouts/SubpageLayout.astro';
@@ -12,8 +13,12 @@ import BoardList from '../components/BoardList.astro';
 import PostView from '../components/PostView.astro';
 import SeriesList from '../components/SeriesList.astro';
 import SeriesView from '../components/SeriesView.astro';
+import SectionIndex from '../components/SectionIndex.astro';
 import Widget from '../components/Widget.astro';
 import { getBoardPosts, slugOf, displayTitle, textExcerpt, type Post } from '../lib/posts';
+import { getNav } from '../lib/nav';
+import type { NavSection } from '../data/nav';
+import { site } from '../data/site';
 
 /** 게시글 검색엔진 설명: 본문 앞부분, 본문이 첨부 링크만이면 "제목 — 게시판" */
 function postDescription(post: Post, boardTitle: string): string {
@@ -46,24 +51,34 @@ export async function getStaticPaths() {
       });
     });
   }
+  // 섹션 목록 페이지 (/about, /media, /ministries …) — 하위 페이지를 카드로
+  for (const section of await getNav()) {
+    if (!section.items?.length || pages.some((p) => p.id === section.key)) continue;
+    const sectionPages = section.items
+      .map((it) => pages.find((p) => '/' + p.id === it.href))
+      .filter((p): p is CollectionEntry<'pages'> => !!p);
+    paths.push({ params: { slug: section.key }, props: { kind: 'section', section, sectionPages } });
+  }
   return paths;
 }
 
 interface Props {
-  kind: 'page' | 'post' | 'series';
-  page: CollectionEntry<'pages'>;
+  kind: 'page' | 'post' | 'series' | 'section';
+  page?: CollectionEntry<'pages'>;
   pageNo?: number;
   post?: Post;
   prev?: Post;
   next?: Post;
   series?: CollectionEntry<'series'>;
+  section?: NavSection;
+  sectionPages?: CollectionEntry<'pages'>[];
 }
-const { kind, page, pageNo = 1, post, prev, next, series } = Astro.props;
-const base = '/' + page.id;
-const d = page.data;
-const { Content } = await render(page);
+const { kind, page, pageNo = 1, post, prev, next, series, section, sectionPages = [] } = Astro.props;
+const base = '/' + (page?.id ?? section?.key ?? '');
+const d = page?.data;
+const Content = page ? (await render(page)).Content : undefined;
 ---
-{kind === 'page' && (
+{kind === 'page' && d && Content && (
   <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} description={d.description}>
     {d.widget && d.widgetPosition === 'top' && <Widget name={d.widget} />}
     <Content />
@@ -75,13 +90,18 @@ const { Content } = await render(page);
     ) : null}
   </SubpageLayout>
 )}
-{kind === 'post' && post && (
+{kind === 'post' && post && d && (
   <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={displayTitle(post)} description={postDescription(post, d.title)} bannerHeading="p">
     <PostView post={post} base={base} prev={prev} next={next} />
   </SubpageLayout>
 )}
-{kind === 'series' && series && (
+{kind === 'series' && series && d && (
   <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={series.data.title} bannerHeading="p">
     <SeriesView series={series} base={base} />
+  </SubpageLayout>
+)}
+{kind === 'section' && section && (
+  <SubpageLayout path={base} title={section.label} subtitle={section.labelEn} headerImage={section.headerImage} description={section.description ?? `${section.label} — ${site.name}`}>
+    <SectionIndex pages={sectionPages} />
   </SubpageLayout>
 )}

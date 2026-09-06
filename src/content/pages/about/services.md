@@ -44,7 +44,7 @@ order: 50
 <img class="img-fluid mb-3" src="/images/pages/service-dawn-prayer.jpeg" alt="">
 <h5>새벽기도회 Dawn Prayer Meeting</h5>
 <ul class="list-unstyled mb-3">
-<li class="mb-3"><strong>Mon-Fri 6:00 a.m., 본당 및 Zoom<br><small>http://zoom.us/my/ckgmc</small></strong></li>
+<li class="mb-3"><strong>Mon-Fri 6:00 a.m., 본당 및 Zoom</strong><br><a class="btn btn-outline-primary btn-sm mt-2" href="https://zoom.us/my/ckgmc" target="_blank" rel="noopener">Zoom으로 참여하기 (zoom.us/my/ckgmc)<span class="sr-only"> (새 창)</span></a></li>
 </ul>
 <h5>토요 주품기도나눔모임 시즌1</h5>
 <ul class="list-unstyled mb-3">

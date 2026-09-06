@@ -1,6 +1,7 @@
 /**
  * 날짜 처리 규칙: 프런트매터의 `2026-08-29T22:50` 같은 시간대 없는 값은 "벽시계 시각"으로 보고
  * UTC 로 저장·표시합니다. 그래서 내 컴퓨터에서 빌드하든 Cloudflare(UTC)에서 빌드하든 같은 시각이 나옵니다.
+ * 사람이 읽는 날짜는 모두 formatKoreanDate("2026년 8월 29일") 하나로 통일합니다.
  */
 const NAIVE = /^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2})(?::(\d{2}))?)?$/;
 
@@ -14,28 +15,16 @@ export function parseWallClock(value: unknown): unknown {
 }
 
 const pad = (n: number) => String(n).padStart(2, '0');
-const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
-/** 2026-08-29 */
+/** 2026-08-29 — <time datetime> 등 기계용 */
 export function formatDate(d: Date): string {
   return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
 }
-/** 2026-08-29 22:50 */
-export function formatDateTime(d: Date): string {
-  return `${formatDate(d)} ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
-}
-/** 2026년 8월 29일 */
-export function formatKoreanDate(d: Date): string {
-  return `${d.getUTCFullYear()}년 ${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일`;
-}
-/** Saturday 29 August 2026 */
-export function formatLongDate(d: Date): string {
-  return `${DAYS[d.getUTCDay()]} ${pad(d.getUTCDate())} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
-}
-/** 24 April 2026 */
-export function formatStoryDate(d: Date): string {
-  return `${pad(d.getUTCDate())} ${MONTHS[d.getUTCMonth()]} ${d.getUTCFullYear()}`;
+/** 2026년 8월 29일 — withWeekday 면 "2026년 8월 29일 (토)" */
+export function formatKoreanDate(d: Date, withWeekday = false): string {
+  const s = `${d.getUTCFullYear()}년 ${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일`;
+  return withWeekday ? `${s} (${WEEKDAYS[d.getUTCDay()]})` : s;
 }
 /** <time datetime="..."> 용 ISO 문자열 (분 단위) */
 export function isoDate(d: Date): string {

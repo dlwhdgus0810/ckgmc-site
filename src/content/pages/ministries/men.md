@@ -21,3 +21,8 @@ description: "40세 이상 남성들이 믿음으로 사는 삶을 함께 배우
 <p>이 사명을 이루기 위한 5가지 순서는 다음과 같습니다.</p>
 <p><img class="img-fluid d-block my-1 mx-auto" src="/images/pages/men-5-steps.png" alt="5가지 순서"></p>
 <p>믿음으로 사는 남성들의 모임에 여러분들을 언제나 환영합니다!</p>
+
+<div class="mt-4 p-3 border rounded bg-light">
+<p class="mb-2"><strong>참여·문의</strong> — 모임 일정과 참여 방법은 교회로 문의해 주세요.</p>
+<a class="btn btn-primary btn-sm" href="/about/contact">문의하기</a>
+</div>

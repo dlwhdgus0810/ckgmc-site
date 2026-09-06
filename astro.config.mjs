@@ -2,11 +2,16 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import cloudflare from '@astrojs/cloudflare';
+import { satteri } from '@astrojs/markdown-satteri';
 import { execSync } from 'node:child_process';
+import { imgSizePlugin } from './src/lib/markdown-img-size.mjs';
+import { imageSizeMap } from './src/lib/image-size.mjs';
 
 // 빌드 식별자 — 관리 화면이 "저장한 내용이 배포되었는지" 판단하는 데 씁니다 (GitHub Actions 는 GITHUB_SHA 제공)
 const buildSha = process.env.GITHUB_SHA ?? (() => { try { return execSync('git rev-parse HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return 'unknown'; } })();
 const buildAt = new Date().toISOString();
+// 우리 교회 이야기 사진의 실제 크기 (대표 사진 <img> 의 width/height 용). 페이지 코드는 서버 번들이라 여기서 미리 계산합니다.
+const storyImageSizes = await imageSizeMap('/images/stories');
 
 // https://astro.build/config
 export default defineConfig({
@@ -19,10 +24,12 @@ export default defineConfig({
   adapter: cloudflare({ imageService: 'passthrough' }),
   // 로그인 세션은 D1 에 직접 저장하므로 Astro 내장 세션(KV)은 쓰지 않습니다.
   session: false,
+  // 마크다운: 본문의 순수 HTML 도 파싱해(rawHtml) <img> 에 실제 크기(width/height)를 붙입니다 (src/lib/markdown-img-size.mjs)
+  markdown: { processor: satteri({ features: { rawHtml: true }, hastPlugins: [imgSizePlugin] }) },
   // sitemap.xml 자동 생성 (검색엔진 등록용). 로그인 전용 페이지는 제외
   integrations: [sitemap({ filter: (page) => !/\/(thanks|404|login|members|manage|auth)(\/|$)/.test(page) })],
   vite: {
-    define: { __BUILD_SHA__: JSON.stringify(buildSha), __BUILD_AT__: JSON.stringify(buildAt) },
+    define: { __BUILD_SHA__: JSON.stringify(buildSha), __BUILD_AT__: JSON.stringify(buildAt), __IMAGE_SIZES__: JSON.stringify(storyImageSizes) },
     css: {
       preprocessorOptions: {
         scss: {

@@ -14,6 +14,7 @@ const times = site.serviceTimes.slice(0, 3);
             <strong>{s.name}</strong>
             <span>{s.time}</span>
             {s.place && <small>{s.place}</small>}
+            {s.note && <small class="info-strip__note">{s.note}</small>}
           </div>
         </div>
       ))}

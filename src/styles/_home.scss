@@ -115,7 +115,9 @@ a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: i
     &::-webkit-scrollbar { display: none; }
     @include media-breakpoint-up(md) { margin: 0; padding: 0 0 .75rem; scroll-padding-left: 0; }
   }
-  &__item { flex: none; scroll-snap-align: start; max-width: min(88vw, 720px); }
+  // 80vw: 휴대전화에서 다음 포스터가 살짝 보여 넘길 수 있음을 알림
+  // position: relative — 카드 안의 sr-only(절대 위치) 텍스트가 트랙 밖으로 나가 페이지를 넓히지 않도록
+  &__item { position: relative; flex: none; scroll-snap-align: start; max-width: min(80vw, 720px); }
   &__card {
     display: flex; flex-direction: column;
     height: 100%;
@@ -146,6 +148,7 @@ a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: i
   &.at-start [data-notice-prev], &.at-end [data-notice-next] { opacity: .35; pointer-events: none; }
 }
 .flip-x { transform: scaleX(-1); }
+.info-strip__note { font-size: .75rem; font-weight: 600; color: $gold-700; }
 
 // 이번 주
 .stack { display: grid; gap: 1rem; align-content: start; }

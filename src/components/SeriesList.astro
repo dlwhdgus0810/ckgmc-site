@@ -2,7 +2,7 @@
 /** 설교 시리즈 목록: 진행 중(카드) + 종료(목록) */
 import { getCollection } from 'astro:content';
 import Icon from './Icon.astro';
-import { formatDate } from '../lib/posts';
+import { formatKoreanDate } from '../lib/posts';
 
 interface Props { base: string }
 const { base } = Astro.props;
@@ -24,7 +24,7 @@ const finished = all.filter((s) => !s.data.ongoing);
           <div class="card-tile__body">
             <span class="card-tile__eyebrow">진행 중</span>
             <h3 class="card-tile__title h5">{s.data.title}</h3>
-            <p class="card-tile__meta">{s.data.episodes.length}편 · {formatDate(s.data.updated ?? s.data.date)} 업데이트</p>
+            <p class="card-tile__meta">{s.data.episodes.length}편 · {formatKoreanDate(s.data.updated ?? s.data.date)} 업데이트</p>
           </div>
         </a>
       </div>
@@ -42,7 +42,7 @@ const finished = all.filter((s) => !s.data.ongoing);
             <img class="series-list__thumb" src={s.data.thumbnail} alt="" loading="lazy" width="120" height="68" />
             <div>
               <h3 class="h6 mb-1">{s.data.title}</h3>
-              <p class="card-tile__meta">{s.data.episodes.length}편 · {formatDate(s.data.updated ?? s.data.date)}</p>
+              <p class="card-tile__meta">{s.data.episodes.length}편 · {formatKoreanDate(s.data.updated ?? s.data.date)}</p>
             </div>
             <Icon name="chevron-right" size={18} />
           </a>

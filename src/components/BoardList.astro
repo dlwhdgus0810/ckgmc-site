@@ -1,7 +1,7 @@
 ---
 /** 게시판 목록 (카드 3열) + 페이지네이션 */
 import Pagination from './Pagination.astro';
-import { getBoardPosts, slugOf, excerptOf, thumbAttrs, formatDate, formatDateTime, isoDate, isNew, titleParts, PARSED_BOARDS } from '../lib/posts';
+import { getBoardPosts, slugOf, excerptOf, thumbAttrs, formatKoreanDate, isoDate, isNew, titleParts, displayDate, dateTimeAttr, PARSED_BOARDS } from '../lib/posts';
 
 interface Props {
   board: string;
@@ -33,7 +33,7 @@ const parsed = PARSED_BOARDS.has(board);
                   <h2 class="card-tile__title h6">{t.title}</h2>
                   {t.preacher && <p class="card-tile__text">{t.preacher}</p>}
                   <p class="card-tile__meta">
-                    <time datetime={isoDate(post.data.date)}>{t.date ?? formatDate(post.data.date)}</time>
+                    <time datetime={dateTimeAttr(post)}>{formatKoreanDate(displayDate(post), true)}</time>
                     {isNew(post.data.date) && <span class="badge-new">NEW</span>}
                   </p>
                 </>
@@ -42,7 +42,7 @@ const parsed = PARSED_BOARDS.has(board);
                   <h2 class="card-tile__title h6">{post.data.title}</h2>
                   <p class="card-tile__text">{excerptOf(post)}</p>
                   <p class="card-tile__meta">
-                    <time datetime={isoDate(post.data.date)}>{formatDateTime(post.data.date)}</time>
+                    <time datetime={isoDate(post.data.date)}>{formatKoreanDate(post.data.date)}</time>
                     {isNew(post.data.date) && <span class="badge-new">NEW</span>}
                   </p>
                 </>

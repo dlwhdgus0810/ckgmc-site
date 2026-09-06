@@ -16,7 +16,7 @@ const [welcomeCta, givingCta] = headerCtas;
 <header class="site-header on-dark">
   <div class="container site-header__inner">
     <a class="site-header__brand" href="/" aria-label={`${site.name} 홈`}>
-      <img src={site.logo} alt="" width="272" height="40" />
+      <img src={site.logo} alt="" width="274" height="40" />
     </a>
 
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="메뉴 열기">
@@ -53,7 +53,7 @@ const [welcomeCta, givingCta] = headerCtas;
 
       <div class="site-nav__ctas">
         {welcomeCta && <a class="site-nav__cta" href={welcomeCta.href}>{welcomeCta.label}</a>}
-        {givingCta && <a class="btn btn-gold btn-sm" href={givingCta.href}>{givingCta.label}</a>}
+        {givingCta && <a class="btn btn-gold btn-sm" href={givingCta.href} aria-current={givingCta.href === currentPath ? 'page' : undefined}>{givingCta.label}</a>}
         <a class="site-nav__account" href="/login" data-account-link title="로그인" aria-label="로그인">
           <Icon name="user" size={18} />
           <span class="site-nav__account-label">로그인</span>

@@ -38,7 +38,7 @@ export const pageSchema = z.object({
 /** 게시판 글 (src/content/posts/<게시판>/<파일>.md) */
 export const postSchema = z.object({
   title: z.string(),
-  /** 작성 시각. `2026-08-29T22:50` 처럼 적은 그대로 표시됩니다 */
+  /** 게시 시각. 정렬과 <time datetime> 에 쓰이고 화면에는 날짜만 표시됩니다 (유튜브 설교는 제목의 예배 날짜를 우선) */
   date: z.preprocess(parseWallClock, z.coerce.date()),
   /** 게시판 키 (폴더 이름과 같음; CMS 용) */
   board: z.string().optional(),
@@ -51,6 +51,8 @@ export const postSchema = z.object({
   attachments: z.array(z.object({ name: z.string(), file: z.string() })).default([]),
   /** 목록에 보여줄 짧은 요약 (없으면 본문 앞부분 사용) */
   excerpt: z.string().optional(),
+  /** 사이트에 표시하지 않음 — 중복 영상 등을 지우지 않고 감출 때. 파일이 남아 있어야 유튜브 자동 등록이 같은 영상을 다시 만들지 않습니다 */
+  hidden: z.boolean().default(false),
 });
 
 /** 설교 시리즈 (src/content/series/<파일>.md) — 유튜브 영상(에피소드) 묶음 */

@@ -66,7 +66,8 @@
       "image": "/images/slides/slide-1.jpg",
       "alt": "청년부 수련회 9월 6–7일 Springfield, MO — Prayerful House",
       "title": "청년부 수련회 9/6–7",
-      "href": "/ministries/young-adult"
+      "href": "/ministries/young-adult",
+      "until": "2026-09-07"
     },
     {
       "image": "/images/slides/slide-2.jpg",
@@ -76,13 +77,13 @@
     },
     {
       "image": "/images/slides/slide-3.jpg",
-      "alt": "교회 안내 포스터",
-      "title": ""
+      "alt": "2026년 표어: 최고의 하나님께 최선의 예배를 (시편 29:2)",
+      "title": "2026 표어 — 최고의 하나님께 최선의 예배를"
     },
     {
       "image": "/images/slides/slide-4.jpg",
-      "alt": "교회 안내 포스터",
-      "title": ""
+      "alt": "기도모임 안내 — 오로지 기도에 힘쓰더라 (행 1:14). 주일 중보기도모임 주일 오전 10:30 2층 청년부실 · 수요 중보기도모임 수요일 오전 10시 도서관 · 가족과 자녀를 위한 기도회 매월 셋째 주 금요성령집회 본당 · 주간 새벽이슬 월요일 오전 6시 본당 · 주품 토요큐티모임 토요일 오전 7시 Apex at Cityplace",
+      "title": "기도모임 안내"
     }
   ],
   "events": [
@@ -140,7 +141,7 @@
     },
     {
       "title": "오시는 길",
-      "subtitle": "Way to Us",
+      "subtitle": "Directions",
       "icon": "/images/icons/front-icon-3.png",
       "href": "/about/directions"
     },
@@ -155,17 +156,12 @@
     {
       "title": "위지엠 (예수동행일기)",
       "image": "/images/links/journalwithjesus.jpeg",
-      "href": "http://journalwithjesus.org/home"
+      "href": "https://jwj.kr"
     },
     {
       "title": "캔사스 청년&청장년 연합집회",
       "image": "/images/links/kansas-united.jpeg",
       "href": "https://www.facebook.com/%EC%BA%94%EC%82%AC%EC%8A%A4-%EC%B2%AD%EB%85%84%EC%B2%AD%EC%9E%A5%EB%85%84-%EC%97%B0%ED%95%A9%EC%A7%91%ED%9A%8C-741591112706959/"
-    },
-    {
-      "title": "THE JOSHUA GENERATION",
-      "image": "/images/links/jgen.jpeg",
-      "href": "http://www.j-gen.org/"
     }
   ]
 }

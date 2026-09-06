@@ -3,7 +3,7 @@
 import type { CollectionEntry } from 'astro:content';
 import SectionHeader from '../SectionHeader.astro';
 import Icon from '../Icon.astro';
-import { formatDate } from '../../lib/posts';
+import { formatKoreanDate } from '../../lib/posts';
 interface Props { series: CollectionEntry<'series'>[] }
 const { series } = Astro.props;
 const [featured, ...others] = series;
@@ -19,7 +19,7 @@ const latestEp = featured?.data.episodes.at(-1);
           <div class="card-tile__body">
             <span class="card-tile__eyebrow">{featured.data.ongoing ? '진행 중인 시리즈' : '최근 시리즈'}</span>
             <h3 class="series-feature__title">{featured.data.title}</h3>
-            <p class="card-tile__meta">{featured.data.episodes.length}편 · 최근 업데이트 {formatDate(featured.data.updated ?? featured.data.date)}</p>
+            <p class="card-tile__meta">{featured.data.episodes.length}편 · 최근 업데이트 {formatKoreanDate(featured.data.updated ?? featured.data.date)}</p>
             {latestEp && (
               <p class="series-feature__latest"><Icon name="play" size={14} /> <span>최신 회차</span> {latestEp.title}</p>
             )}
@@ -32,7 +32,7 @@ const latestEp = featured?.data.episodes.at(-1);
               <div>
                 <span class="card-tile__eyebrow">{s.data.ongoing ? '진행 중' : '지난 시리즈'}</span>
                 <strong>{s.data.title}</strong>
-                <small>{s.data.episodes.length}편 · {formatDate(s.data.updated ?? s.data.date)}</small>
+                <small>{s.data.episodes.length}편 · {formatKoreanDate(s.data.updated ?? s.data.date)}</small>
               </div>
             </a>
           ))}

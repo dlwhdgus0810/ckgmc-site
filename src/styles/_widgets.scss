@@ -14,6 +14,10 @@
     small { color: $ink-600; }
   }
   &__frame { display: block; width: 100%; border: 0; border-top: 1px solid $line; background: #fff; }
+  // 허용 호스트 확인 전·허용되지 않은 주소: 프레임을 아예 그리지 않음 (빈 640px 공간 없음)
+  &__frame[data-src]:not([src]) { display: none; }
+  // mobile='button-only': 휴대전화에서는 버튼만
+  &--mobile-button &__frame { @include media-breakpoint-down(sm) { display: none; } }
 }
 .map-card {
   .media-frame { margin-bottom: 1rem; background: $surface; }

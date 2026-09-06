@@ -42,7 +42,7 @@ const stories = (await getCollection('stories')).sort((a, b) => b.data.date.getT
     <InfoStrip />
     <VerseBand verses={site.verses} today={today} />
     <EventList events={site.events} today={today} />
-    <NoticeCards notices={site.notices} />
+    <NoticeCards notices={site.notices} today={today} />
     <ThisWeek sermon={sermon} bulletin={bulletin} resource={resource} />
     <SeriesRow series={series} />
     <MinistryGrid pages={ministries} />

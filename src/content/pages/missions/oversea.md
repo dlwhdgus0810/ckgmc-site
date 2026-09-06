@@ -1,6 +1,6 @@
 ---
 title: "해외선교"
-subtitle: "Oversea Mission"
+subtitle: "Overseas Missions"
 headerImage: /images/headers/missions-oversea.jpeg
 order: 20
 ---
@@ -8,7 +8,7 @@ order: 20
 <div class="row">
 <div class="col-sm"><img class="img-fluid mb-4" src="/images/pages/oversea-india.png" alt="인도 선교"></div>
 <div class="col-sm">
-<p class="lead">2016년부터 캔사스한인중앙글로벌감리교회는 인도의 뭄바이에서 사역하시는 원정하 선교사님의 사역을 돕고 후원하고 있습니다.</p>
+<p class="lead">2016년부터 캔사스중앙글로벌감리교회는 인도의 뭄바이에서 사역하시는 원정하 선교사님의 사역을 돕고 후원하고 있습니다.</p>
 <p>이 사역은 크게 2가지입니다.</p>
 <dl>
 <dt>땅에 쓰신 글씨 프로젝트</dt>

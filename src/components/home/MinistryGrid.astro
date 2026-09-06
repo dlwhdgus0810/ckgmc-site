@@ -8,7 +8,7 @@ const { pages } = Astro.props;
 {pages.length > 0 && (
   <section class="section" aria-labelledby="ministry-title">
     <div class="container">
-      <SectionHeader id="ministry-title" eyebrow="Ministries" title="사역 소개" more={{ href: pages[0] ? '/' + pages[0].id : '/ministries/children', label: '모든 사역' }} />
+      <SectionHeader id="ministry-title" eyebrow="Ministries" title="사역 소개" more={{ href: '/ministries', label: '모든 사역' }} />
       <div class="row ministry-grid">
         {pages.map((p) => {
           const img = p.data.image ?? p.data.headerImage;

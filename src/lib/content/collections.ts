@@ -67,7 +67,7 @@ export const pagesCollectionKey = (section: string) => `pages_${section.replace(
 
 const postFields = (youtube: boolean): Field[] => [
   { name: 'title', label: '제목', widget: 'string', required: true },
-  { name: 'date', label: '날짜', widget: 'datetime', required: true, hint: '적은 시각 그대로 표시됩니다' },
+  { name: 'date', label: '날짜', widget: 'datetime', required: true, hint: '목록·글에는 날짜만 표시되고 시각은 정렬에만 쓰입니다' },
   { name: 'writer', label: '작성자', widget: 'string', default: '관리자' },
   { name: 'youtube', label: '유튜브 영상', widget: 'youtube', hint: youtube ? '영상 주소를 붙여 넣으면 됩니다 (https://youtu.be/… 또는 watch?v=…)' : '영상이 있으면 주소를 붙여 넣으세요' },
   { name: 'thumbnail', label: '목록 썸네일', widget: 'image', hint: '비우면 유튜브 썸네일 → 기본 이미지 순으로 표시' },
@@ -76,6 +76,7 @@ const postFields = (youtube: boolean): Field[] => [
     { name: 'file', label: '파일', widget: 'file', required: true },
   ] },
   { name: 'excerpt', label: '목록 요약', widget: 'text', hint: '비우면 본문 앞부분을 보여줍니다' },
+  { name: 'hidden', label: '숨김 (사이트에 표시하지 않음)', widget: 'boolean', default: false, hint: '중복 영상 등을 지우지 않고 감출 때' },
 ];
 
 const pageFields: Field[] = [
@@ -184,7 +185,8 @@ export const COLLECTIONS: Collection[] = [
         { name: 'image', label: '포스터 이미지', widget: 'image', required: true, hint: '권장 1600×500' },
         { name: 'alt', label: '포스터 설명 (대체 텍스트)', widget: 'string', required: true },
         { name: 'title', label: '제목', widget: 'string' },
-        { name: 'href', label: '누르면 이동할 주소', widget: 'string' },
+        { name: 'href', label: '누르면 이동할 주소', widget: 'string', hint: '비우면 포스터 원본 이미지를 새 창으로 엽니다' },
+        { name: 'until', label: '표시 마감일', widget: 'date', hint: '이 날짜까지만 보이고 자동으로 사라집니다. 비우면 계속 표시' },
       ] },
       { name: 'events', label: '다가오는 일정 (메인)', widget: 'list', itemLabel: '일정', hint: '날짜가 지난 일정은 자동으로 사라집니다. 가까운 순서로 3개까지 표시됩니다.', fields: [
         { name: 'title', label: '일정 이름', widget: 'string', required: true },

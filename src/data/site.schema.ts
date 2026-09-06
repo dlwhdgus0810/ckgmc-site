@@ -45,6 +45,8 @@ export const siteSchema = z.object({
     alt: z.string().min(1, '포스터의 대체 텍스트(alt)는 비울 수 없습니다'),
     title: z.string().optional(),
     href: z.string().optional(),
+    /** 이 날짜(포함)까지만 표시. 비우면 계속 표시 */
+    until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD 형식').optional(),
   })),
   /** 다가오는 일정 (메인에 날짜가 지나지 않은 것 3개까지 표시) */
   events: z.array(z.object({

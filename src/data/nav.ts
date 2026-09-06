@@ -18,15 +18,20 @@ export interface NavSection {
   href?: string;
   /** getNav() 가 채움 */
   items?: NavItem[];
+  /** 섹션 목록 페이지(/about, /ministries …)의 배너 사진 */
+  headerImage?: string;
+  /** 섹션 목록 페이지의 검색엔진용 설명 */
+  description?: string;
 }
 
+// 온라인헌금은 여기(주 메뉴)에 넣지 않습니다 — 아래 headerCtas 의 금색 버튼과 푸터·모바일 메뉴에 이미 있어
+// 두 번 나오면 넓은 화면에서 헤더가 가로로 넘칩니다.
 export const sections: NavSection[] = [
-  { key: 'about', label: '교회 소개', labelEn: 'About Us' },
-  { key: 'media', label: '미디어', labelEn: 'Media' },
-  { key: 'ministries', label: '사역', labelEn: 'Ministries' },
-  { key: 'next-steps', label: '양육과 훈련', labelEn: 'Next Steps' },
-  { key: 'missions', label: '섬김과 선교', labelEn: 'Missions' },
-  { key: 'offering', label: '온라인헌금', labelEn: 'Online Offering', href: '/offering' },
+  { key: 'about', label: '교회 소개', labelEn: 'About Us', headerImage: '/images/headers/about.jpg', description: '캔사스중앙글로벌감리교회의 사명, 역사, 리더십, 섬기는 이들, 예배 안내와 찾아오시는 길' },
+  { key: 'media', label: '미디어', labelEn: 'Media', headerImage: '/images/headers/media.jpeg', description: '설교 시리즈, 영상 설교, 특별 집회, 성가대 찬양, 주보와 자료실' },
+  { key: 'ministries', label: '사역', labelEn: 'Ministries', headerImage: '/images/headers/ministries-camping.jpeg', description: '유아·어린이부부터 청소년·청년·남녀선교회·성가대·헤세드 워십·English Ministry 까지 교회의 모든 사역' },
+  { key: 'next-steps', label: '양육과 훈련', labelEn: 'Next Steps', headerImage: '/images/headers/next-steps-discipleship.jpeg', description: '제자훈련, 예수동행일기, 교인등록, 세례, 새가족환영회, 말씀 묵상, 교회 섬김' },
+  { key: 'missions', label: '섬김과 선교', labelEn: 'Missions', headerImage: '/images/headers/missions-oversea.jpeg', description: '국내 선교, 해외선교, 지역 사회 섬김과 선교지 소식' },
 ];
 
 /** 헤더 오른쪽 강조 링크 */
