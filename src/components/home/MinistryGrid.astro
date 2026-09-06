@@ -9,11 +9,11 @@ const { pages } = Astro.props;
   <section class="section" aria-labelledby="ministry-title">
     <div class="container">
       <SectionHeader id="ministry-title" eyebrow="Ministries" title="사역 소개" more={{ href: pages[0] ? '/' + pages[0].id : '/ministries/children', label: '모든 사역' }} />
-      <div class="row">
+      <div class="row ministry-grid">
         {pages.map((p) => {
           const img = p.data.image ?? p.data.headerImage;
           return (
-            <div class="col-sm-6 col-lg-4 mb-4">
+            <div class="col-6 col-lg-4 mb-3 mb-md-4">
               <a class="card-tile card-tile--portrait" href={'/' + p.id}>
                 {img && <div class="card-tile__media"><img src={img} alt="" loading="lazy" width="1200" height="900" /></div>}
                 <div class="card-tile__body">

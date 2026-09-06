@@ -1,7 +1,7 @@
 ---
 title: "여선교회"
 subtitle: "Women Ministry"
-headerImage: /images/headers/ministries-women.png
+headerImage: /images/pages/women.jpg
 showTitle: false
 order: 50
 image: "/images/pages/women.jpg"

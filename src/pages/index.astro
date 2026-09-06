@@ -4,6 +4,8 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/home/Hero.astro';
 import InfoStrip from '../components/home/InfoStrip.astro';
+import VerseBand from '../components/home/VerseBand.astro';
+import EventList from '../components/home/EventList.astro';
 import NoticeCards from '../components/home/NoticeCards.astro';
 import ThisWeek from '../components/home/ThisWeek.astro';
 import SeriesRow from '../components/home/SeriesRow.astro';
@@ -29,12 +31,17 @@ const ministries = (await getCollection('pages', (p) => p.id.startsWith('ministr
   .sort((a, b) => a.data.order - b.data.order)
   .slice(0, 6);
 
+// 빌드 시점(캔자스 기준)의 오늘 — 지난 일정 숨김
+const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+
 const stories = (await getCollection('stories')).sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 ---
 <BaseLayout description={site.description}>
   <main id="main" tabindex="-1">
     <Hero />
     <InfoStrip />
+    <VerseBand verse={site.verse} />
+    <EventList events={site.events} today={today} />
     <NoticeCards notices={site.notices} />
     <ThisWeek sermon={sermon} bulletin={bulletin} resource={resource} />
     <SeriesRow series={series} />

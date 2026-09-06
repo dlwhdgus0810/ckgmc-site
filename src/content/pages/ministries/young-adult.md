@@ -1,7 +1,7 @@
 ---
 title: "청년부"
 subtitle: "Young Adult"
-headerImage: /images/headers/ministries-young-adult.png
+headerImage: /images/pages/young-adult.jpg
 board: young-adult
 showTitle: false
 order: 30

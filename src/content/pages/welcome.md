@@ -1,7 +1,7 @@
 ---
 title: "처음 오셨나요?"
 subtitle: "I'm New"
-headerImage: /images/headers/about-story.png
+headerImage: /images/headers/about.jpg
 description: "캔사스중앙글로벌감리교회에 처음 오시는 분들을 위한 안내 — 예배 시간, 오시는 길, 자녀 프로그램, 새가족 등록"
 widget: service-times
 widgetPosition: top

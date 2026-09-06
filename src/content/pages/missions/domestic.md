@@ -1,7 +1,7 @@
 ---
 title: "국내 선교"
 subtitle: "Domestic Mission"
-headerImage: /images/headers/missions-domestic.png
+headerImage: /images/headers/missions-domestic.jpg
 order: 10
 ---
 <article id="mission">

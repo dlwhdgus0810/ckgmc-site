@@ -1,7 +1,7 @@
 ---
 title: "청소년부"
 subtitle: "X-Youth"
-headerImage: /images/headers/ministries-youth.png
+headerImage: /images/pages/em-youth.jpg
 board: youth
 showTitle: false
 order: 20

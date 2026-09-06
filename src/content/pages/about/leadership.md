@@ -1,7 +1,7 @@
 ---
 title: "리더십"
 subtitle: "Our Leadership"
-headerImage: /images/headers/about-leadership.png
+headerImage: /images/headers/about.jpg
 showTitle: false
 order: 30
 ---

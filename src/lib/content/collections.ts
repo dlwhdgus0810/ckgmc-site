@@ -186,6 +186,19 @@ export const COLLECTIONS: Collection[] = [
         { name: 'title', label: '제목', widget: 'string' },
         { name: 'href', label: '누르면 이동할 주소', widget: 'string' },
       ] },
+      { name: 'events', label: '다가오는 일정 (메인)', widget: 'list', itemLabel: '일정', hint: '날짜가 지난 일정은 자동으로 사라집니다. 가까운 순서로 3개까지 표시됩니다.', fields: [
+        { name: 'title', label: '일정 이름', widget: 'string', required: true },
+        { name: 'date', label: '날짜', widget: 'date', required: true },
+        { name: 'endDate', label: '종료 날짜 (여러 날이면)', widget: 'date' },
+        { name: 'time', label: '시간', widget: 'string', placeholder: '예: 오후 7:30' },
+        { name: 'place', label: '장소', widget: 'string' },
+        { name: 'href', label: '자세히 보기 링크', widget: 'string', placeholder: '/ministries/young-adult 또는 https://…' },
+        { name: 'description', label: '한 줄 설명', widget: 'string' },
+      ] },
+      { name: 'verse', label: '이번 주 말씀 (메인 정보 띠 아래)', widget: 'object', fields: [
+        { name: 'text', label: '구절', widget: 'text', required: true },
+        { name: 'ref', label: '출처 (예: 요한복음 15:5)', widget: 'string', required: true },
+      ] },
       { name: 'quickLinks', label: '메인 바로가기 아이콘', widget: 'list', itemLabel: '바로가기', fields: [
         { name: 'title', label: '제목', widget: 'string', required: true },
         { name: 'subtitle', label: '영문', widget: 'string' },

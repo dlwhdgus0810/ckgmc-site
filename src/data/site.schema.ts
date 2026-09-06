@@ -46,6 +46,18 @@ export const siteSchema = z.object({
     title: z.string().optional(),
     href: z.string().optional(),
   })),
+  /** 다가오는 일정 (메인에 날짜가 지나지 않은 것 3개까지 표시) */
+  events: z.array(z.object({
+    title: z.string().min(1),
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD 형식'),
+    endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD 형식').optional(),
+    time: z.string().optional(),
+    place: z.string().optional(),
+    href: z.string().optional(),
+    description: z.string().optional(),
+  })).default([]),
+  /** 이번 주 말씀 (정보 띠 아래 한 구절) */
+  verse: z.object({ text: z.string().min(1), ref: z.string().min(1) }).optional(),
   quickLinks: z.array(z.object({ title: z.string(), subtitle: z.string(), icon: z.string(), href: z.string() })),
   /** 협력 단체 배너 */
   links: z.array(z.object({ title: z.string(), image: z.string(), href: z.string() })),

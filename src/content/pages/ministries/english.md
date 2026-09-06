@@ -1,6 +1,6 @@
 ---
 title: "English Ministry"
-headerImage: /images/headers/ministries-english.png
+headerImage: /images/pages/em-youth.jpg
 board: english
 showTitle: false
 order: 90

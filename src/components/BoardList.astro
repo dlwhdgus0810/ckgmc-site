@@ -1,7 +1,7 @@
 ---
 /** 게시판 목록 (카드 3열) + 페이지네이션 */
 import Pagination from './Pagination.astro';
-import { getBoardPosts, slugOf, excerptOf, thumbnailOf, formatDate, formatDateTime, isoDate, isNew, titleParts, PARSED_BOARDS } from '../lib/posts';
+import { getBoardPosts, slugOf, excerptOf, thumbAttrs, formatDate, formatDateTime, isoDate, isNew, titleParts, PARSED_BOARDS } from '../lib/posts';
 
 interface Props {
   board: string;
@@ -25,7 +25,7 @@ const parsed = PARSED_BOARDS.has(board);
       {posts.map((post) => (
         <div class="col-sm-6 col-lg-4 mb-4">
           <a class="card-tile" href={`${base}/${slugOf(post)}`}>
-            <div class="card-tile__media"><img src={thumbnailOf(post)} alt="" loading="lazy" width="640" height="360" /></div>
+            <div class="card-tile__media"><img {...thumbAttrs(post)} alt="" loading="lazy" width="640" height="360" /></div>
             <div class="card-tile__body">
               {parsed ? (() => { const t = titleParts(post); return (
                 <>

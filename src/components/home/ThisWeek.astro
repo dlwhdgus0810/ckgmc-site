@@ -2,7 +2,7 @@
 /** 이번 주: 최신 설교(클릭 시 영상 재생) + 이번 주 주보(PDF) + 소그룹 나눔지 */
 import SectionHeader from '../SectionHeader.astro';
 import Icon from '../Icon.astro';
-import { slugOf, excerptOf, thumbnailOf, pdfOf, fileUrl, formatKoreanDate, isoDate, titleParts, type Post } from '../../lib/posts';
+import { slugOf, excerptOf, thumbAttrs, pdfOf, fileUrl, formatKoreanDate, isoDate, titleParts, type Post } from '../../lib/posts';
 interface Props { sermon?: Post; bulletin?: Post; resource?: Post }
 const { sermon, bulletin, resource } = Astro.props;
 const pdf = bulletin ? pdfOf(bulletin) : undefined;
@@ -16,7 +16,7 @@ const st = sermon ? titleParts(sermon) : undefined;
         {sermon ? (
           <article class="card-tile this-week__sermon">
             <div class="card-tile__media video-poster" data-youtube={sermon.data.youtube} data-title={sermon.data.title}>
-              <img src={thumbnailOf(sermon)} alt="" width="1280" height="720" loading="lazy" />
+              <img {...thumbAttrs(sermon)} alt="" width="1280" height="720" loading="lazy" />
               {sermon.data.youtube && (
                 <button type="button" class="video-poster__play" aria-label={`설교 영상 재생: ${sermon.data.title}`}>
                   <Icon name="play" size={30} />

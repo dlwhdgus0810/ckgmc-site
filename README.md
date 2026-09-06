@@ -121,7 +121,8 @@ GitHub 계정이 있는 개발자는 [Sveltia CMS](https://sveltiacms.app) 화�
 
 ### 사이트 설정 (`src/data/site.json`)
 교회 이름·주소·전화·이메일·SNS, 예배 시간(`serviceTimes`), 메인 첫 화면(`hero`: 사진·제목·소개·버튼),
-교회 소식 포스터(`notices`, 권장 1600×500, `alt` 필수), 협력 단체 배너(`links`), 문의 폼 주소(`formEndpoint`).
+이번 주 말씀(`verse`), 다가오는 일정(`events`: 날짜가 지나면 자동 숨김, 메인에 3개), 교회 소식 포스터(`notices`, `alt` 필수),
+협력 단체 배너(`links`), 문의 폼 주소(`formEndpoint`). 모두 콘텐츠 관리 → 사이트 설정에서 편집할 수 있습니다.
 잘못된 값이 있으면 빌드가 실패하면서 어느 항목인지 알려줍니다.
 
 **메인 첫 화면 사진**: 현재 청년부 단체 사진(`/images/pages/young-adult.jpg`)을 임시로 쓰고 있습니다.

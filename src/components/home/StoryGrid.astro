@@ -6,7 +6,7 @@ interface Props { stories: CollectionEntry<'stories'>[]; limit?: number }
 const { stories, limit } = Astro.props;
 const list = limit ? stories.slice(0, limit) : stories;
 ---
-<div class="story-grid">
+<div class:list={['story-grid', { 'story-grid--home': !!limit }]}>
   {list.map((s) => (
     <a class="card-tile card-tile--portrait" href={`/story/${s.id}`}>
       <div class="card-tile__media">

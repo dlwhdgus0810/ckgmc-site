@@ -1,7 +1,7 @@
 ---
 title: "지역 사회 섬김"
 subtitle: "Serving the Community"
-headerImage: /images/headers/missions-community.png
+headerImage: /images/headers/missions-community.jpg
 board: community
 order: 30
 ---

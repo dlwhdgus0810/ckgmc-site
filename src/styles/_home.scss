@@ -57,6 +57,44 @@
   &__more { display: inline-flex; align-items: center; gap: .25rem; font-size: .875rem !important; color: $navy !important; font-weight: 600; }
 }
 
+// 이번 주 말씀
+.verse-band {
+  padding: 2.5rem 0 .5rem;
+  @include media-breakpoint-up(lg) { padding-top: 3.5rem; }
+  &__quote {
+    max-width: 46rem; margin: 0 auto; padding: 0; border: 0; text-align: center;
+    p { margin: 0 0 .5rem; font-family: $font-family-serif; font-size: clamp(1.0625rem, .95rem + .5vw, 1.3125rem); line-height: 1.8; color: $navy-700; text-wrap: balance; }
+    cite { display: inline-block; font-style: normal; font-size: .8125rem; font-weight: 600; letter-spacing: .1em; color: $gold-700; &::before { content: '— '; } }
+  }
+}
+
+// 다가오는 일정
+.section--tight { padding-top: 2.5rem; padding-bottom: 2.5rem; }
+.event-list {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: .75rem;
+  @include media-breakpoint-up(md) { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+}
+.event-card {
+  display: flex; align-items: center; gap: 1rem; height: 100%;
+  padding: .875rem 1rem;
+  border: 1px solid $line; border-radius: $border-radius; background: #fff; color: inherit;
+  transition: transform .2s ease, box-shadow .2s ease;
+  &__date {
+    flex: none; width: 3.75rem; padding: .375rem 0; text-align: center;
+    border-radius: $border-radius-sm; background: $navy-50; color: $navy-900;
+    span { display: block; font-size: .6875rem; font-weight: 600; letter-spacing: .04em; color: $navy; }
+    strong { display: block; font-size: 1.5rem; line-height: 1.1; }
+    small { display: block; font-size: .6875rem; color: $ink-600; }
+  }
+  &__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .2rem; }
+  &__title { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.4; color: $ink-900; }
+  &__meta { display: flex; flex-wrap: wrap; gap: .2rem .875rem; margin: 0; font-size: .8125rem; color: $ink-600; span { display: inline-flex; align-items: center; gap: .3rem; } .icon { color: $gold-700; } }
+  &__desc { margin: 0; font-size: .8125rem; color: $ink-600; }
+  &__arrow { flex: none; color: $navy; }
+}
+a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: inherit; transform: translateY(-2px); box-shadow: 0 .5rem 1.25rem rgba($navy-900, .1); .event-card__title { color: $navy; } }
+
 // 교회 소식 포스터 — 높이를 맞춘 가로 띠 (포스터 비율은 그대로, 좌우로 넘김)
 .notice-strip {
   position: relative;
@@ -156,6 +194,17 @@
   &--more { background: $navy-50; border-color: transparent; color: $navy-900; .icon { flex: none; color: $navy; } }
 }
 
+// 사역 소개 — 모바일 2열
+.ministry-grid {
+  @include media-breakpoint-down(sm) {
+    margin-left: -.375rem; margin-right: -.375rem;
+    > [class*="col-"] { padding-left: .375rem; padding-right: .375rem; }
+    .card-tile__body { padding: .75rem .875rem 1rem; gap: .25rem; }
+    .card-tile__title { font-size: .9375rem; }
+    .card-tile__text, .card-tile__eyebrow { display: none; }
+  }
+}
+
 // 우리 교회 이야기
 .story-grid {
   display: grid;
@@ -165,6 +214,8 @@
   .card-tile__meta { margin-top: 0; padding-top: 0; }
   &__placeholder { width: 100%; height: 100%; background: linear-gradient(135deg, $navy-50, $gold-50); }
   @include media-breakpoint-down(xs) { gap: 1rem; .card-tile__text { display: none; } .card-tile__body { padding: .75rem .875rem 1rem; } }
+  // 메인에서는 모바일에 4개만 (나머지는 "모든 이야기")
+  &--home { @include media-breakpoint-down(sm) { > :nth-child(n + 5) { display: none; } } }
 }
 
 // 새가족 띠 + 협력 단체

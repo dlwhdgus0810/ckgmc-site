@@ -1,7 +1,7 @@
 ---
 title: "연락처"
 subtitle: "Contact us"
-headerImage: /images/headers/about-contact.png
+headerImage: /images/headers/about.jpg
 widget: contact
 order: 70
 ---

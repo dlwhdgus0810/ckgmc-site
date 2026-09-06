@@ -1,7 +1,7 @@
 ---
 title: "섬기는 이들"
 subtitle: "Our Pastors & Staff"
-headerImage: /images/headers/about-staff.png
+headerImage: /images/headers/about.jpg
 showTitle: false
 order: 40
 ---

@@ -46,10 +46,22 @@ export function excerptOf(post: Post, length = 70): string {
 /** 목록용 썸네일: 지정 썸네일 → 유튜브 썸네일 → 본문 첫 이미지 → 기본 이미지 */
 export function thumbnailOf(post: Post): string {
   if (post.data.thumbnail) return post.data.thumbnail;
-  if (post.data.youtube) return `https://i.ytimg.com/vi/${post.data.youtube}/hqdefault.jpg`;
+  if (post.data.youtube) return `https://i.ytimg.com/vi/${post.data.youtube}/hq720.jpg`;
   const m = (post.body ?? '').match(/<img[^>]+src="([^"]+)"/);
   if (m) return m[1];
   return '/images/thumbnail-default.jpg';
+}
+
+/**
+ * <img> 에 펼쳐 넣는 썸네일 속성. 유튜브는 16:9 원본(hq720)을 먼저 쓰고, 없는 영상이면 4:3 기본(hqdefault)으로 바꿉니다
+ * (hqdefault 는 위아래 검은 띠가 있어 카드에서 잘려 보임).
+ */
+export function thumbAttrs(post: Post): { src: string; onerror?: string } {
+  const src = thumbnailOf(post);
+  if (!post.data.thumbnail && post.data.youtube) {
+    return { src, onerror: `this.onerror=null;this.src='https://i.ytimg.com/vi/${post.data.youtube}/hqdefault.jpg'` };
+  }
+  return { src };
 }
 
 /** 첨부파일 경로: `/` 나 `http` 로 시작하면 그대로, 아니면 public/files/ 안의 파일로 봅니다 */

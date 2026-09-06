@@ -29,30 +29,117 @@
     "eyebrow": "Central Korean Global Methodist Church of Kansas",
     "headline": "예수님과 친밀히 동행하는 교회",
     "subline": "이 땅의 한 사람, 한 영혼을 그리스도의 참된 제자로 세워가는 캔자스시티 한인 공동체입니다.",
-    "primary": { "label": "예배 안내", "href": "/about/services" },
-    "secondary": { "label": "처음 오셨나요?", "href": "/welcome" }
+    "primary": {
+      "label": "예배 안내",
+      "href": "/about/services"
+    },
+    "secondary": {
+      "label": "처음 오셨나요?",
+      "href": "/welcome"
+    }
   },
   "serviceTimes": [
-    { "name": "주일예배 (한국어)", "time": "주일 오전 9:30 · 11:00", "place": "1부 도서관 · 2부 본당 & YouTube Live" },
-    { "name": "English Service", "time": "Sunday 11:00 AM", "place": "1층 친교실 (Fellowship Hall)" },
-    { "name": "헤세드 금요성령집회", "time": "금요일 저녁 8:00", "place": "본당 & YouTube Live", "note": "매월 넷째 금요일은 모이지 않습니다" },
-    { "name": "새벽기도회", "time": "월–금 오전 6:00", "place": "본당 및 Zoom" }
+    {
+      "name": "주일예배 (한국어)",
+      "time": "주일 오전 9:30 · 11:00",
+      "place": "1부 도서관 · 2부 본당 & YouTube Live"
+    },
+    {
+      "name": "English Service",
+      "time": "Sunday 11:00 AM",
+      "place": "1층 친교실 (Fellowship Hall)"
+    },
+    {
+      "name": "헤세드 금요성령집회",
+      "time": "금요일 저녁 8:00",
+      "place": "본당 & YouTube Live",
+      "note": "매월 넷째 금요일은 모이지 않습니다"
+    },
+    {
+      "name": "새벽기도회",
+      "time": "월–금 오전 6:00",
+      "place": "본당 및 Zoom"
+    }
   ],
   "notices": [
-    { "image": "/images/slides/slide-1.jpg", "alt": "청년부 수련회 9월 6–7일 Springfield, MO — Prayerful House", "title": "청년부 수련회 9/6–7", "href": "/ministries/young-adult" },
-    { "image": "/images/slides/slide-2.jpg", "alt": "새로운 주일 설교 시리즈 Who We Are — 그리스도인과 웨슬리안의 정체성, 2026년 6월 14일부터", "title": "새 설교 시리즈 Who We Are", "href": "/media/series/61" },
-    { "image": "/images/slides/slide-3.jpg", "alt": "교회 안내 포스터", "title": "" },
-    { "image": "/images/slides/slide-4.jpg", "alt": "교회 안내 포스터", "title": "" }
+    {
+      "image": "/images/slides/slide-1.jpg",
+      "alt": "청년부 수련회 9월 6–7일 Springfield, MO — Prayerful House",
+      "title": "청년부 수련회 9/6–7",
+      "href": "/ministries/young-adult"
+    },
+    {
+      "image": "/images/slides/slide-2.jpg",
+      "alt": "새로운 주일 설교 시리즈 Who We Are — 그리스도인과 웨슬리안의 정체성, 2026년 6월 14일부터",
+      "title": "새 설교 시리즈 Who We Are",
+      "href": "/media/series/61"
+    },
+    {
+      "image": "/images/slides/slide-3.jpg",
+      "alt": "교회 안내 포스터",
+      "title": ""
+    },
+    {
+      "image": "/images/slides/slide-4.jpg",
+      "alt": "교회 안내 포스터",
+      "title": ""
+    }
   ],
+  "events": [
+    {
+      "title": "청년부 수련회 Prayerful House",
+      "date": "2026-09-06",
+      "endDate": "2026-09-07",
+      "place": "Springfield, MO",
+      "href": "/ministries/young-adult",
+      "description": "청년부 가을 수련회"
+    }
+  ],
+  "verse": {
+    "text": "나는 포도나무요 너희는 가지라 그가 내 안에, 내가 그 안에 거하면 사람이 열매를 많이 맺나니 나를 떠나서는 너희가 아무것도 할 수 없음이라",
+    "ref": "요한복음 15:5"
+  },
   "quickLinks": [
-    { "title": "교회 소개", "subtitle": "About Us", "icon": "/images/icons/front-icon-1.png", "href": "/about/purpose" },
-    { "title": "예배시간 안내", "subtitle": "Our Services", "icon": "/images/icons/front-icon-2.png", "href": "/about/services" },
-    { "title": "오시는 길", "subtitle": "Way to Us", "icon": "/images/icons/front-icon-3.png", "href": "/about/directions" },
-    { "title": "섬기는 이들", "subtitle": "Pastors & Staff", "icon": "/images/icons/front-icon-4.png", "href": "/about/staff" }
+    {
+      "title": "교회 소개",
+      "subtitle": "About Us",
+      "icon": "/images/icons/front-icon-1.png",
+      "href": "/about/purpose"
+    },
+    {
+      "title": "예배시간 안내",
+      "subtitle": "Our Services",
+      "icon": "/images/icons/front-icon-2.png",
+      "href": "/about/services"
+    },
+    {
+      "title": "오시는 길",
+      "subtitle": "Way to Us",
+      "icon": "/images/icons/front-icon-3.png",
+      "href": "/about/directions"
+    },
+    {
+      "title": "섬기는 이들",
+      "subtitle": "Pastors & Staff",
+      "icon": "/images/icons/front-icon-4.png",
+      "href": "/about/staff"
+    }
   ],
   "links": [
-    { "title": "위지엠 (예수동행일기)", "image": "/images/links/journalwithjesus.jpeg", "href": "http://journalwithjesus.org/home" },
-    { "title": "캔사스 청년&청장년 연합집회", "image": "/images/links/kansas-united.jpeg", "href": "https://www.facebook.com/%EC%BA%94%EC%82%AC%EC%8A%A4-%EC%B2%AD%EB%85%84%EC%B2%AD%EC%9E%A5%EB%85%84-%EC%97%B0%ED%95%A9%EC%A7%91%ED%9A%8C-741591112706959/" },
-    { "title": "THE JOSHUA GENERATION", "image": "/images/links/jgen.jpeg", "href": "http://www.j-gen.org/" }
+    {
+      "title": "위지엠 (예수동행일기)",
+      "image": "/images/links/journalwithjesus.jpeg",
+      "href": "http://journalwithjesus.org/home"
+    },
+    {
+      "title": "캔사스 청년&청장년 연합집회",
+      "image": "/images/links/kansas-united.jpeg",
+      "href": "https://www.facebook.com/%EC%BA%94%EC%82%AC%EC%8A%A4-%EC%B2%AD%EB%85%84%EC%B2%AD%EC%9E%A5%EB%85%84-%EC%97%B0%ED%95%A9%EC%A7%91%ED%9A%8C-741591112706959/"
+    },
+    {
+      "title": "THE JOSHUA GENERATION",
+      "image": "/images/links/jgen.jpeg",
+      "href": "http://www.j-gen.org/"
+    }
   ]
 }

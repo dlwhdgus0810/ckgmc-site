@@ -1,0 +1,16 @@
+---
+/** 이번 주 말씀 — 정보 띠 아래 한 구절 (site.json 의 verse). 비어 있으면 그리지 않습니다 */
+import type { SiteConfig } from '../../data/site';
+interface Props { verse: SiteConfig['verse'] }
+const { verse } = Astro.props;
+---
+{verse && (
+  <section class="verse-band" aria-label="이번 주 말씀">
+    <div class="container">
+      <blockquote class="verse-band__quote">
+        <p>“{verse.text}”</p>
+        <cite>{verse.ref}</cite>
+      </blockquote>
+    </div>
+  </section>
+)}

@@ -1,7 +1,7 @@
 ---
 title: "예배 안내"
 subtitle: "Our Services"
-headerImage: /images/headers/about-services.png
+headerImage: /images/headers/about-services.jpg
 order: 50
 ---
 <article id="worship-service">

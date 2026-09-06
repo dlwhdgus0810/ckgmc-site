@@ -1,7 +1,7 @@
 ---
 title: "우리 교회의 사명"
 subtitle: "Our Purpose"
-headerImage: /images/headers/about-purpose.png
+headerImage: /images/headers/about.jpg
 order: 10
 ---
 <article id="vision">
