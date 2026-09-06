@@ -10,17 +10,16 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import SubpageLayout from '../layouts/SubpageLayout.astro';
 import BoardList from '../components/BoardList.astro';
 import PostView from '../components/PostView.astro';
-import { displayTitle, textExcerpt, type Post } from '../lib/posts';
+import SeriesList from '../components/SeriesList.astro';
+import SeriesView from '../components/SeriesView.astro';
+import Widget from '../components/Widget.astro';
+import { getBoardPosts, slugOf, displayTitle, textExcerpt, type Post } from '../lib/posts';
 
 /** 게시글 검색엔진 설명: 본문 앞부분, 본문이 첨부 링크만이면 "제목 — 게시판" */
 function postDescription(post: Post, boardTitle: string): string {
   const ex = textExcerpt(post.body, 150);
   return !ex || /\.(pdf|docx?|pptx?|xlsx?|hwp)$/i.test(ex.trim()) ? `${post.data.title} — ${boardTitle}` : ex;
 }
-import SeriesList from '../components/SeriesList.astro';
-import SeriesView from '../components/SeriesView.astro';
-import Widget from '../components/Widget.astro';
-import { getBoardPosts, slugOf, type Post } from '../lib/posts';
 
 export async function getStaticPaths() {
   const pages = await getCollection('pages');
