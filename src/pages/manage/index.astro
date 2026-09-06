@@ -33,10 +33,10 @@ const [counts, pending, cells, cares] = await Promise.all([dashboardCounts(month
 
   <section class="cms-band mb-5" aria-labelledby="cms-heading">
     <div>
-      <h2 id="cms-heading" class="h6 mb-1">글·사진 올리기는 콘텐츠 관리 화면에서</h2>
-      <p class="mb-0 small text-muted">주보 PDF, 소그룹 나눔지, 영상 설교, 설교 시리즈, 부서 소식, 예배 시간·메인 화면 설정은 <strong>/admin/</strong> (GitHub 계정으로 로그인) 에서 편집합니다. 저장하면 1~2분 뒤 사이트에 반영됩니다.</p>
+      <h2 id="cms-heading" class="h6 mb-1">글·사진 올리기는 콘텐츠 관리에서</h2>
+      <p class="mb-0 small text-muted">주보 PDF, 소그룹 나눔지, 영상 설교, 설교 시리즈, 부서 소식, 페이지, 예배 시간·메인 화면 설정을 이 로그인 그대로 편집합니다. 저장하면 2~3분 뒤 사이트에 반영됩니다.</p>
     </div>
-    <a class="btn btn-outline-primary" href="/admin/" target="_blank" rel="noopener"><Icon name="external" size={16} /> 콘텐츠 관리 열기</a>
+    <a class="btn btn-primary" href="/manage/content"><Icon name="file-text" size={16} /> 콘텐츠 관리 열기</a>
   </section>
 
   {pending.length > 0 && (

@@ -12,6 +12,7 @@ const memberLinks = [
 ];
 const manageLinks = [
   { href: '/manage', label: '대시보드' },
+  { href: '/manage/content', label: '콘텐츠 관리' },
   { href: '/manage/cell-reports', label: '리더 보고서' },
   { href: '/manage/care-reports', label: '일대일 양육보고서' },
   { href: '/manage/groups', label: 'D그룹 관리' },
@@ -19,8 +20,8 @@ const manageLinks = [
   { href: '/manage/users', label: '회원 관리' },
 ];
 /** 글·사진은 별도 관리 화면(Sveltia CMS, GitHub 로그인)에서 편집 */
-const cmsLink = { href: '/admin/', label: '글·사진 관리 (CMS)' };
-const cur = (href: string) => (href === path ? 'page' : undefined);
+const cmsLink = { href: '/admin/', label: '개발자용 CMS (GitHub)' };
+const cur = (href: string) => (href === path || (href !== '/manage' && href !== '/members' && path.startsWith(href + '/')) ? 'page' : undefined);
 ---
 <nav class="section-nav member-nav" aria-label="교인 공간 메뉴">
   <div class="section-nav__title">

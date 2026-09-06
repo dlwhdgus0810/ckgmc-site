@@ -1,0 +1,135 @@
+---
+/**
+ * 글 만들기/수정/삭제 · 사이트 설정 편집. 저장 = 저장소 커밋 (첨부·사진도 같은 커밋에 포함)
+ */
+export const prerender = false;
+import MemberLayout from '../../../../layouts/MemberLayout.astro';
+import NotFound from '../../../../components/members/NotFound.astro';
+import ContentForm from '../../../../components/manage/ContentForm.astro';
+import { getCollection, ownsPath, urlForPath } from '../../../../lib/content/collections';
+import { base64ToUtf8, ContentStoreError, getStore, utf8ToBase64, type ContentStore } from '../../../../lib/content/store';
+import { parseFrontmatter, serializeFrontmatter } from '../../../../lib/content/frontmatter';
+import { collectValues, fillAttachmentNames, newUploadCtx, slugify, titleOf, zodMessages } from '../../../../lib/content/forms';
+import { recordChange } from '../../../../lib/content/changes';
+import { formStr, setFlash, todayLocal } from '../../../../lib/http';
+
+const user = Astro.locals.user!;
+const col = getCollection(Astro.params.collection);
+if (!col) Astro.response.status = 404;
+
+let store: ContentStore | null = null;
+let storeError: string | null = null;
+try { store = getStore(); } catch (e) { storeError = e instanceof Error ? e.message : String(e); }
+
+const listHref = col?.kind === 'json' ? '/manage/content' : `/manage/content/${col?.key}`;
+const requestedPath = Astro.url.searchParams.get('path') || (col?.kind === 'json' ? col.file! : '');
+let path: string | null = requestedPath && col && ownsPath(col, requestedPath) ? requestedPath : null;
+if (requestedPath && !path && col) Astro.response.status = 404;
+
+let values: Record<string, unknown> = {};
+let body = '';
+let sha: string | null = null;
+const errors: string[] = [];
+let loadFailed = false;
+
+// 기본값 (새 글)
+if (col && !path) {
+  for (const f of col.fields) if ('default' in f && f.default !== undefined) values[f.name] = f.default;
+  if (col.fields.some((f) => f.name === 'date' && f.widget === 'datetime')) values.date = `${todayLocal()}T${new Date().toLocaleTimeString('en-GB', { timeZone: 'America/Chicago', hour: '2-digit', minute: '2-digit' })}`;
+  if (col.fields.some((f) => f.name === 'date' && f.widget === 'date')) values.date = todayLocal();
+}
+
+// 기존 파일 읽기
+if (col && path && store && Astro.request.method === 'GET') {
+  try {
+    const file = await store.readFile(path);
+    if (!file) { Astro.response.status = 404; loadFailed = true; }
+    else {
+      sha = file.sha;
+      const text = base64ToUtf8(file.base64);
+      if (col.kind === 'json') values = JSON.parse(text) as Record<string, unknown>;
+      else { const fm = parseFrontmatter(text); values = fm.data; body = fm.body; }
+    }
+  } catch (e) { errors.push(e instanceof Error ? e.message : String(e)); }
+}
+
+// 저장 / 삭제
+if (col && store && Astro.request.method === 'POST') {
+  const fd = await Astro.request.formData();
+  const action = formStr(fd, 'action', 20);
+  const formPath = formStr(fd, 'path', 400);
+  const formSha = formStr(fd, 'sha', 100);
+  const author = { name: user.name, email: user.email };
+  try {
+    if (action === 'delete' && col.kind === 'folder' && formPath && ownsPath(col, formPath)) {
+      const { sha: commitSha } = await store.commit({ put: [], delete: [formPath] }, `content: ${col.label} 글 삭제 — ${formPath.split('/').pop()} (관리 화면)`, author);
+      await recordChange({ collection: col.key, path: formPath, title: formPath.split('/').pop() ?? formPath, action: 'delete', userId: user.id, commitSha });
+      setFlash(Astro.cookies, 'success', '삭제했습니다. 2~3분 뒤 사이트에서 사라집니다.');
+      return Astro.redirect(listHref, 303);
+    }
+    if (action === 'save') {
+      const ctx = newUploadCtx();
+      values = await collectValues(fd, col.fields, '', ctx);
+      fillAttachmentNames(values, ctx);
+      body = col.body === 'none' ? '' : formStr(fd, 'body', 500000);
+      if (col.schema) {
+        const r = col.schema.safeParse(values);
+        if (!r.success) errors.push(...zodMessages(r.error));
+      }
+      const isNew = !formPath;
+      path = formPath && ownsPath(col, formPath) ? formPath : null;
+      if (!isNew && !path) errors.push('잘못된 파일 경로입니다.');
+      if (errors.length === 0) {
+        if (isNew) {
+          if (col.kind === 'json') throw new Error('설정 파일은 새로 만들 수 없습니다.');
+          const title = titleOf(values, '');
+          const base = (col.datePrefix && typeof values.date === 'string' ? values.date.slice(0, 10) + '-' : '') + slugify(title || 'post');
+          let candidate = `${col.folder}/${base}.md`;
+          for (let n = 2; (await store.readFile(candidate)) && n < 50; n++) candidate = `${col.folder}/${base}-${n}.md`;
+          path = candidate;
+        } else if (formSha) {
+          const cur = await store.readFile(path!);
+          if (cur && cur.sha !== formSha) errors.push('다른 사람이 먼저 이 글을 수정했습니다. 목록에서 다시 열어 편집해 주세요.');
+          if (!cur && col.kind === 'folder') errors.push('원본 파일이 없습니다 (삭제되었을 수 있음).');
+          // 원본에 없던 항목이 기본값 그대로면 파일에 추가하지 않음 (변경 이력을 깔끔하게)
+          if (cur && col.kind === 'folder') {
+            const original = parseFrontmatter(base64ToUtf8(cur.base64)).data;
+            for (const f of col.fields) {
+              const dflt = (f as { default?: unknown }).default;
+              if (dflt !== undefined && !(f.name in original) && values[f.name] === dflt) delete values[f.name];
+              if (Array.isArray(values[f.name]) && (values[f.name] as unknown[]).length === 0 && !(f.name in original)) delete values[f.name];
+            }
+          }
+        }
+      }
+      if (errors.length === 0 && path) {
+        const text = col.kind === 'json' ? JSON.stringify(values, null, 2) + '\n' : serializeFrontmatter(values, body);
+        const title = titleOf(values, col.label);
+        const message = `content: ${col.label} ${isNew ? '새 글' : '수정'} — ${title} (관리 화면, ${user.name})`;
+        const { sha: commitSha } = await store.commit({ put: [...ctx.puts, { path, base64: utf8ToBase64(text) }], delete: [] }, message, author);
+        await recordChange({ collection: col.key, path, title, action: isNew ? 'create' : 'update', userId: user.id, commitSha });
+        for (const up of ctx.uploaded) await recordChange({ collection: col.key, path: up, title: up.split('/').pop() ?? up, action: 'upload', userId: user.id, commitSha });
+        setFlash(Astro.cookies, 'success', `${isNew ? '만들었습니다' : '저장했습니다'}. 2~3분 뒤 사이트에 반영됩니다.${ctx.uploaded.length ? ` (파일 ${ctx.uploaded.length}개 포함)` : ''}`);
+        return Astro.redirect(col.kind === 'json' ? `/manage/content/${col.key}/edit` : listHref, 303);
+      }
+      if (!isNew) sha = formSha;
+    }
+  } catch (e) {
+    errors.push(e instanceof ContentStoreError ? e.message : `저장 중 오류: ${e instanceof Error ? e.message : String(e)}`);
+  }
+}
+const heading = !col ? '콘텐츠' : col.kind === 'json' ? col.label : path ? `${col.label} · 편집` : `${col.label} · 새 글`;
+---
+<MemberLayout title={heading} subtitle="Content" area="manage">
+  {!col || loadFailed || (requestedPath && !path) ? <NotFound back={listHref} backLabel="목록으로" /> : (
+    <>
+      {storeError && <div class="alert alert-warning" role="alert"><strong>저장소가 연결되지 않아 편집할 수 없습니다.</strong> {storeError}</div>}
+      {!storeError && (
+        <ContentForm collection={col} values={values} body={body} path={path} sha={sha} errors={errors} backHref={listHref} previewUrl={path && col.kind === 'folder' ? urlForPath(col, path) : null} />
+      )}
+    </>
+  )}
+</MemberLayout>
+<script>
+  import '../../../../scripts/content-editor';
+</script>

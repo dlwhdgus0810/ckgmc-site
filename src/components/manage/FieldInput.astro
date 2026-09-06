@@ -1,0 +1,108 @@
+---
+/**
+ * 콘텐츠 편집 폼의 입력 하나 (재귀). 이름 규칙: 중첩 = 점, 목록 = 대괄호 (src/lib/content/forms.ts 와 짝)
+ */
+import Self from './FieldInput.astro';
+import Icon from '../Icon.astro';
+import type { Field } from '../../lib/content/collections';
+interface Props { field: Field; value: unknown; prefix?: string }
+const { field, value, prefix = '' } = Astro.props;
+const name = prefix + field.name;
+const id = 'f-' + name.replace(/[^\w-]+/g, '-');
+const widget = field.widget;
+// 템플릿에서 타입 단언을 쓰지 않도록 여기서 정리
+const sub = (field as { fields?: Field[] }).fields ?? [];
+const itemLabel = (field as { itemLabel?: string }).itemLabel ?? '항목';
+const options = (field as { options?: { value: string; label: string }[] }).options ?? [];
+const dflt = (field as { default?: unknown }).default;
+const placeholder = (field as { placeholder?: string }).placeholder;
+const rows: Record<string, unknown>[] = widget === 'list' && Array.isArray(value) ? (value as Record<string, unknown>[]) : [];
+const obj: Record<string, unknown> = widget === 'object' && value && typeof value === 'object' ? (value as Record<string, unknown>) : {};
+const images: string[] = widget === 'imagelist' && Array.isArray(value) ? (value as string[]).filter((v) => typeof v === 'string') : [];
+const text = value === undefined || value === null ? '' : String(value);
+const textOrDefault = value === undefined || value === null ? (dflt === undefined || dflt === null ? '' : String(dflt)) : String(value);
+const checked = value === undefined ? dflt === true : value === true;
+const isImg = (p: string) => /\.(png|jpe?g|gif|webp|svg|avif)$/i.test(p);
+// 예전 글의 첨부는 파일 이름만 적혀 있음 (public/files 기준)
+const href = text && !/^(\/|https?:)/.test(text) && widget === 'file' ? '/files/' + text : text;
+---
+{widget === 'object' ? (
+  <fieldset class="cf-object">
+    <legend>{field.label}</legend>
+    {field.hint && <p class="cf-hint">{field.hint}</p>}
+    {sub.map((f) => <Self field={f} value={obj[f.name]} prefix={name + '.'} />)}
+  </fieldset>
+) : widget === 'list' ? (
+  <fieldset class="cf-list" data-list={name}>
+    <legend>{field.label}</legend>
+    {field.hint && <p class="cf-hint">{field.hint}</p>}
+    <div class="cf-list__rows" data-list-rows>
+      {rows.map((row, i) => (
+        <div class="cf-list__row" data-list-row>
+          <div class="cf-list__row-head"><span>{itemLabel} {i + 1}</span><button type="button" class="btn btn-link btn-sm text-danger p-0" data-list-remove>삭제</button></div>
+          {sub.map((f) => <Self field={f} value={row[f.name]} prefix={`${name}[${i}].`} />)}
+        </div>
+      ))}
+    </div>
+    <template data-list-template>
+      <div class="cf-list__row" data-list-row>
+        <div class="cf-list__row-head"><span>{itemLabel}</span><button type="button" class="btn btn-link btn-sm text-danger p-0" data-list-remove>삭제</button></div>
+        {sub.map((f) => <Self field={f} value={undefined} prefix={`${name}[__IDX__].`} />)}
+      </div>
+    </template>
+    <button type="button" class="btn btn-outline-secondary btn-sm" data-list-add>+ {itemLabel} 추가</button>
+  </fieldset>
+) : (
+  <div class:list={['form-group cf-field', `cf-field--${widget}`]}>
+    {widget !== 'boolean' && <label for={id}>{field.label}{field.required && <span class="text-danger"> *</span>}</label>}
+
+    {widget === 'string' && <input id={id} class="form-control" name={name} value={textOrDefault} required={field.required} placeholder={placeholder} />}
+    {widget === 'youtube' && <input id={id} class="form-control" name={name} value={text} required={field.required} placeholder="https://youtu.be/… 또는 영상 ID" />}
+    {widget === 'text' && <textarea id={id} class="form-control" name={name} rows="3" required={field.required}>{textOrDefault}</textarea>}
+    {widget === 'number' && <input id={id} class="form-control cf-narrow" name={name} type="number" step="any" value={textOrDefault} required={field.required} />}
+    {widget === 'datetime' && <input id={id} class="form-control cf-narrow" name={name} type="datetime-local" value={text.slice(0, 16)} required={field.required} />}
+    {widget === 'date' && <input id={id} class="form-control cf-narrow" name={name} type="date" value={text.slice(0, 10)} required={field.required} />}
+    {widget === 'select' && (
+      <select id={id} class="form-control cf-narrow" name={name} required={field.required}>
+        {!field.required && <option value="">선택 안 함</option>}
+        {options.map((o) => <option value={o.value} selected={textOrDefault === o.value}>{o.label}</option>)}
+      </select>
+    )}
+    {widget === 'boolean' && (
+      <>
+        <input type="hidden" name={name} value="false" />
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id={id} name={name} value="true" checked={checked} />
+          <label class="form-check-label" for={id}>{field.label}</label>
+        </div>
+      </>
+    )}
+    {(widget === 'image' || widget === 'file') && (
+      <div class="cf-upload">
+        {text && (
+          <div class="cf-upload__current">
+            {widget === 'image' && isImg(text) ? <img src={text} alt="" class="cf-upload__preview" loading="lazy" /> : <Icon name="file-text" size={18} />}
+            <a href={href} target="_blank" rel="noopener" class="cf-upload__name">{text.split('/').pop()}</a>
+            <label class="cf-upload__remove"><input type="checkbox" name={name + '__remove'} value="1" /> 삭제</label>
+          </div>
+        )}
+        <input type="hidden" name={name + '__current'} value={text} />
+        <input id={id} class="form-control-file" type="file" name={name} accept={widget === 'image' ? 'image/*' : undefined} required={field.required && !text} />
+      </div>
+    )}
+    {widget === 'imagelist' && (
+      <div class="cf-imagelist">
+        {images.length > 0 && (
+          <ul class="cf-imagelist__items">
+            {images.map((p) => (
+              <li><label><input type="checkbox" name={name + '__current'} value={p} checked /> <img src={p} alt="" loading="lazy" /><span>{p.split('/').pop()}</span></label></li>
+            ))}
+          </ul>
+        )}
+        <input id={id} class="form-control-file" type="file" name={name} accept="image/*" multiple />
+        <small class="text-muted d-block">체크를 풀면 앨범에서 빠집니다. 여러 장을 한 번에 고를 수 있습니다.</small>
+      </div>
+    )}
+    {field.hint && <small class="form-text text-muted">{field.hint}</small>}
+  </div>
+)}

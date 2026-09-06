@@ -1,0 +1,5 @@
+/** /images/uploads/… 가 정적 파일에 없을 때(방금 올린 사진) 저장소에서 읽어 응답 */
+export const prerender = false;
+import type { APIRoute } from 'astro';
+import { serveFromStore } from '../../../lib/content/proxy';
+export const GET: APIRoute = ({ params }) => serveFromStore('public/images/uploads', params.path);

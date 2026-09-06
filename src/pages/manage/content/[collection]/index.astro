@@ -1,0 +1,72 @@
+---
+/** 컬렉션 목록: 배포된 글 + 방금 저장한 글(배포 대기) */
+export const prerender = false;
+import MemberLayout from '../../../../layouts/MemberLayout.astro';
+import NotFound from '../../../../components/members/NotFound.astro';
+import Pager from '../../../../components/members/Pager.astro';
+import Icon from '../../../../components/Icon.astro';
+import { getCollection, urlForPath } from '../../../../lib/content/collections';
+import { changesSince, loadIndex, mergeEntries } from '../../../../lib/content/changes';
+import { formatLocal, paging } from '../../../../lib/http';
+
+const col = getCollection(Astro.params.collection);
+if (!col) Astro.response.status = 404;
+if (col?.kind === 'json') return Astro.redirect(`/manage/content/${col.key}/edit`, 302);
+
+const index = col ? await loadIndex(Astro.url) : null;
+const pending = col ? await changesSince(index?.builtAt, col.key) : [];
+let entries = col ? mergeEntries((index?.entries ?? []).filter((e) => e.collection === col.key), pending) : [];
+const q = (Astro.url.searchParams.get('q') ?? '').trim().toLowerCase();
+if (q) entries = entries.filter((e) => e.title.toLowerCase().includes(q) || e.path.toLowerCase().includes(q));
+if (col?.sortBy === 'date') entries.sort((a, b) => (b.date ?? '').localeCompare(a.date ?? '') || b.path.localeCompare(a.path));
+else if (col?.sortBy === 'order') entries.sort((a, b) => (a.order ?? 999) - (b.order ?? 999) || a.title.localeCompare(b.title, 'ko'));
+else entries.sort((a, b) => a.title.localeCompare(b.title, 'ko'));
+const pg = paging(Astro.url.searchParams.get('page'), entries.length, 30);
+const rows = entries.slice(pg.offset, pg.offset + pg.perPage);
+const editHref = (path: string) => `/manage/content/${col!.key}/edit?path=${encodeURIComponent(path)}`;
+---
+<MemberLayout title={col?.label ?? '콘텐츠'} subtitle="Content" area="manage">
+  {!col ? <NotFound back="/manage/content" backLabel="콘텐츠 관리로" /> : (
+    <>
+      <div class="d-flex flex-wrap align-items-center justify-content-between mb-3" style="gap:.5rem">
+        <form method="get" class="d-flex" style="gap:.5rem">
+          <input name="q" class="form-control" placeholder="제목 검색" value={q} style="min-height:40px" />
+          <button class="btn btn-outline-secondary" type="submit">검색</button>
+        </form>
+        <div class="d-flex" style="gap:.5rem">
+          <a href="/manage/content" class="btn btn-link">← 콘텐츠 관리</a>
+          <a href={`/manage/content/${col.key}/edit`} class="btn btn-primary"><Icon name="file-text" size={16} /> 새 글</a>
+        </div>
+      </div>
+      {col.hint && <p class="cf-hint">{col.hint}</p>}
+      {!index && <div class="alert alert-warning">배포된 글 목록(content-index.json)을 읽을 수 없어 최근 저장한 글만 보입니다.</div>}
+      <p class="text-muted small">총 {entries.length}개{pending.length > 0 && <> · 배포 대기 {pending.filter((p) => p.action !== 'upload').length}건</>}</p>
+
+      {rows.length === 0 ? <p class="text-muted">글이 없습니다.</p> : (
+        <div class="table-responsive">
+          <table class="table table-sm table-report">
+            <thead><tr><th>제목</th><th>{col.sortBy === 'order' ? '순서' : '날짜'}</th><th>비고</th><th>상태</th><th></th></tr></thead>
+            <tbody>
+              {rows.map((e) => {
+                const url = e.pending ? null : urlForPath(col, e.path);
+                return (
+                  <tr>
+                    <td><a href={editHref(e.path)}><strong>{e.title}</strong></a><div class="small text-muted text-truncate" style="max-width:28rem">{e.path.replace(col.folder + '/', '')}</div></td>
+                    <td class="text-nowrap">{col.sortBy === 'order' ? e.order ?? '' : (e.date ?? '').slice(0, 16).replace('T', ' ')}</td>
+                    <td class="small text-muted">{e.note ?? ''}</td>
+                    <td>{e.pending ? <span class="badge badge-pending">배포 대기</span> : <span class="badge badge-light border">반영됨</span>}</td>
+                    <td class="text-right text-nowrap">
+                      <a href={editHref(e.path)} class="btn btn-outline-primary btn-sm">편집</a>
+                      {url && <a href={url} class="btn btn-link btn-sm" target="_blank" rel="noopener" title="사이트에서 보기"><Icon name="external" size={14} /></a>}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+      <Pager paging={pg} />
+    </>
+  )}
+</MemberLayout>

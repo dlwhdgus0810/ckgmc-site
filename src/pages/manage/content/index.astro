@@ -1,0 +1,60 @@
+---
+/** 콘텐츠 관리 홈: 배포 상태 + 편집할 수 있는 콘텐츠 종류 */
+export const prerender = false;
+import MemberLayout from '../../../layouts/MemberLayout.astro';
+import Icon from '../../../components/Icon.astro';
+import { COLLECTIONS, GROUPS } from '../../../lib/content/collections';
+import { deployState, latestChange, loadIndex, recentChanges } from '../../../lib/content/changes';
+import { storeStatus } from '../../../lib/content/store';
+import { formatLocal } from '../../../lib/http';
+
+const status = storeStatus();
+const [index, latest, recent] = await Promise.all([loadIndex(Astro.url), latestChange(), recentChanges(8)]);
+const counts = new Map<string, number>();
+for (const e of index?.entries ?? []) counts.set(e.collection, (counts.get(e.collection) ?? 0) + 1);
+const deploy = deployState(index, latest);
+const ACTION_LABEL = { create: '새 글', update: '수정', delete: '삭제', upload: '파일 올림' } as const;
+---
+<MemberLayout title="콘텐츠 관리" subtitle="Content" area="manage">
+  {!status.ok && (
+    <div class="alert alert-warning" role="alert">
+      <strong>저장소가 연결되지 않았습니다.</strong> {status.reason}<br />
+      <small>README "교인 전용 기능 → 콘텐츠 관리" 절을 참고하세요. 연결 전에는 읽기만 가능합니다.</small>
+    </div>
+  )}
+  <div class:list={['deploy-state', `deploy-state--${deploy.tone}`]} role="status">
+    <Icon name={deploy.tone === 'success' ? 'check-circle' : 'clock'} size={18} />
+    <span>{deploy.text}</span>
+    {index && <small>배포된 빌드: {formatLocal(index.builtAt)}{latest && <> · 마지막 저장: {formatLocal(latest.created_at)} ({latest.user_name ?? '—'})</>}</small>}
+  </div>
+
+  {GROUPS.map((g) => (
+    <section class="mb-3" aria-label={g}>
+      <h2 class="h6 text-muted text-uppercase mb-2" style="letter-spacing:.08em">{g}</h2>
+      <div class="collection-grid">
+        {COLLECTIONS.filter((c) => c.group === g).map((c) => (
+          <a class="collection-card" href={c.kind === 'json' ? `/manage/content/${c.key}/edit` : `/manage/content/${c.key}`}>
+            <strong>{c.label}</strong>
+            {c.kind === 'folder' && <span class="badge badge-light border">{counts.get(c.key) ?? 0}</span>}
+          </a>
+        ))}
+      </div>
+    </section>
+  ))}
+
+  {recent.length > 0 && (
+    <section class="mt-4" aria-labelledby="recent-heading">
+      <h2 id="recent-heading" class="h6 mb-2">최근 변경</h2>
+      <ul class="list-unstyled small mb-0">
+        {recent.map((c) => (
+          <li class="py-1 border-bottom d-flex flex-wrap" style="gap:.25rem .75rem">
+            <span class="text-muted">{formatLocal(c.created_at)}</span>
+            <span><strong>{c.user_name ?? '—'}</strong> · {ACTION_LABEL[c.action]}</span>
+            <span class="text-truncate" style="max-width:32rem">{c.title || c.path}</span>
+            {c.created_at > (index?.builtAt ?? '') && <span class="badge badge-pending">배포 대기</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+</MemberLayout>

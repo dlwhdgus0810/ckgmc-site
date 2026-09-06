@@ -2,6 +2,11 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import cloudflare from '@astrojs/cloudflare';
+import { execSync } from 'node:child_process';
+
+// 빌드 식별자 — 관리 화면이 "저장한 내용이 배포되었는지" 판단하는 데 씁니다 (GitHub Actions 는 GITHUB_SHA 제공)
+const buildSha = process.env.GITHUB_SHA ?? (() => { try { return execSync('git rev-parse HEAD', { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim(); } catch { return 'unknown'; } })();
+const buildAt = new Date().toISOString();
 
 // https://astro.build/config
 export default defineConfig({
@@ -17,6 +22,7 @@ export default defineConfig({
   // sitemap.xml 자동 생성 (검색엔진 등록용). 로그인 전용 페이지는 제외
   integrations: [sitemap({ filter: (page) => !/\/(thanks|404|login|members|manage|auth)(\/|$)/.test(page) })],
   vite: {
+    define: { __BUILD_SHA__: JSON.stringify(buildSha), __BUILD_AT__: JSON.stringify(buildAt) },
     css: {
       preprocessorOptions: {
         scss: {

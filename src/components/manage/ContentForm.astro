@@ -1,0 +1,67 @@
+---
+/** 콘텐츠 편집 폼: 필드들 + 본문 편집기 + 저장/삭제 */
+import FieldInput from './FieldInput.astro';
+import Icon from '../Icon.astro';
+import type { Collection } from '../../lib/content/collections';
+interface Props {
+  collection: Collection;
+  values: Record<string, unknown>;
+  body: string;
+  path: string | null;
+  sha: string | null;
+  errors: string[];
+  backHref: string;
+  previewUrl?: string | null;
+}
+const { collection: col, values, body, path, sha, errors, backHref, previewUrl } = Astro.props;
+const isNew = !path;
+---
+<form method="post" enctype="multipart/form-data" class="content-form" novalidate data-content-form>
+  <input type="hidden" name="action" value="save" />
+  <input type="hidden" name="path" value={path ?? ''} />
+  <input type="hidden" name="sha" value={sha ?? ''} />
+  {errors.length > 0 && (
+    <div class="alert alert-danger" role="alert">
+      <strong>저장하지 못했습니다.</strong>
+      <ul class="mb-0 pl-3 mt-1">{errors.map((e) => <li>{e}</li>)}</ul>
+    </div>
+  )}
+  {col.hint && <p class="cf-hint">{col.hint}</p>}
+
+  <div class="cf-fields">
+    {col.fields.map((f) => <FieldInput field={f} value={values[f.name]} />)}
+  </div>
+
+  {col.body !== 'none' && (
+    <div class="form-group cf-body" data-body-mode={col.body}>
+      <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap:.5rem">
+        <label for="body" class="mb-0">본문</label>
+        {col.body === 'html' && (
+          <label class="small mb-0"><input type="checkbox" data-raw-toggle /> HTML 직접 편집</label>
+        )}
+      </div>
+      {col.body === 'html' && <div id="quill-editor" class="cf-editor"></div>}
+      <textarea id="body" name="body" class:list={['form-control cf-raw', { 'd-none': col.body === 'html' }]} rows="18" spellcheck="false">{body}</textarea>
+      {col.body === 'raw' && <small class="form-text text-muted">HTML 을 그대로 편집합니다. 사진은 아래 "사진 올리기"로 주소를 만들어 <code>&lt;img src="…"&gt;</code> 에 넣으세요.</small>}
+      <div class="cf-inline-upload mt-2">
+        <label class="btn btn-outline-secondary btn-sm mb-0" for="inline-upload"><Icon name="download" size={14} /> 사진 올리기 (주소 복사)</label>
+        <input id="inline-upload" type="file" accept="image/*" class="d-none" data-inline-upload />
+        <span class="small text-muted" data-inline-upload-result></span>
+      </div>
+    </div>
+  )}
+
+  <div class="cf-actions">
+    <button type="submit" class="btn btn-primary"><Icon name="check-circle" size={18} /> {isNew ? '만들기' : '저장'}</button>
+    <a href={backHref} class="btn btn-outline-secondary">목록으로</a>
+    {previewUrl && <a href={previewUrl} class="btn btn-link" target="_blank" rel="noopener">사이트에서 보기 <Icon name="external" size={14} /></a>}
+    <span class="small text-muted ml-auto">저장하면 저장소에 커밋되고 2~3분 뒤 사이트에 반영됩니다.</span>
+  </div>
+</form>
+{!isNew && col.kind === 'folder' && (
+  <form method="post" class="mt-4 text-right" onsubmit="return confirm('이 글을 삭제할까요? 되돌리려면 저장소 이력에서 복구해야 합니다.')">
+    <input type="hidden" name="action" value="delete" />
+    <input type="hidden" name="path" value={path} />
+    <button type="submit" class="btn btn-outline-danger btn-sm">삭제</button>
+  </form>
+)}

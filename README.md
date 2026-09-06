@@ -40,10 +40,13 @@ src/
   components/, layouts/ 화면 부품과 틀 (components/home/ = 메인 화면 섹션들, components/members/ = 교인 공간 부품)
   pages/                주소 → 화면 연결 (index, [...slug], story/, 404, thanks)
   pages/login.astro, auth/, members/, manage/   교인 전용 기능 (서버 렌더링, 로그인 필요)
+  pages/manage/content/   콘텐츠 관리 (글·사진·설정 편집 → GitHub 커밋)
+  lib/content/          콘텐츠 관리 엔진: collections.ts(폼 정의) · store.ts(GitHub/로컬 저장) · forms.ts · changes.ts
+  content/schemas.ts, data/site.schema.ts   프런트매터·설정 스키마 (빌드와 관리 화면이 공유)
   middleware.ts         로그인 보호·같은 출처 검사 (서버 렌더링 페이지에만 적용)
   lib/auth/, lib/reports.ts, lib/db.ts   세션·비밀번호·소셜 로그인·회원·보고서 쿼리 (Cloudflare D1)
 public/
-  admin/                관리 화면(Sveltia CMS) — config.yml 에 저장소·로그인 주소 설정
+  admin/                (선택) 개발자용 Sveltia CMS — config.yml 에 저장소·로그인 주소 설정
   images/               이미지 (hero, slides, headers, pages, staff, posts, series, stories, uploads …)
   files/                주보 PDF 등 첨부파일
   fonts/                나눔명조 (Pretendard 는 npm 패키지에서 자동 포함)
@@ -58,16 +61,37 @@ scripts/
   import/               기존 사이트 데이터 가져오기 도구
 .github/workflows/
   youtube-sync.yml      매주 월요일 유튜브 동기화 후 커밋
-  deploy.yml            GitHub Pages 수동 배포 (예비, 정적 페이지만)
+  deploy-cloudflare.yml main 커밋마다 Cloudflare Workers 배포
 ```
 
-## 콘텐츠 관리 화면 (CMS) — 개발자가 아니어도 글을 올릴 수 있게
+## 콘텐츠 관리 — 사이트 로그인만으로 글·사진 올리기
 
-사이트 안의 `https://ckgmc.org/admin/` 에서 [Sveltia CMS](https://sveltiacms.app) 가 뜹니다.
-GitHub 계정으로 로그인해 글·사진·설정을 고치면 저장소에 커밋되고 1~2분 뒤 사이트에 반영됩니다.
-**최초 1회** 아래 설정이 필요합니다 (사이트 소유자가 직접).
+관리자(`/manage` 에 들어갈 수 있는 계정)는 **`/manage/content`** 에서 GitHub 계정 없이 모든 콘텐츠를 편집합니다.
+게시판 14개(주보 PDF·소그룹 나눔지·영상 설교·부서 소식 …), 설교 시리즈, 우리 교회 이야기, 페이지(섹션별), 사이트 설정(예배 시간·메인 첫 화면·포스터·연락처).
+
+- 저장하면 서버가 **GitHub 저장소에 커밋**하고(작성자 이름으로), GitHub Actions 가 빌드해 **2~3분 뒤 사이트에 반영**됩니다.
+  목록에는 그동안 "배포 대기"로 표시되고, 방금 올린 사진·PDF 는 배포 전에도 바로 열립니다.
+- 게시글 본문은 서식 편집기(굵게·목록·링크·사진·유튜브)이고 "HTML 직접 편집"으로 바꿀 수 있습니다. 페이지 본문은 Bootstrap 클래스가 있어 HTML 직접 편집입니다.
+- 저장 전에 스키마(`src/content/schemas.ts`, `src/data/site.schema.ts`)로 검사하므로 잘못된 값으로 빌드가 깨지지 않습니다.
+- 편집 폼 정의는 `src/lib/content/collections.ts` 한 곳에 있습니다. 게시판을 추가하면 `BOARDS` 에 한 줄 넣으면 됩니다.
+
+**연결 (최초 1회, 저장소 소유자)**
+1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token
+   - Repository access: *Only select repositories* → `ckgmc-site`
+   - Permissions → Repository permissions → **Contents: Read and write** (다른 권한은 불필요), 만료는 1년(만료 전 재발급)
+2. 토큰을 Worker 에 넣기: `npx wrangler secret put GITHUB_TOKEN` (값을 물어보면 붙여 넣기). 로컬은 `.dev.vars` 의 `GITHUB_TOKEN`.
+3. 자동 배포: 저장소 Settings → Secrets and variables → Actions 에 `CLOUDFLARE_API_TOKEN`(대시보드 My Profile → API Tokens → *Edit Cloudflare Workers* 템플릿)과
+   `CLOUDFLARE_ACCOUNT_ID`(Workers & Pages 우측) 추가. 이후 main 에 커밋이 생기면 `.github/workflows/deploy-cloudflare.yml` 이 배포합니다.
+4. 저장소에 D1 변경이 있으면 `npm run db:migrate:remote` (콘텐츠 변경 기록 테이블 `content_changes` 포함).
+
+> 로컬에서 시험: `npm run dev:content` (별도 터미널) + `.dev.vars` 의 `CONTENT_LOCAL_URL` → 관리 화면 저장이 GitHub 대신 이 폴더의 파일에 바로 반영되고 `astro dev` 가 즉시 보여줍니다. 커밋은 직접 하세요.
+
+### (선택) 개발자용 CMS — Sveltia (`/admin/`, GitHub 로그인)
+
+GitHub 계정이 있는 개발자는 [Sveltia CMS](https://sveltiacms.app) 화면도 쓸 수 있습니다. 같은 파일을 편집하며 저장 즉시 커밋됩니다.
 
 > **현재 상태 (2026-09-05)**: 1·2·4(ALLOWED_DOMAINS)·5 는 끝났습니다. 남은 것은 **3. GitHub OAuth App 만들기**와 그 키를 워커에 넣는 것, 그리고 6. 편집자 초대입니다.
+> 위의 `/manage/content` 를 쓰면 이 설정은 하지 않아도 됩니다.
 
 1. **GitHub 저장소** — `dlwhdgus0810/ckgmc-site` (완료).
 2. **로그인 워커** — 이 저장소의 `cms-auth/` 폴더가 그 워커입니다. `npm run cms-auth:deploy` 로 배포되어
@@ -88,10 +112,7 @@ GitHub 계정으로 로그인해 글·사진·설정을 고치면 저장소에 �
    교회 관리자(admin@ckgmc.org)도 GitHub 계정이 있어야 관리 화면에 들어올 수 있습니다 (사이트 로그인 계정과는 별개).
 7. `https://ckgmc.org/admin/` 접속 → *Sign in with GitHub* → 왼쪽 목록에서 게시판을 골라 글쓰기.
 
-관리 화면에서 할 수 있는 일: 페이지 본문 수정, 설교·주보(PDF 업로드)·자료실·부서 소식·시리즈·이야기 등록,
-메인 첫 화면 문구/사진, 예배 시간, 교회 소식 포스터, 연락처 등 **사이트 설정** 편집.
-교인 전용 기능의 관리자 화면(`/manage`) 왼쪽 메뉴와 대시보드에도 이 화면으로 가는 링크가 있습니다.
-저장 = 저장소 커밋이므로, Workers Builds(아래 "배포" 절)를 연결해 두지 않았다면 `npm run deploy` 를 실행해야 사이트에 반영됩니다.
+
 
 > 로컬 테스트: `npm run dev` 를 켠 뒤 Chrome 에서 `http://localhost:4321/admin/index.html` 을 열고
 > **Work with Local Repository** 를 선택하면 로그인 없이 이 폴더의 파일을 직접 편집해 볼 수 있습니다.
@@ -182,6 +203,7 @@ GitHub 저장소 → Actions 탭에서 *Run workflow* 로 즉시 실행할 수�
 | `/manage/groups` | 관리자 | D그룹 추가·수정·비활성 |
 | `/manage/stats` | 관리자 | 연도별 그룹 요약, 월별 평균 출석 |
 | `/manage/users` | 관리자 | 회원 검색·승인·권한/상태 변경·비밀번호 재설정·계정 만들기 |
+| `/manage/content` | 관리자 | 글·사진·설정 편집 (위 "콘텐츠 관리" 절) |
 
 **권한과 상태**
 * 권한: `관리자`(admin) / `교인`(member). 상태: `승인 대기`(pending) / `활성`(active) / `비활성`(disabled).
@@ -228,15 +250,13 @@ npm run admin:create -- --email admin@ckgmc.org --name 관리자 --password '8�
 7. Settings → Domains & Routes 에서 `ckgmc.org`, `www.ckgmc.org` 연결.
 8. 관리 화면(CMS) 로그인 워커의 `ALLOWED_DOMAINS` 에 위 도메인과 `ckgmc-site.<내계정>.workers.dev` 를 넣습니다.
 
-**push 할 때마다 자동 배포** (선택): 대시보드 → Workers & Pages → Create → *Import a repository* 로 이 저장소를 연결하고
-Build command `npm run build`, Deploy command `npx wrangler deploy` 를 지정합니다 (Workers Builds).
-관리 화면(CMS)에서 글을 저장하면 커밋이 생기므로 이 설정이 있어야 자동으로 반영됩니다.
+**push 할 때마다 자동 배포**: `.github/workflows/deploy-cloudflare.yml` 이 main 커밋마다 빌드·배포합니다.
+저장소 Secrets 에 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` 가 있어야 합니다 (위 "콘텐츠 관리 → 연결" 3번).
+콘텐츠 관리에서 저장하거나 유튜브 자동 등록이 커밋을 만들면 이 워크플로가 반영합니다.
 
 `public/_redirects`(옛 주소 리다이렉트)와 `public/_headers` 는 정적 파일에 자동 적용됩니다.
 DB 스키마를 바꿀 때는 `migrations/000N_*.sql` 을 추가하고 `npm run db:migrate:local` / `:remote` 를 실행합니다.
 
-> GitHub Pages 로도 배포할 수는 있지만(`.github/workflows/deploy.yml`, 수동 실행) 정적 페이지만 나오고
-> 로그인·보고서 기능과 옛 주소 리다이렉트는 동작하지 않습니다.
 
 ## 기존 사이트 데이터 가져오기
 이 저장소에는 **확인용 샘플 데이터**만 있습니다 (게시판별 최근 글 몇 개, 시리즈 5개, 이야기 16개).
@@ -250,6 +270,7 @@ DB 덤프를 직접 받았다면 게시판별 `data/<board>.json` 을
 ## 기존 사이트와 달라진 점
 * 로그인·D그룹 리더 보고서·일대일 양육보고서 — Cloudflare Workers + D1 로 다시 구현 (위 "교인 전용 기능"). 이메일 자체 가입은 없고 관리자 승인 또는 계정 발급 방식.
 * 답글 이메일 발송, "지원 요청"(제작사 문의) 메뉴, 그룹 통계의 그래프 — 제외. 그룹 통계는 표로 제공.
+* 글 편집은 즉시 반영이 아니라 커밋 → 자동 배포(2~3분). 그 대신 모든 변경 이력이 저장소에 남고 되돌릴 수 있습니다.
 * 메인 화면 — 포스터 슬라이더 대신 교회 사진 첫 화면 + 예배 시간/오시는 길 정보 띠 + 이번 주 설교·주보 + 사역 소개 + 새가족 안내.
 * 페이스북 피드 자동 표시 — API 토큰이 필요해 `content/stories/` 마크다운으로 관리 (관리 화면에서 사진 소식 등록).
 * 주소 체계 — `/about/staff` 같은 영문 주소. 옛 한글 주소는 `public/_redirects` 로 넘겨줍니다.

@@ -5,6 +5,9 @@
 import type { SessionUser } from './lib/auth/session';
 
 declare global {
+  /** 빌드 커밋 SHA · 빌드 시각 (astro.config.mjs 의 vite.define) */
+  const __BUILD_SHA__: string;
+  const __BUILD_AT__: string;
   namespace App {
     interface Locals {
       /** 로그인한 사용자. 비로그인·정적 페이지에서는 null */
