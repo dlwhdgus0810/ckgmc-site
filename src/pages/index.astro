@@ -21,8 +21,9 @@ const [resource] = await getBoardPosts('resources');
 const allSeries = (await getCollection('series')).sort(
   (a, b) => (b.data.updated ?? b.data.date).getTime() - (a.data.updated ?? a.data.date).getTime()
 );
+// 진행 중인 시리즈를 앞에, 그 뒤에 최근 시리즈를 채워 4개까지 (첫 번째는 크게 표시)
 const ongoing = allSeries.filter((s) => s.data.ongoing);
-const series = (ongoing.length ? ongoing : allSeries).slice(0, 3);
+const series = [...ongoing, ...allSeries.filter((s) => !s.data.ongoing)].slice(0, 4);
 
 const ministries = (await getCollection('pages', (p) => p.id.startsWith('ministries/') && !p.data.hideFromNav))
   .sort((a, b) => a.data.order - b.data.order)

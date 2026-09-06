@@ -1,7 +1,7 @@
 ---
 /** 게시판 목록 (카드 3열) + 페이지네이션 */
 import Pagination from './Pagination.astro';
-import { getBoardPosts, slugOf, excerptOf, thumbnailOf, formatDateTime, isoDate, isNew } from '../lib/posts';
+import { getBoardPosts, slugOf, excerptOf, thumbnailOf, formatDate, formatDateTime, isoDate, isNew, titleParts, PARSED_BOARDS } from '../lib/posts';
 
 interface Props {
   board: string;
@@ -14,6 +14,8 @@ const { board, base, page = 1, perPage = 15 } = Astro.props;
 const all = await getBoardPosts(board);
 const totalPages = Math.max(1, Math.ceil(all.length / perPage));
 const posts = all.slice((page - 1) * perPage, page * perPage);
+// 유튜브 제목(예배 | 제목 | 설교자 | 날짜)은 나눠서 보여주고, 유튜브 설명 요약은 생략
+const parsed = PARSED_BOARDS.has(board);
 ---
 <section id="loop-blog" aria-label="글 목록">
   {posts.length === 0 ? (
@@ -25,12 +27,26 @@ const posts = all.slice((page - 1) * perPage, page * perPage);
           <a class="card-tile" href={`${base}/${slugOf(post)}`}>
             <div class="card-tile__media"><img src={thumbnailOf(post)} alt="" loading="lazy" width="640" height="360" /></div>
             <div class="card-tile__body">
-              <h2 class="card-tile__title h6">{post.data.title}</h2>
-              <p class="card-tile__text">{excerptOf(post)}</p>
-              <p class="card-tile__meta">
-                <time datetime={isoDate(post.data.date)}>{formatDateTime(post.data.date)}</time>
-                {isNew(post.data.date) && <span class="badge-new">NEW</span>}
-              </p>
+              {parsed ? (() => { const t = titleParts(post); return (
+                <>
+                  {t.service && <span class="card-tile__eyebrow">{t.service}</span>}
+                  <h2 class="card-tile__title h6">{t.title}</h2>
+                  {t.preacher && <p class="card-tile__text">{t.preacher}</p>}
+                  <p class="card-tile__meta">
+                    <time datetime={isoDate(post.data.date)}>{t.date ?? formatDate(post.data.date)}</time>
+                    {isNew(post.data.date) && <span class="badge-new">NEW</span>}
+                  </p>
+                </>
+              ); })() : (
+                <>
+                  <h2 class="card-tile__title h6">{post.data.title}</h2>
+                  <p class="card-tile__text">{excerptOf(post)}</p>
+                  <p class="card-tile__meta">
+                    <time datetime={isoDate(post.data.date)}>{formatDateTime(post.data.date)}</time>
+                    {isNew(post.data.date) && <span class="badge-new">NEW</span>}
+                  </p>
+                </>
+              )}
             </div>
           </a>
         </div>

@@ -1,10 +1,11 @@
 ---
 /**
- * 게시글 상세: 제목·작성자·날짜 → 유튜브 영상 → 본문 → PDF(주보) → 첨부 → 이전/다음 글
+ * 게시글 상세: 제목·메타 → 유튜브 영상 → 본문 → PDF(주보) → 첨부 → 이전/다음 글
+ * 유튜브에서 자동 등록된 설교는 제목을 "예배 종류 · 설교자 · 날짜"로 나눠 보여주고, 설명의 상용구(예배 안내·헌금·저작권)는 접어 둡니다.
  */
 import { render } from 'astro:content';
 import Icon from './Icon.astro';
-import { slugOf, formatDate, isoDate, pdfOf, fileUrl, textExcerpt, type Post } from '../lib/posts';
+import { slugOf, formatDate, isoDate, pdfOf, fileUrl, textExcerpt, titleParts, displayTitle, splitDescription, type Post } from '../lib/posts';
 
 interface Props {
   post: Post;
@@ -18,19 +19,22 @@ const { post, base, prev, next } = Astro.props;
 const { Content } = await render(post);
 const pdf = pdfOf(post);
 const otherFiles = post.data.attachments.filter((a) => a !== pdf);
+const t = titleParts(post);
 // 옮겨온 주보 글은 본문이 PDF 링크 한 줄뿐이라 미리보기와 중복되므로 생략
 const norm = (s: string) => s.replace(/\s+/g, '');
 const bodyIsPdfLink = !!pdf && norm(textExcerpt(post.body, 300)) === norm(pdf.name);
 const hasBody = (post.body ?? '').trim().length > 0 && !bodyIsPdfLink;
+// 영상 설명: 구분선 아래는 접기
+const split = post.data.youtube ? splitDescription(post.body) : null;
+const metaItems = [t.service, t.preacher ?? post.data.writer].filter(Boolean) as string[];
 ---
 <article class="post">
   <header class="post__header">
-    <h1 class="post__title">{post.data.title}</h1>
-    <dl class="post__meta">
-      {post.data.writer && (<><dt>작성자</dt><dd>{post.data.writer}</dd></>)}
-      <dt>날짜</dt>
-      <dd><time datetime={isoDate(post.data.date)}>{formatDate(post.data.date)}</time></dd>
-    </dl>
+    <h1 class="post__title">{t.title}</h1>
+    <p class="post__meta">
+      {metaItems.map((m) => <span>{m}</span>)}
+      <time datetime={isoDate(post.data.date)}>{t.date ?? formatDate(post.data.date)}</time>
+    </p>
   </header>
 
   {post.data.youtube && (
@@ -45,7 +49,19 @@ const hasBody = (post.body ?? '').trim().length > 0 && !bodyIsPdfLink;
     </div>
   )}
 
-  {hasBody && <div class="post__body"><Content /></div>}
+  {hasBody && (split ? (
+    <div class="post__body">
+      {split.intro && <div class="post__intro" set:html={split.intro} />}
+      {split.more && (
+        <details class="post__more">
+          <summary><Icon name="chevron-down" size={16} /> 영상 설명 더 보기 <small>(예배 안내 · 헌금 · 섬기는 사람들)</small></summary>
+          <div class="post__more-body" set:html={split.more} />
+        </details>
+      )}
+    </div>
+  ) : (
+    <div class="post__body"><Content /></div>
+  ))}
 
   {pdf && (
     <section class="pdf-card" aria-label="PDF 문서">
@@ -81,13 +97,13 @@ const hasBody = (post.body ?? '').trim().length > 0 && !bodyIsPdfLink;
     {next ? (
       <a class="card-tile card-tile--flat post__nav-link" rel="next" href={`${base}/${slugOf(next)}`}>
         <span class="card-tile__eyebrow">다음 글</span>
-        <span class="post__nav-title">{next.data.title}</span>
+        <span class="post__nav-title">{displayTitle(next)}</span>
       </a>
     ) : <span></span>}
     {prev && (
       <a class="card-tile card-tile--flat post__nav-link" rel="prev" href={`${base}/${slugOf(prev)}`}>
         <span class="card-tile__eyebrow">이전 글</span>
-        <span class="post__nav-title">{prev.data.title}</span>
+        <span class="post__nav-title">{displayTitle(prev)}</span>
       </a>
     )}
   </nav>

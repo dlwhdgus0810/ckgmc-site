@@ -62,3 +62,49 @@ export function pdfOf(post: Post): { name: string; file: string } | undefined {
 }
 
 export { formatDate, formatDateTime, formatKoreanDate, formatLongDate, formatStoryDate, isoDate, isNew } from './dates';
+
+// ── 설교 제목 나누기 ────────────────────────────────────────────────
+/** 유튜브 제목처럼 `예배 종류 | 설교 제목 | 설교자 | 날짜` 로 이어진 제목을 나눕니다 */
+export interface ParsedTitle { title: string; service?: string; preacher?: string; date?: string; raw: string }
+/** 제목을 나눠서 보여주는 게시판 (유튜브에서 자동 등록되는 것들) */
+export const PARSED_BOARDS = new Set(['sermons', 'special-services', 'choir']);
+
+export function parseSermonTitle(raw: string): ParsedTitle {
+  const parts = raw.split('|').map((s) => s.trim()).filter(Boolean);
+  if (parts.length < 2) return { title: raw, raw };
+  let date: string | undefined;
+  let preacher: string | undefined;
+  let service: string | undefined;
+  const rest: string[] = [];
+  for (const p of parts) {
+    const clean = p.replace(/^\[|\]$/g, '').trim();
+    if (!date && /^\d{4}[.\-/]\s?\d{1,2}[.\-/]\s?\d{1,2}\.?(\s*\(.\))?$/.test(clean)) date = clean.replace(/\.$/, '');
+    else if (!preacher && clean.length <= 24 && /(목사|전도사|간사|장로|사모|선교사|교수|집사|Pastor|Rev\.|Dr\.)/.test(clean)) preacher = clean;
+    else if (!service && clean.length <= 28 && /(예배|집회|설교|찬양|간증|LIVE|Live|Service|Worship|Praise)/.test(clean)) service = clean;
+    else rest.push(clean);
+  }
+  if (rest.length === 0) return { title: service ?? raw, preacher, date, raw };
+  return { title: rest.join(' | '), service, preacher, date, raw };
+}
+/** 게시판에 따라 나눈 제목 또는 원래 제목 */
+export function titleParts(post: Post): ParsedTitle {
+  return PARSED_BOARDS.has(boardOf(post)) ? parseSermonTitle(post.data.title) : { title: post.data.title, raw: post.data.title };
+}
+export const displayTitle = (post: Post) => titleParts(post).title;
+
+// ── 유튜브 설명 접기 ─────────────────────────────────────────────────
+const DIVIDER = /<p>\s*(?:[─—–_=-]\s*){8,}<\/p>|<hr\s*\/?>/i;
+/**
+ * 영상 설명 본문을 "말씀 소개"와 "그 아래 상용구(예배 안내·헌금·저작권)" 로 나눕니다.
+ * 구분선(────)이 없으면 나누지 않습니다. URL 은 링크로 바꿉니다.
+ */
+export function splitDescription(html: string | undefined): { intro: string; more: string } | null {
+  if (!html) return null;
+  let body = html.trim().replace(/^<div>\s*/i, '').replace(/\s*<\/div>\s*$/i, '');
+  const m = DIVIDER.exec(body);
+  if (!m) return null;
+  const linkify = (s: string) => s.replace(/(^|[^"'>])(https?:\/\/[^\s<]+)/g, (_, pre, url) => `${pre}<a href="${url}" target="_blank" rel="noopener">${decodeURIComponent(url).replace(/^https?:\/\//, '')}</a>`);
+  const intro = linkify(body.slice(0, m.index).trim());
+  const more = linkify(body.slice(m.index + m[0].length).replace(DIVIDER, '<hr>').replace(new RegExp(DIVIDER.source, 'gi'), '<hr>').trim());
+  return { intro, more };
+}

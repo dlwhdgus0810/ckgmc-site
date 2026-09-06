@@ -4,11 +4,28 @@
 .post {
   &__header { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid $line; }
   &__title { margin-bottom: .75rem; font-size: clamp(1.375rem, 1rem + 1.4vw, 1.875rem); line-height: 1.3; }
+  // 예배 종류 · 설교자 · 날짜 를 점으로 이어 한 줄로
   &__meta {
-    display: flex; flex-wrap: wrap; gap: .25rem 1.5rem;
-    margin: 0; font-size: .9rem; color: $ink-600;
-    dt { display: inline; margin-right: .35rem; font-weight: 600; &::after { content: ':'; } }
-    dd { display: inline; margin: 0; }
+    display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 0;
+    margin: 0; font-size: .9375rem; color: $ink-600;
+    > * + *::before { content: '·'; margin: 0 .6rem; color: $gold; }
+    time { font-variant-numeric: tabular-nums; }
+  }
+  &__intro > :last-child { margin-bottom: 0; }
+  // 영상 설명의 상용구(예배 안내·헌금·저작권)는 접어 둠
+  &__more {
+    margin-top: 1.25rem;
+    border: 1px solid $line; border-radius: $border-radius; background: $surface;
+    summary {
+      display: flex; align-items: center; gap: .4rem;
+      padding: .75rem 1rem; cursor: pointer; list-style: none;
+      font-weight: 600; color: $navy;
+      &::-webkit-details-marker { display: none; }
+      .icon { transition: transform .2s ease; }
+      small { font-weight: 400; color: $ink-600; }
+    }
+    &[open] summary { border-bottom: 1px solid $line; .icon { transform: rotate(180deg); } }
+    &-body { padding: 1rem 1rem 0; font-size: .9375rem; color: $ink-600; hr { margin: 1rem 0; border-color: $line; } > :last-child { margin-bottom: 1rem; } a { word-break: break-all; } }
   }
   &__video { margin-bottom: 1.5rem; }
   &__body { max-width: 72ch; > :last-child { margin-bottom: 0; } }

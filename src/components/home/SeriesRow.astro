@@ -1,28 +1,46 @@
 ---
-/** 진행 중인 설교 시리즈 카드 */
+/** 설교 시리즈: 첫 번째(진행 중)를 크게, 나머지는 작은 목록으로 */
 import type { CollectionEntry } from 'astro:content';
 import SectionHeader from '../SectionHeader.astro';
+import Icon from '../Icon.astro';
 import { formatDate } from '../../lib/posts';
 interface Props { series: CollectionEntry<'series'>[] }
 const { series } = Astro.props;
+const [featured, ...others] = series;
+const latestEp = featured?.data.episodes.at(-1);
 ---
-{series.length > 0 && (
+{featured && (
   <section class="section section--surface" aria-labelledby="series-title">
     <div class="container">
       <SectionHeader id="series-title" eyebrow="Sermon Series" title="설교 시리즈" more={{ href: '/media/series', label: '모든 시리즈' }} />
-      <div class="row">
-        {series.map((s) => (
-          <div class="col-md-6 col-lg-4 mb-4">
-            <a class="card-tile" href={`/media/series/${s.id}`}>
-              <div class="card-tile__media"><img src={s.data.thumbnail} alt="" loading="lazy" width="960" height="540" /></div>
-              <div class="card-tile__body">
+      <div class="series-feature">
+        <a class="card-tile series-feature__main" href={`/media/series/${featured.id}`}>
+          <div class="card-tile__media"><img src={featured.data.thumbnail} alt="" loading="lazy" width="960" height="540" /></div>
+          <div class="card-tile__body">
+            <span class="card-tile__eyebrow">{featured.data.ongoing ? '진행 중인 시리즈' : '최근 시리즈'}</span>
+            <h3 class="series-feature__title">{featured.data.title}</h3>
+            <p class="card-tile__meta">{featured.data.episodes.length}편 · 최근 업데이트 {formatDate(featured.data.updated ?? featured.data.date)}</p>
+            {latestEp && (
+              <p class="series-feature__latest"><Icon name="play" size={14} /> <span>최신 회차</span> {latestEp.title}</p>
+            )}
+          </div>
+        </a>
+        <div class="series-feature__side">
+          {others.map((s) => (
+            <a class="series-mini" href={`/media/series/${s.id}`}>
+              <img src={s.data.thumbnail} alt="" loading="lazy" width="320" height="180" />
+              <div>
                 <span class="card-tile__eyebrow">{s.data.ongoing ? '진행 중' : '지난 시리즈'}</span>
-                <h3 class="card-tile__title h5">{s.data.title}</h3>
-                <p class="card-tile__meta">{s.data.episodes.length}편 · {formatDate(s.data.updated ?? s.data.date)}</p>
+                <strong>{s.data.title}</strong>
+                <small>{s.data.episodes.length}편 · {formatDate(s.data.updated ?? s.data.date)}</small>
               </div>
             </a>
-          </div>
-        ))}
+          ))}
+          <a class="series-mini series-mini--more" href="/media/series">
+            <div><strong>모든 설교 시리즈 보기</strong><small>주제별로 묶인 설교를 한 곳에서</small></div>
+            <Icon name="arrow-right" size={20} />
+          </a>
+        </div>
       </div>
     </div>
   </section>

@@ -10,6 +10,7 @@ import { getCollection, render, type CollectionEntry } from 'astro:content';
 import SubpageLayout from '../layouts/SubpageLayout.astro';
 import BoardList from '../components/BoardList.astro';
 import PostView from '../components/PostView.astro';
+import { displayTitle } from '../lib/posts';
 import SeriesList from '../components/SeriesList.astro';
 import SeriesView from '../components/SeriesView.astro';
 import Widget from '../components/Widget.astro';
@@ -70,7 +71,7 @@ const { Content } = await render(page);
   </SubpageLayout>
 )}
 {kind === 'post' && post && (
-  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={post.data.title} bannerHeading="p">
+  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={displayTitle(post)} bannerHeading="p">
     <PostView post={post} base={base} prev={prev} next={next} />
   </SubpageLayout>
 )}
