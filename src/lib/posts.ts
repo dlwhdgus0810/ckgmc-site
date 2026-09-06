@@ -43,22 +43,24 @@ export function excerptOf(post: Post, length = 70): string {
   return text;
 }
 
-/** 목록용 썸네일: 지정 썸네일 → 유튜브 썸네일 → 본문 첫 이미지 → 기본 이미지 */
-export function thumbnailOf(post: Post): string {
+/**
+ * 목록용 썸네일: 지정 썸네일 → 유튜브 썸네일 → 본문 첫 이미지 → 기본 이미지
+ * size 'hq' = 480×360(약 13KB, 위아래 검은 띠는 16:9 상자에서 잘려 보이지 않음) / 'hd' = 1280×720(약 300KB, 큰 카드 전용)
+ */
+export function thumbnailOf(post: Post, size: 'hq' | 'hd' = 'hq'): string {
   if (post.data.thumbnail) return post.data.thumbnail;
-  if (post.data.youtube) return `https://i.ytimg.com/vi/${post.data.youtube}/hq720.jpg`;
+  if (post.data.youtube) return `https://i.ytimg.com/vi/${post.data.youtube}/${size === 'hd' ? 'hq720' : 'hqdefault'}.jpg`;
   const m = (post.body ?? '').match(/<img[^>]+src="([^"]+)"/);
   if (m) return m[1];
   return '/images/thumbnail-default.jpg';
 }
 
 /**
- * <img> 에 펼쳐 넣는 썸네일 속성. 유튜브는 16:9 원본(hq720)을 먼저 쓰고, 없는 영상이면 4:3 기본(hqdefault)으로 바꿉니다
- * (hqdefault 는 위아래 검은 띠가 있어 카드에서 잘려 보임).
+ * <img> 에 펼쳐 넣는 썸네일 속성. 'hd' 는 16:9 원본(hq720)을 먼저 쓰고 없는 영상이면 기본(hqdefault)으로 바꿉니다.
  */
-export function thumbAttrs(post: Post): { src: string; onerror?: string } {
-  const src = thumbnailOf(post);
-  if (!post.data.thumbnail && post.data.youtube) {
+export function thumbAttrs(post: Post, size: 'hq' | 'hd' = 'hq'): { src: string; onerror?: string } {
+  const src = thumbnailOf(post, size);
+  if (size === 'hd' && !post.data.thumbnail && post.data.youtube) {
     return { src, onerror: `this.onerror=null;this.src='https://i.ytimg.com/vi/${post.data.youtube}/hqdefault.jpg'` };
   }
   return { src };

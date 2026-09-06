@@ -16,7 +16,7 @@ const st = sermon ? titleParts(sermon) : undefined;
         {sermon ? (
           <article class="card-tile this-week__sermon">
             <div class="card-tile__media video-poster" data-youtube={sermon.data.youtube} data-title={sermon.data.title}>
-              <img {...thumbAttrs(sermon)} alt="" width="1280" height="720" loading="lazy" />
+              <img {...thumbAttrs(sermon, 'hd')} alt="" width="1280" height="720" loading="lazy" />
               {sermon.data.youtube && (
                 <button type="button" class="video-poster__play" aria-label={`설교 영상 재생: ${sermon.data.title}`}>
                   <Icon name="play" size={30} />

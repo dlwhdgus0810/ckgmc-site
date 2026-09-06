@@ -12,8 +12,9 @@ const TYPES: Record<string, string> = {
 };
 
 export async function serveFromStore(repoDir: string, relPath: string | undefined): Promise<Response> {
-  const rel = decodeURIComponent(relPath ?? '');
-  if (!rel || rel.includes('..') || rel.startsWith('/')) return new Response('Not found', { status: 404 });
+  let rel = '';
+  try { rel = decodeURIComponent(relPath ?? ''); } catch { return new Response('Not found', { status: 404 }); } // 잘못된 % 인코딩
+  if (!rel || rel.includes('..') || rel.startsWith('/') || rel.includes('\0')) return new Response('Not found', { status: 404 });
   try {
     const file = await getStore().readFile(`${repoDir}/${rel}`);
     if (!file) return new Response('Not found', { status: 404 });

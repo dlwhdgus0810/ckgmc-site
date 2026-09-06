@@ -46,9 +46,16 @@ export function uploadTarget(kind: 'image' | 'file', originalName: string, now =
   return { repoPath: `public/images/uploads/${yyyy}/${mm}/${name}`, publicPath: `/images/uploads/${yyyy}/${mm}/${name}` };
 }
 export const MAX_UPLOAD = 25 * 1024 * 1024; // 25MB
+/** 올릴 수 있는 파일 종류 (실행 파일·HTML 등은 제외) */
+const IMAGE_EXT = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif']);
+const FILE_EXT = new Set([...IMAGE_EXT, '.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.hwp', '.hwpx', '.zip', '.txt', '.mp3', '.m4a', '.mp4']);
 
 export async function stageUpload(ctx: UploadCtx, file: File, kind: 'image' | 'file'): Promise<string> {
   if (file.size > MAX_UPLOAD) throw new Error(`파일이 너무 큽니다 (${file.name}, 최대 25MB).`);
+  const ext = sanitizeFilename(file.name).ext;
+  if (!(kind === 'image' ? IMAGE_EXT : FILE_EXT).has(ext)) {
+    throw new Error(`올릴 수 없는 파일 형식입니다 (${file.name}). 허용: ${[...(kind === 'image' ? IMAGE_EXT : FILE_EXT)].join(' ')}`);
+  }
   const t = uploadTarget(kind, file.name);
   ctx.puts.push({ path: t.repoPath, base64: bytesToBase64(new Uint8Array(await file.arrayBuffer())) });
   ctx.uploaded.push(t.publicPath);

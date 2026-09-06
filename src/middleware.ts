@@ -41,6 +41,9 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   }
 
   const res = await next();
+  res.headers.set('x-content-type-options', 'nosniff');
+  res.headers.set('referrer-policy', 'strict-origin-when-cross-origin');
+  res.headers.set('x-frame-options', 'SAMEORIGIN');
   if (protectedArea || path === '/login' || path.startsWith('/auth/')) {
     res.headers.set('cache-control', 'private, no-store');
     res.headers.set('x-robots-tag', 'noindex, nofollow');
