@@ -61,6 +61,11 @@
 .verse-band {
   padding: 2.5rem 0 .5rem;
   @include media-breakpoint-up(lg) { padding-top: 3.5rem; }
+  &__label {
+    margin: 0 0 .75rem; text-align: center;
+    font-size: .75rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: $gold-700;
+    span { font-weight: 500; color: $ink-600; margin-left: .35rem; letter-spacing: .08em; }
+  }
   &__quote {
     max-width: 46rem; margin: 0 auto; padding: 0; border: 0; text-align: center;
     p { margin: 0 0 .5rem; font-family: $font-family-serif; font-size: clamp(1.0625rem, .95rem + .5vw, 1.3125rem); line-height: 1.8; color: $navy-700; text-wrap: balance; }

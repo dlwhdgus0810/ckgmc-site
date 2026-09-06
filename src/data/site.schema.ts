@@ -56,8 +56,8 @@ export const siteSchema = z.object({
     href: z.string().optional(),
     description: z.string().optional(),
   })).default([]),
-  /** 이번 주 말씀 (정보 띠 아래 한 구절) */
-  verse: z.object({ text: z.string().min(1), ref: z.string().min(1) }).optional(),
+  /** 오늘의 말씀 목록 — 날짜에 따라 하나씩 돌아가며 표시 (정보 띠 아래). 비우면 표시 안 함 */
+  verses: z.array(z.object({ text: z.string().min(1), ref: z.string().min(1) })).default([]),
   quickLinks: z.array(z.object({ title: z.string(), subtitle: z.string(), icon: z.string(), href: z.string() })),
   /** 협력 단체 배너 */
   links: z.array(z.object({ title: z.string(), image: z.string(), href: z.string() })),

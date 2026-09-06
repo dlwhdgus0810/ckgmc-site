@@ -1,16 +1,41 @@
 ---
-/** 이번 주 말씀 — 정보 띠 아래 한 구절 (site.json 의 verse). 비어 있으면 그리지 않습니다 */
+/**
+ * 오늘의 말씀 — 정보 띠 아래 한 구절. site.json 의 verses 목록에서 날짜(연중 일수)에 따라 하나를 고릅니다.
+ * 서버는 빌드 날짜 기준 구절을 넣고, 브라우저에서 오늘 날짜로 다시 골라 매일 바뀌게 합니다 (스크립트 없이도 한 구절은 보임).
+ */
 import type { SiteConfig } from '../../data/site';
-interface Props { verse: SiteConfig['verse'] }
-const { verse } = Astro.props;
+interface Props { verses: SiteConfig['verses']; today: string }
+const { verses, today } = Astro.props;
+const dayOfYear = (ymd: string) => { const d = new Date(ymd + 'T00:00:00Z'); return Math.floor((d.getTime() - Date.UTC(d.getUTCFullYear(), 0, 0)) / 86400000); };
+const pick = verses.length ? verses[dayOfYear(today) % verses.length] : null;
 ---
-{verse && (
-  <section class="verse-band" aria-label="이번 주 말씀">
+{pick && (
+  <section class="verse-band" aria-label="오늘의 말씀" data-verse-band>
     <div class="container">
+      <p class="verse-band__label">오늘의 말씀 <span>Verse of the Day</span></p>
       <blockquote class="verse-band__quote">
-        <p>“{verse.text}”</p>
-        <cite>{verse.ref}</cite>
+        <p data-verse-text>“{pick.text}”</p>
+        <cite data-verse-ref>{pick.ref}</cite>
       </blockquote>
+      {verses.length > 1 && <script type="application/json" data-verses set:html={JSON.stringify(verses)} />}
     </div>
   </section>
 )}
+<script>
+  // 방문자의 오늘 날짜(캔자스 기준)로 구절을 다시 고릅니다 — 사이트를 다시 만들지 않아도 매일 바뀝니다
+  const band = document.querySelector<HTMLElement>('[data-verse-band]');
+  const data = band?.querySelector<HTMLScriptElement>('[data-verses]');
+  if (band && data) {
+    try {
+      const verses = JSON.parse(data.textContent || '[]') as { text: string; ref: string }[];
+      const ymd = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+      const d = new Date(ymd + 'T00:00:00Z');
+      const day = Math.floor((d.getTime() - Date.UTC(d.getUTCFullYear(), 0, 0)) / 86400000);
+      const v = verses[day % verses.length];
+      if (v) {
+        band.querySelector('[data-verse-text]')!.textContent = `“${v.text}”`;
+        band.querySelector('[data-verse-ref]')!.textContent = v.ref;
+      }
+    } catch { /* 그대로 둠 */ }
+  }
+</script>

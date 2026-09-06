@@ -195,7 +195,7 @@ export const COLLECTIONS: Collection[] = [
         { name: 'href', label: '자세히 보기 링크', widget: 'string', placeholder: '/ministries/young-adult 또는 https://…' },
         { name: 'description', label: '한 줄 설명', widget: 'string' },
       ] },
-      { name: 'verse', label: '이번 주 말씀 (메인 정보 띠 아래)', widget: 'object', fields: [
+      { name: 'verses', label: '오늘의 말씀 (메인 정보 띠 아래)', widget: 'list', itemLabel: '구절', hint: '날짜에 따라 하루에 하나씩 순서대로 돌아가며 보여줍니다. 20~30개 정도를 권합니다.', fields: [
         { name: 'text', label: '구절', widget: 'text', required: true },
         { name: 'ref', label: '출처 (예: 요한복음 15:5)', widget: 'string', required: true },
       ] },
