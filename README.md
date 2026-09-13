@@ -1,287 +1,284 @@
-# 캔사스중앙글로벌감리교회 홈페이지
+# Central Korean Global Methodist Church of Kansas — Website
 
-기존 ckgmc.org 를 다시 만든 프로젝트입니다. [Astro](https://astro.build) 로 만들었고, 일반 페이지는 모두 **정적 파일**로 빌드되어
-Cloudflare 무료 플랜에 올릴 수 있습니다. 로그인이 필요한 **교인 전용 기능**(D그룹 리더 보고서, 일대일 양육보고서, 회원 관리)만
-Cloudflare Workers + D1(무료 DB)에서 서버로 동작합니다.
-글·사진은 브라우저 관리 화면(`/admin`)에서 고칠 수 있고, 유튜브 새 영상은 매주 자동으로 설교 게시판에 올라갑니다.
+A rebuild of the existing ckgmc.org site, made with [Astro](https://astro.build). All regular pages are built as **static files**,
+so the site fits on Cloudflare's free plan. Only the login-protected **members-only features** (D-Group leader reports, one-on-one discipleship reports, member management)
+run server-side on Cloudflare Workers + D1 (free database).
+Posts and photos can be edited in the browser admin UI, and new YouTube videos are posted to the sermon board automatically every week.
 
-## 빠른 시작
+## Quick start
 
 ```bash
-nvm use                     # .nvmrc 의 Node 22 사용 (nvm 이 없으면 https://nodejs.org 에서 22 LTS 설치)
-npm install                 # 최초 1회
-cp .dev.vars.example .dev.vars   # 최초 1회: 로컬용 환경 변수 (ADMIN_EMAILS 에 내 이메일)
-npm run db:migrate:local    # 최초 1회: 로컬 DB(교인 전용 기능용) 테이블 생성
-npm run dev                 # 개발 서버 http://localhost:4321 (파일을 고치면 바로 반영)
-npm run build               # dist/ 에 배포용 파일 생성 (client = 정적, server = Worker)
-npm run preview             # 빌드 결과 미리보기
-npm run check               # 타입/문법 검사
+nvm use                     # use Node 22 from .nvmrc (without nvm, install 22 LTS from https://nodejs.org)
+npm install                 # first time only
+cp .dev.vars.example .dev.vars   # first time only: local env vars (put your email in ADMIN_EMAILS)
+npm run db:migrate:local    # first time only: create local DB tables (for members-only features)
+npm run dev                 # dev server at http://localhost:4321 (reloads on file changes)
+npm run build               # build deployable output into dist/ (client = static, server = Worker)
+npm run preview             # preview the build output
+npm run check               # type/syntax check
 ```
 
-Node.js **22.12 이상**이 필요합니다 (`npm run admin:create` 는 22.18 이상).
-개발 서버에서 `/login` 을 열면 "개발용 로그인"이 보여 이메일만 넣고 바로 들어갈 수 있습니다 (배포본에는 없음).
+Requires Node.js **22.12 or later** (`npm run admin:create` needs 22.18 or later).
+On the dev server, `/login` shows a "dev login" option that signs you in with just an email (not present in production).
 
-## 폴더 구조 — 어디를 고치면 되나
+## Project structure — where to edit what
 
 ```
 src/
-  data/site.json        교회 이름·주소·연락처·SNS·예배 시간·메인 첫 화면 문구/사진·교회 소식 포스터  ← 대부분의 설정
-  data/site.ts          site.json 을 검증하고 파생값(지도 링크 등)을 만드는 코드 (필드를 추가할 때만)
-  data/nav.ts           메뉴 "섹션"(교회 소개·미디어·사역…) 정의. 하위 항목은 페이지 파일에서 자동 생성
-  content/pages/        일반 페이지 (마크다운). 파일 경로 = 주소  예) about/staff.md → /about/staff
-  content/posts/        게시판 글. 폴더 = 게시판
-                        sermons/ 영상설교 · bulletins/ 주보 · resources/ 자료실 · choir/ 성가대 찬양 ·
+  data/site.json        church name, address, contact, social links, service times, home hero text/photo, news posters  ← most settings
+  data/site.ts          validates site.json and derives values (map links, etc.) — only edit when adding fields
+  data/nav.ts           menu "sections" (About, Media, Ministries…). Sub-items are generated from page files
+  content/pages/        regular pages (Markdown). File path = URL, e.g. about/staff.md → /about/staff
+  content/posts/        board posts. Folder = board
+                        sermons/ video sermons · bulletins/ bulletins · resources/ resources · choir/ choir ·
                         special-services/ · mission-stories/ · children/ youth/ young-adult/ camping/
-                        english/ newcomers/ serving/ community/ (사역 페이지 아래 부서 소식)
-  content/series/       설교 시리즈 (유튜브 영상 묶음)
-  content/stories/      우리 교회 이야기 (사진 소식)
-  styles/_tokens.scss   색·글꼴·간격 토큰  ← 디자인을 바꾸려면 여기
-  styles/*.scss         컴포넌트별 스타일
-  components/, layouts/ 화면 부품과 틀 (components/home/ = 메인 화면 섹션들, components/members/ = 교인 공간 부품)
-  pages/                주소 → 화면 연결 (index, [...slug], story/, 404, thanks)
-  pages/login.astro, auth/, members/, manage/   교인 전용 기능 (서버 렌더링, 로그인 필요)
-  pages/manage/content/   콘텐츠 관리 (글·사진·설정 편집 → GitHub 커밋)
-  lib/content/          콘텐츠 관리 엔진: collections.ts(폼 정의) · store.ts(GitHub/로컬 저장) · forms.ts · changes.ts
-  content/schemas.ts, data/site.schema.ts   프런트매터·설정 스키마 (빌드와 관리 화면이 공유)
-  middleware.ts         로그인 보호·같은 출처 검사 (서버 렌더링 페이지에만 적용)
-  lib/auth/, lib/reports.ts, lib/db.ts   세션·비밀번호·소셜 로그인·회원·보고서 쿼리 (Cloudflare D1)
+                        english/ newcomers/ serving/ community/ (department news under ministry pages)
+  content/series/       sermon series (groups of YouTube videos)
+  content/stories/      church stories (photo news)
+  styles/_tokens.scss   color, font, spacing tokens  ← change the design here
+  styles/*.scss         per-component styles
+  components/, layouts/ UI parts and page shells (components/home/ = home page sections, components/members/ = members area parts)
+  pages/                URL → page routing (index, [...slug], story/, 404, thanks)
+  pages/login.astro, auth/, members/, manage/   members-only features (server-rendered, login required)
+  pages/manage/content/   content management (edit posts/photos/settings → GitHub commit)
+  lib/content/          content management engine: collections.ts (form definitions) · store.ts (GitHub/local storage) · forms.ts · changes.ts
+  content/schemas.ts, data/site.schema.ts   front matter and settings schemas (shared by the build and the admin UI)
+  middleware.ts         login protection and same-origin checks (server-rendered pages only)
+  lib/auth/, lib/reports.ts, lib/db.ts   sessions, passwords, social login, members, report queries (Cloudflare D1)
 public/
-  admin/                (선택) 개발자용 Sveltia CMS — config.yml 에 저장소·로그인 주소 설정
-  images/               이미지 (hero, slides, headers, pages, staff, posts, series, stories, uploads …)
-  files/                주보 PDF 등 첨부파일
-  fonts/                나눔명조 (Pretendard 는 npm 패키지에서 자동 포함)
-  _redirects            옛 주소 → 새 주소 (Cloudflare 가 자동 적용)
-  _headers, robots.txt  /admin·/members·/manage 검색 제외
-migrations/             D1 데이터베이스 테이블 정의 (npm run db:migrate:local / :remote)
-wrangler.jsonc          Cloudflare Workers 설정 (D1 바인딩, 정적 파일 폴더)
-.dev.vars.example       로컬 개발용 환경 변수 예시 → .dev.vars 로 복사
+  admin/                (optional) developer Sveltia CMS — repo and login URL set in config.yml
+  images/               images (hero, slides, headers, pages, staff, posts, series, stories, uploads …)
+  files/                attachments such as bulletin PDFs
+  fonts/                Nanum Myeongjo (Pretendard is bundled from the npm package)
+  _redirects            legacy URLs → new URLs (applied automatically by Cloudflare)
+  _headers, robots.txt  exclude /admin, /members, /manage from search engines
+migrations/             D1 database table definitions (npm run db:migrate:local / :remote)
+wrangler.jsonc          Cloudflare Workers config (D1 binding, static assets directory)
+.dev.vars.example       example local env vars → copy to .dev.vars
 scripts/
-  import-youtube.mjs    유튜브 채널 새 영상 → posts/sermons (GitHub Actions 가 매주 실행)
-  fetch-fonts.mjs       나눔명조 웹폰트 내려받기
-  import/               기존 사이트 데이터 가져오기 도구
+  import-youtube.mjs    new YouTube channel videos → posts/sermons (run weekly by GitHub Actions)
+  fetch-fonts.mjs       download Nanum Myeongjo web fonts
+  import/               tools for importing data from the old site
 .github/workflows/
-  youtube-sync.yml      매주 월요일 유튜브 동기화 후 커밋
-  deploy-cloudflare.yml main 커밋마다 Cloudflare Workers 배포
+  youtube-sync.yml      weekly Monday YouTube sync, then commit
+  deploy-cloudflare.yml deploy to Cloudflare Workers on every commit to main
 ```
 
-## 콘텐츠 관리 — 사이트 로그인만으로 글·사진 올리기
+## Content management — publish posts and photos with a site login
 
-관리자(`/manage` 에 들어갈 수 있는 계정)는 **`/manage/content`** 에서 GitHub 계정 없이 모든 콘텐츠를 편집합니다.
-게시판 14개(주보 PDF·소그룹 나눔지·영상 설교·부서 소식 …), 설교 시리즈, 우리 교회 이야기, 페이지(섹션별), 사이트 설정(예배 시간·메인 첫 화면·포스터·연락처).
+Admins (accounts that can access `/manage`) edit all content at **`/manage/content`**, no GitHub account needed:
+14 boards (bulletin PDFs, small group discussion sheets, video sermons, department news …), sermon series, church stories, pages (by section), and site settings (service times, home hero, posters, contact info).
 
-- 저장하면 서버가 **GitHub 저장소에 커밋**하고(작성자 이름으로), GitHub Actions 가 빌드해 **2~3분 뒤 사이트에 반영**됩니다.
-  목록에는 그동안 "배포 대기"로 표시되고, 방금 올린 사진·PDF 는 배포 전에도 바로 열립니다.
-- 게시글 본문은 서식 편집기(굵게·목록·링크·사진·유튜브)이고 "HTML 직접 편집"으로 바꿀 수 있습니다. 페이지 본문은 Bootstrap 클래스가 있어 HTML 직접 편집입니다.
-- 저장 전에 스키마(`src/content/schemas.ts`, `src/data/site.schema.ts`)로 검사하므로 잘못된 값으로 빌드가 깨지지 않습니다.
-- 편집 폼 정의는 `src/lib/content/collections.ts` 한 곳에 있습니다. 게시판을 추가하면 `BOARDS` 에 한 줄 넣으면 됩니다.
+- Saving makes the server **commit to the GitHub repository** (under the editor's name), and GitHub Actions builds it so the change **goes live in 2–3 minutes**.
+  In the meantime the list shows it as "pending deploy", and newly uploaded photos/PDFs open right away even before deploy.
+- Post bodies use a rich text editor (bold, lists, links, photos, YouTube) and can be switched to "edit HTML directly". Page bodies contain Bootstrap classes, so they are edited as HTML.
+- Values are validated against the schemas (`src/content/schemas.ts`, `src/data/site.schema.ts`) before saving, so bad values cannot break the build.
+- Edit form definitions live in one place: `src/lib/content/collections.ts`. To add a board, add one line to `BOARDS`.
 
-**연결 (최초 1회, 저장소 소유자)**
+**Setup (one time, repository owner)**
 1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate new token
    - Repository access: *Only select repositories* → `ckgmc-site`
-   - Permissions → Repository permissions → **Contents: Read and write** (다른 권한은 불필요), 만료는 1년(만료 전 재발급)
-2. 토큰을 Worker 에 넣기: `npx wrangler secret put GITHUB_TOKEN` (값을 물어보면 붙여 넣기). 로컬은 `.dev.vars` 의 `GITHUB_TOKEN`.
-3. 자동 배포: 저장소 Settings → Secrets and variables → Actions 에 `CLOUDFLARE_API_TOKEN`(대시보드 My Profile → API Tokens → *Edit Cloudflare Workers* 템플릿)과
-   `CLOUDFLARE_ACCOUNT_ID`(Workers & Pages 우측) 추가. 이후 main 에 커밋이 생기면 `.github/workflows/deploy-cloudflare.yml` 이 배포합니다.
-4. 저장소에 D1 변경이 있으면 `npm run db:migrate:remote` (콘텐츠 변경 기록 테이블 `content_changes` 포함).
+   - Permissions → Repository permissions → **Contents: Read and write** (no other permissions needed), expiration 1 year (reissue before it expires)
+2. Add the token to the Worker: `npx wrangler secret put GITHUB_TOKEN` (paste the value when prompted). Locally, use `GITHUB_TOKEN` in `.dev.vars`.
+3. Auto deploy: in the repository Settings → Secrets and variables → Actions, add `CLOUDFLARE_API_TOKEN` (dashboard My Profile → API Tokens → *Edit Cloudflare Workers* template) and
+   `CLOUDFLARE_ACCOUNT_ID` (right side of Workers & Pages). After that, `.github/workflows/deploy-cloudflare.yml` deploys every commit to main.
+4. If the repository has D1 changes, run `npm run db:migrate:remote` (includes the `content_changes` change log table).
 
-> 로컬에서 시험: `npm run dev:content` (별도 터미널) + `.dev.vars` 의 `CONTENT_LOCAL_URL` → 관리 화면 저장이 GitHub 대신 이 폴더의 파일에 바로 반영되고 `astro dev` 가 즉시 보여줍니다. 커밋은 직접 하세요.
+> Local testing: run `npm run dev:content` (separate terminal) and set `CONTENT_LOCAL_URL` in `.dev.vars` → saves from the admin UI write straight to files in this folder instead of GitHub, and `astro dev` shows them immediately. Commit them yourself.
 
-### (선택) 개발자용 CMS — Sveltia (`/admin/`, GitHub 로그인)
+### (Optional) Developer CMS — Sveltia (`/admin/`, GitHub login)
 
-GitHub 계정이 있는 개발자는 [Sveltia CMS](https://sveltiacms.app) 화면도 쓸 수 있습니다. 같은 파일을 편집하며 저장 즉시 커밋됩니다.
+Developers with a GitHub account can also use the [Sveltia CMS](https://sveltiacms.app) UI. It edits the same files and commits on save.
 
-> **현재 상태 (2026-09-05)**: 1·2·4(ALLOWED_DOMAINS)·5 는 끝났습니다. 남은 것은 **3. GitHub OAuth App 만들기**와 그 키를 워커에 넣는 것, 그리고 6. 편집자 초대입니다.
-> 위의 `/manage/content` 를 쓰면 이 설정은 하지 않아도 됩니다.
+> **Status (2026-09-05)**: steps 1, 2, 4 (ALLOWED_DOMAINS), and 5 are done. Remaining: **3. create the GitHub OAuth App** and add its keys to the worker, and 6. invite editors.
+> If you use `/manage/content` above, you do not need this setup.
 
-1. **GitHub 저장소** — `dlwhdgus0810/ckgmc-site` (완료).
-2. **로그인 워커** — 이 저장소의 `cms-auth/` 폴더가 그 워커입니다. `npm run cms-auth:deploy` 로 배포되어
-   `https://sveltia-cms-auth.ckgmc-site.workers.dev` 에서 동작 중 (완료).
+1. **GitHub repository** — `dlwhdgus0810/ckgmc-site` (done).
+2. **Login worker** — the `cms-auth/` folder in this repository is that worker. Deployed with `npm run cms-auth:deploy` and
+   running at `https://sveltia-cms-auth.ckgmc-site.workers.dev` (done).
 3. **GitHub OAuth App** — GitHub → Settings → Developer settings → OAuth Apps → *New OAuth App*
-   - Application name: `CKGMC CMS` (아무 이름)
+   - Application name: `CKGMC CMS` (any name)
    - Homepage URL: `https://ckgmc.org`
    - Authorization callback URL: `https://sveltia-cms-auth.ckgmc-site.workers.dev/callback`
-   - 생성 후 *Client ID* 를 복사하고, *Generate a new client secret* 으로 *Client Secret* 을 만듭니다.
-4. **워커 변수** — 터미널에서 (값을 물어보면 붙여 넣기):
+   - After creating it, copy the *Client ID*, then create a *Client Secret* with *Generate a new client secret*.
+4. **Worker variables** — in a terminal (paste the values when prompted):
    ```bash
    npx wrangler secret put GITHUB_CLIENT_ID --config cms-auth/wrangler.toml
    npx wrangler secret put GITHUB_CLIENT_SECRET --config cms-auth/wrangler.toml
    ```
-   `ALLOWED_DOMAINS` = `ckgmc.org,www.ckgmc.org,ckgmc-site.ckgmc-site.workers.dev` 는 이미 설정됨.
-5. **config.yml** — `public/admin/config.yml` 의 `repo`, `base_url` 설정 완료.
-6. **편집자 초대** — 글을 올릴 분들의 GitHub 계정을 저장소 Collaborator(Write) 로 초대합니다.
-   교회 관리자(admin@ckgmc.org)도 GitHub 계정이 있어야 관리 화면에 들어올 수 있습니다 (사이트 로그인 계정과는 별개).
-7. `https://ckgmc.org/admin/` 접속 → *Sign in with GitHub* → 왼쪽 목록에서 게시판을 골라 글쓰기.
+   `ALLOWED_DOMAINS` = `ckgmc.org,www.ckgmc.org,ckgmc-site.ckgmc-site.workers.dev` is already set.
+5. **config.yml** — `repo` and `base_url` in `public/admin/config.yml` are set (done).
+6. **Invite editors** — invite the GitHub accounts of people who will post as repository Collaborators (Write).
+   The church admin (admin@ckgmc.org) also needs a GitHub account to use this UI (separate from the site login account).
+7. Open `https://ckgmc.org/admin/` → *Sign in with GitHub* → pick a board from the left list and write a post.
 
+> Local testing: start `npm run dev`, open `http://localhost:4321/admin/index.html` in Chrome, and choose
+> **Work with Local Repository** to edit files in this folder directly without logging in.
 
+## Editing files directly
 
-> 로컬 테스트: `npm run dev` 를 켠 뒤 Chrome 에서 `http://localhost:4321/admin/index.html` 을 열고
-> **Work with Local Repository** 를 선택하면 로그인 없이 이 폴더의 파일을 직접 편집해 볼 수 있습니다.
+### Site settings (`src/data/site.json`)
+Church name, address, phone, email, social links, service times (`serviceTimes`), home hero (`hero`: photo, title, intro, buttons),
+verse of the week (`verse`), upcoming events (`events`: hidden automatically once the date passes, 3 shown on the home page), news posters (`notices`: `alt` required, `until` sets the last display date, opens the original image in a new tab when `href` is missing),
+partner banners (`links`), and contact form endpoint (`formEndpoint`). All of these are editable in Content management → Site settings.
+If a value is invalid, the build fails and tells you which field.
 
-## 파일로 직접 편집하기
+**Home hero photo**: the young adults group photo (`/images/pages/young-adult.jpg`) is used as a placeholder for now.
+Put a sanctuary/congregation photo at least 1920px wide in `public/images/hero/` and update `hero.image`.
 
-### 사이트 설정 (`src/data/site.json`)
-교회 이름·주소·전화·이메일·SNS, 예배 시간(`serviceTimes`), 메인 첫 화면(`hero`: 사진·제목·소개·버튼),
-이번 주 말씀(`verse`), 다가오는 일정(`events`: 날짜가 지나면 자동 숨김, 메인에 3개), 교회 소식 포스터(`notices`, `alt` 필수, `until` 로 표시 마감일, `href` 가 없으면 원본 이미지를 새 창으로 엶),
-협력 단체 배너(`links`), 문의 폼 주소(`formEndpoint`). 모두 콘텐츠 관리 → 사이트 설정에서 편집할 수 있습니다.
-잘못된 값이 있으면 빌드가 실패하면서 어느 항목인지 알려줍니다.
-
-**메인 첫 화면 사진**: 현재 청년부 단체 사진(`/images/pages/young-adult.jpg`)을 임시로 쓰고 있습니다.
-가로 1920px 이상의 예배당/전체 사진을 `public/images/hero/` 에 넣고 `hero.image` 를 바꿔주세요.
-
-### 페이지 (`src/content/pages/<섹션>/<이름>.md`)
+### Pages (`src/content/pages/<section>/<name>.md`)
 ```md
 ---
-title: "예배 안내"                 # 제목 (배너에 크게 표시)
-subtitle: "Our Services"           # 영문 부제 (선택)
-order: 50                          # 같은 섹션 안의 메뉴 순서 (작을수록 위)
-menuTitle: "예배 안내"             # 메뉴 표시 이름 (선택, 비우면 "제목 부제")
-headerImage: /images/headers/about-services.png   # 배너 사진 (선택)
-image: /images/pages/xxx.jpg       # 메인 사역 소개 카드 사진 (사역 페이지)
-description: "한 줄 설명"          # 카드·검색엔진용 (선택)
-board: sermons                     # 이 페이지 아래에 붙일 게시판 (선택)
-widget: contact                    # contact | baptism | membership | offering | map | service-times (선택)
-hideFromNav: true                  # 메뉴에서 숨김 (선택)
+title: "예배 안내"                 # title (shown large in the banner)
+subtitle: "Our Services"           # English subtitle (optional)
+order: 50                          # menu order within the section (lower = higher)
+menuTitle: "예배 안내"             # menu label (optional; defaults to "title subtitle")
+headerImage: /images/headers/about-services.png   # banner photo (optional)
+image: /images/pages/xxx.jpg       # ministry card photo on the home page (ministry pages)
+description: "한 줄 설명"          # for cards and search engines (optional)
+board: sermons                     # board to attach below this page (optional)
+widget: contact                    # contact | baptism | membership | offering | map | service-times (optional)
+hideFromNav: true                  # hide from the menu (optional)
 ---
-본문 (마크다운 + HTML, Bootstrap 4 클래스 사용 가능)
+Body (Markdown + HTML, Bootstrap 4 classes allowed)
 ```
-**새 페이지 추가** = 섹션 폴더(about, media, ministries, next-steps, missions)에 `.md` 파일을 만들면 끝. 메뉴에 자동으로 들어갑니다.
-섹션 자체를 추가/이름 변경하려면 `src/data/nav.ts` 를 고칩니다.
+**Adding a page** = create a `.md` file in a section folder (about, media, ministries, next-steps, missions). It is added to the menu automatically.
+To add or rename a section itself, edit `src/data/nav.ts`.
 
-### 게시글 (`src/content/posts/<게시판>/YYYY-MM-DD-이름.md`)
+### Posts (`src/content/posts/<board>/YYYY-MM-DD-name.md`)
 ```md
 ---
 title: "주일예배 LIVE | 참된 믿음 | 송명철 목사 | 2026.08.02"
-date: 2026-08-02T14:10            # 적은 시각 그대로 표시 (시간대 없음)
+date: 2026-08-02T14:10            # shown exactly as written (no time zone)
 writer: "이주혁"
-youtube: "KH6vXZN1nfw"            # 유튜브 영상 ID (선택) → 영상·썸네일 자동
-attachments:                      # 첨부 (선택). public/files/ 에 넣고 이름을 적음
+youtube: "KH6vXZN1nfw"            # YouTube video ID (optional) → video and thumbnail automatically
+attachments:                      # attachments (optional). Put files in public/files/ and list them
   - name: "20260830 주일예배 주보.pdf"
-    file: "20260830.pdf"          # 또는 /files/20260830.pdf
-hidden: true                      # (선택) 사이트에서 숨김. 중복 영상처럼 지우면 유튜브 자동 등록이 다시 만드는 글에 사용
+    file: "20260830.pdf"          # or /files/20260830.pdf
+hidden: true                      # (optional) hide from the site. Use for posts the YouTube sync would recreate if deleted, e.g. duplicate videos
 ---
-<p>본문</p>
+<p>Body</p>
 ```
-주보는 첨부 PDF 가 글 페이지 안에서 바로 보이고(데스크톱), 휴대전화에서는 "새 창에서 열기" 버튼으로 열립니다.
-화면에는 날짜만 표시됩니다(시각은 정렬용). 유튜브에서 자동 등록된 설교는 `date`(업로드 시각) 대신 제목 끝의 예배 날짜(`… | 2026.09.04`)를 보여줍니다.
-본문 `<img>` 에는 빌드 때 실제 픽셀 크기(width/height)가 자동으로 붙습니다 (`src/lib/markdown-img-size.mjs`).
+Bulletin PDF attachments display inline on the post page (desktop); on phones they open with an "open in new tab" button.
+Only the date is shown (the time is for sorting). Sermons imported from YouTube show the service date at the end of the title (`… | 2026.09.04`) instead of `date` (upload time).
+Body `<img>` tags get their actual pixel size (width/height) added at build time (`src/lib/markdown-img-size.mjs`).
 
-### 설교 시리즈 (`src/content/series/<이름>.md`)
-`title`, `thumbnail`, `ongoing`(진행 중이면 메인에 표시), `date`, `updated`, `episodes: [{title, youtube}]`.
+### Sermon series (`src/content/series/<name>.md`)
+`title`, `thumbnail`, `ongoing` (shown on the home page while in progress), `date`, `updated`, `episodes: [{title, youtube}]`.
 
-### 우리 교회 이야기 (`src/content/stories/YYYY-MM-DD-이름.md`)
-`title`, `date`, `image`(대표), `images`(앨범), `permalink`(원본 페이스북 글). 본문은 소식 글.
+### Church stories (`src/content/stories/YYYY-MM-DD-name.md`)
+`title`, `date`, `image` (cover), `images` (album), `permalink` (original Facebook post). The body is the story text.
 
-## 디자인 바꾸기
-`src/styles/_tokens.scss` 의 변수만 고치면 됩니다 — 남색(`$navy-*`), 금색(`$gold-*`), 글자색, 글꼴, 간격, 모서리.
-글꼴은 Pretendard(본문·제목)와 나눔명조(성경 구절·인용)입니다. 나눔명조를 바꾸려면 `scripts/fetch-fonts.mjs` 를 고치고 `npm run fetch:fonts`.
-접근성: 모든 색 조합은 WCAG AA 대비(4.5:1)를 만족하도록 정했고, 키보드 포커스 링·본문 건너뛰기 링크·감소 모션 설정을 지원합니다.
+## Changing the design
+Only edit the variables in `src/styles/_tokens.scss` — navy (`$navy-*`), gold (`$gold-*`), text colors, fonts, spacing, corner radius.
+Fonts are Pretendard (body and headings) and Nanum Myeongjo (Bible verses and quotes). To change Nanum Myeongjo, edit `scripts/fetch-fonts.mjs` and run `npm run fetch:fonts`.
+Accessibility: all color pairs meet WCAG AA contrast (4.5:1), with keyboard focus rings, a skip-to-content link, and reduced motion support.
 
-## 유튜브 설교 자동 등록
-`.github/workflows/youtube-sync.yml` 이 **매주 월요일** 유튜브 채널(`site.json` 의 `youtubeChannelId`) RSS 를 읽어
-아직 없는 영상을 `src/content/posts/sermons/` 에 추가하고 커밋합니다 → Cloudflare 가 자동 재빌드.
-GitHub 저장소 → Actions 탭에서 *Run workflow* 로 즉시 실행할 수도 있습니다. 로컬에서는 `npm run import:youtube`.
-제목·본문은 유튜브 제목·설명을 그대로 가져오므로, 필요하면 관리 화면에서 다듬으면 됩니다.
+## Automatic YouTube sermon posts
+`.github/workflows/youtube-sync.yml` reads the YouTube channel RSS (`youtubeChannelId` in `site.json`) **every Monday**,
+adds videos not yet present to `src/content/posts/sermons/`, and commits → Cloudflare rebuilds automatically.
+You can also run it immediately from the GitHub repository → Actions tab → *Run workflow*. Locally, use `npm run import:youtube`.
+Titles and bodies are copied from the YouTube title and description, so polish them in the admin UI if needed.
 
-## 문의 폼 · 세례 신청 폼
-정적 사이트에는 서버가 없어 무료 폼 전송 서비스 [FormSubmit](https://formsubmit.co) 을 씁니다 (가입 불필요).
-`site.json` 의 `formEndpoint` 가 `https://formsubmit.co/<이메일>` 로 설정되어 있습니다.
-1. 배포 후 연락처 페이지에서 문의 폼을 **한 번 전송**합니다.
-2. 그 이메일로 온 FormSubmit "Activate" 메일의 링크를 누릅니다 (최초 1회).
-3. 이후 문의·세례 신청이 이메일로 도착하고, 보낸 사람은 `/thanks` 페이지로 이동합니다.
+## Contact form · baptism application form
+A static site has no server, so it uses the free form service [FormSubmit](https://formsubmit.co) (no sign-up).
+`formEndpoint` in `site.json` is set to `https://formsubmit.co/<email>`.
+1. After deploying, **submit the contact form once** from the contact page.
+2. Click the link in the FormSubmit "Activate" email sent to that address (first time only).
+3. From then on, inquiries and baptism applications arrive by email, and senders are redirected to `/thanks`.
 
-이메일 노출을 피하려면 활성화 후 FormSubmit 이 알려주는 임의 문자열 주소로 바꾸세요. 이메일을 바꾸면 다시 활성화해야 합니다.
+To avoid exposing the email address, switch to the random-string endpoint FormSubmit gives you after activation. Changing the email requires activating again.
 
-## 교인 전용 기능 — 로그인 · D그룹 리더 보고서 · 일대일 양육보고서
+## Members-only features — login · D-Group leader reports · one-on-one discipleship reports
 
-기존 사이트의 회원 기능을 옮긴 부분입니다. 주소는 모두 로그인이 필요하며 검색엔진에는 노출되지 않습니다.
+These replace the member features of the old site. All of these URLs require login and are hidden from search engines.
 
-| 주소 | 누가 | 내용 |
+| URL | Who | What |
 |---|---|---|
-| `/login` | 모두 | 소셜 로그인(설정된 것만 버튼 표시) + 이메일·비밀번호 |
-| `/members` | 교인 | 마이페이지: 내 정보, 내가 낸 보고서와 관리자 답글 |
-| `/members/cell-report` | 교인 | D그룹 리더 보고서 작성 (원본의 8개 항목 그대로) |
-| `/members/care-report` | 교인 | 일대일 양육보고서 작성 |
-| `/members/password` | 교인 | 비밀번호 만들기/변경 |
-| `/manage` | 관리자 | 대시보드, 승인 대기 회원 바로 승인 |
-| `/manage/cell-reports`, `/manage/care-reports` | 관리자 | 보고서 목록(그룹·부서·기간 필터), 상세에서 답글·삭제, CSV 내려받기 |
-| `/manage/groups` | 관리자 | D그룹 추가·수정·비활성 |
-| `/manage/stats` | 관리자 | 연도별 그룹 요약, 월별 평균 출석 |
-| `/manage/users` | 관리자 | 회원 검색·승인·권한/상태 변경·비밀번호 재설정·계정 만들기 |
-| `/manage/content` | 관리자 | 글·사진·설정 편집 (위 "콘텐츠 관리" 절) |
+| `/login` | everyone | social login (buttons shown only for configured providers) + email/password |
+| `/members` | member | My page: profile, my submitted reports and admin replies |
+| `/members/cell-report` | member | write a D-Group leader report (same 8 fields as the original) |
+| `/members/care-report` | member | write a one-on-one discipleship report |
+| `/members/password` | member | set/change password |
+| `/manage` | admin | dashboard, approve pending members directly |
+| `/manage/cell-reports`, `/manage/care-reports` | admin | report lists (group/department/date filters), reply and delete from detail, CSV download |
+| `/manage/groups` | admin | add, edit, deactivate D-Groups |
+| `/manage/stats` | admin | yearly group summary, monthly average attendance |
+| `/manage/users` | admin | search, approve, change role/status, reset password, create accounts |
+| `/manage/content` | admin | edit posts, photos, settings ("Content management" section above) |
 
-**권한과 상태**
-* 권한: `관리자`(admin) / `교인`(member). 상태: `승인 대기`(pending) / `활성`(active) / `비활성`(disabled).
-* 소셜 로그인으로 처음 들어온 사람은 **승인 대기**가 되어 관리자가 승인해야 보고서를 쓸 수 있습니다 (스팸 가입 방지).
-* 환경 변수 `ADMIN_EMAILS`(쉼표 구분)에 적힌 이메일은 어떤 방법으로 로그인해도 곧바로 관리자가 됩니다.
-* 관리자가 "새 회원 추가"로 계정을 만들고 초기 비밀번호를 알려 주는 방식도 됩니다 (소셜 계정이 없는 분).
+**Roles and statuses**
+* Roles: `관리자` (admin) / `교인` (member). Statuses: `승인 대기` (pending) / `활성` (active) / `비활성` (disabled).
+* People who sign in with social login for the first time are **pending** and need admin approval before writing reports (prevents spam sign-ups).
+* Emails listed in the `ADMIN_EMAILS` env var (comma-separated) become admins immediately, whichever way they sign in.
+* Admins can also create an account with "Add new member" and share an initial password (for people without social accounts).
 
-**첫 관리자 만들기** (둘 중 하나)
+**Creating the first admin** (either one)
 ```bash
-# 1) 이메일·비밀번호 계정으로 (배포 DB 에 직접 기록)
-npm run admin:create -- --email admin@ckgmc.org --name 관리자 --password '8자이상비밀번호' --remote
-# 2) 또는 ADMIN_EMAILS 에 내 Google 이메일을 넣고 소셜 로그인 (아래 "소셜 로그인 연결" 후)
+# 1) email/password account (written directly to the deployed DB)
+npm run admin:create -- --email admin@ckgmc.org --name 관리자 --password 'password-8-chars-or-more' --remote
+# 2) or put your Google email in ADMIN_EMAILS and use social login (after "Connecting social login" below)
 ```
 
-**소셜 로그인 연결** (나중에 해도 됨 — 변수가 비어 있으면 버튼이 안 보일 뿐입니다)
-* Google: [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → OAuth 클라이언트 ID(웹) →
-  승인된 리디렉션 URI `https://ckgmc.org/auth/google/callback` (www 도메인도 쓰면 함께 등록) → `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
-* Facebook: [Meta for Developers](https://developers.facebook.com/) → 앱 → Facebook 로그인 → 유효한 OAuth 리디렉션 URI
-  `https://ckgmc.org/auth/facebook/callback` → `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET` (이메일 권한 필요)
-* 변수는 Cloudflare 대시보드 → Workers & Pages → ckgmc-site → Settings → Variables and Secrets 에 넣습니다 (로컬은 `.dev.vars`).
-* 다른 공급자(카카오 등)를 붙이려면 `src/lib/auth/oauth.ts` 의 `PROVIDERS` 에 항목을 추가하면 됩니다.
+**Connecting social login** (can be done later — buttons are simply hidden while the variables are empty)
+* Google: [Google Cloud Console](https://console.cloud.google.com/apis/credentials) → OAuth client ID (web) →
+  authorized redirect URI `https://ckgmc.org/auth/google/callback` (also register the www domain if used) → `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+* Facebook: [Meta for Developers](https://developers.facebook.com/) → app → Facebook Login → valid OAuth redirect URI
+  `https://ckgmc.org/auth/facebook/callback` → `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET` (email permission required)
+* Set the variables in the Cloudflare dashboard → Workers & Pages → ckgmc-site → Settings → Variables and Secrets (locally, `.dev.vars`).
+* To add another provider (Kakao, etc.), add an entry to `PROVIDERS` in `src/lib/auth/oauth.ts`.
 
-**어떻게 동작하나**
-* 데이터는 Cloudflare **D1**(SQLite) 에 저장됩니다. 테이블 정의는 `migrations/`, 쿼리는 `src/lib/reports.ts`, `src/lib/auth/users.ts`.
-* 세션은 30일 쿠키 + DB(`sessions`) 입니다. 비밀번호는 PBKDF2-SHA256 으로 해시합니다 (`src/lib/auth/password.ts`).
-* 로그인 보호와 CSRF(같은 출처) 검사는 `src/middleware.ts` 한 곳에서 합니다. 정적 페이지에는 영향이 없습니다.
-* 답글은 보고자의 마이페이지에 표시됩니다 (원본처럼 이메일로 보내지는 않음 — 필요하면 Resend 같은 메일 API 연결).
-* 개인 정보(회원·보고서)는 저장소가 아니라 DB 에만 있습니다. 그룹 목록도 관리 화면에서 직접 입력합니다.
+**How it works**
+* Data is stored in Cloudflare **D1** (SQLite). Table definitions are in `migrations/`; queries are in `src/lib/reports.ts` and `src/lib/auth/users.ts`.
+* Sessions are a 30-day cookie + DB (`sessions`). Passwords are hashed with PBKDF2-SHA256 (`src/lib/auth/password.ts`).
+* Login protection and CSRF (same-origin) checks happen in one place, `src/middleware.ts`. Static pages are unaffected.
+* Replies show on the reporter's My page (not emailed like the original — connect a mail API such as Resend if needed).
+* Personal data (members, reports) lives only in the DB, never in the repository. The group list is also entered in the admin UI.
 
-## 배포 — Cloudflare Workers (무료 플랜으로 충분)
-정적 페이지와 교인 전용 기능이 **하나의 Worker** 로 배포됩니다 (정적 파일 요청은 무료·무제한, 서버 요청은 하루 10만 건).
+## Deployment — Cloudflare Workers (free plan is enough)
+Static pages and members-only features deploy as **a single Worker** (static asset requests are free and unlimited; server requests are limited to 100,000 per day).
 
-> **현재 상태 (2026-09-05)**: 아래 1~5 단계는 끝났습니다. D1 `ckgmc` 생성·마이그레이션 완료, Worker `ckgmc-site` 배포 완료 —
-> https://ckgmc-site.ckgmc-site.workers.dev , `ADMIN_EMAILS` 시크릿 설정됨. 남은 일: 첫 관리자 만들기(6), 도메인 연결(7), CMS 워커 도메인 추가(8), 자동 배포 연결(선택).
-> 코드를 고친 뒤 다시 배포하려면 `npm run deploy` 한 줄이면 됩니다.
+> **Status (2026-09-05)**: steps 1–5 below are done. D1 `ckgmc` created and migrated, Worker `ckgmc-site` deployed —
+> https://ckgmc-site.ckgmc-site.workers.dev , `ADMIN_EMAILS` secret set. Remaining: create the first admin (6), connect the domain (7), add the domain to the CMS worker (8), connect auto deploy (optional).
+> To redeploy after code changes, run `npm run deploy`.
 
-**최초 1회**
-1. `npx wrangler login` (Cloudflare 계정 연결).
-2. DB 만들기: `npx wrangler d1 create ckgmc` → 출력된 `database_id` 를 `wrangler.jsonc` 의 `d1_databases[0].database_id` 에 넣고 커밋.
-3. 테이블 만들기: `npm run db:migrate:remote`
-4. 첫 배포: `npm run deploy` (= `npm run build && wrangler deploy`). `https://ckgmc-site.<내계정>.workers.dev` 가 생깁니다.
-5. 대시보드 → Workers & Pages → ckgmc-site → Settings → Variables and Secrets 에 `ADMIN_EMAILS` (와 소셜 로그인 키) 추가.
-6. 첫 관리자 만들기 (위 "교인 전용 기능" 절).
-7. Settings → Domains & Routes 에서 `ckgmc.org`, `www.ckgmc.org` 연결.
-   - **온라인헌금 임베드는 `https://ckgmc.org` 에서만 표시됩니다.** ChurchTrac 이 `frame-ancestors https://ckgmc.org` 로 그 주소만 허용하기 때문에
-     workers.dev 임시 주소와 `www.ckgmc.org` 에서는 "ChurchTrac에서 헌금하기" 버튼만 보입니다 (`src/components/widgets/Offering.astro` 의 `allowedHosts`).
-     Cloudflare → Rules → Redirect Rules 에 `www.ckgmc.org/*` → `https://ckgmc.org/$1` (301) 을 추가하거나, ChurchTrac 설정에서 www 주소도 허용하세요.
-8. 관리 화면(CMS) 로그인 워커의 `ALLOWED_DOMAINS` 에 위 도메인과 `ckgmc-site.<내계정>.workers.dev` 를 넣습니다.
+**One-time setup**
+1. `npx wrangler login` (connect your Cloudflare account).
+2. Create the DB: `npx wrangler d1 create ckgmc` → put the printed `database_id` into `d1_databases[0].database_id` in `wrangler.jsonc` and commit.
+3. Create tables: `npm run db:migrate:remote`
+4. First deploy: `npm run deploy` (= `npm run build && wrangler deploy`). This creates `https://ckgmc-site.<your-account>.workers.dev`.
+5. Dashboard → Workers & Pages → ckgmc-site → Settings → Variables and Secrets: add `ADMIN_EMAILS` (and social login keys).
+6. Create the first admin (see "Members-only features" above).
+7. Connect `ckgmc.org` and `www.ckgmc.org` in Settings → Domains & Routes.
+   - **The online giving embed only shows on `https://ckgmc.org`.** ChurchTrac allows only that origin via `frame-ancestors https://ckgmc.org`, so
+     the workers.dev URL and `www.ckgmc.org` show only the "give on ChurchTrac" button (`allowedHosts` in `src/components/widgets/Offering.astro`).
+     Add a Cloudflare → Rules → Redirect Rule `www.ckgmc.org/*` → `https://ckgmc.org/$1` (301), or allow the www origin in ChurchTrac settings.
+8. Add the domains above and `ckgmc-site.<your-account>.workers.dev` to `ALLOWED_DOMAINS` of the admin UI (CMS) login worker.
 
-**push 할 때마다 자동 배포**: `.github/workflows/deploy-cloudflare.yml` 이 main 커밋마다 빌드·배포합니다.
-저장소 Secrets 에 `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` 가 있어야 합니다 (위 "콘텐츠 관리 → 연결" 3번).
-콘텐츠 관리에서 저장하거나 유튜브 자동 등록이 커밋을 만들면 이 워크플로가 반영합니다.
+**Auto deploy on every push**: `.github/workflows/deploy-cloudflare.yml` builds and deploys every commit to main.
+The repository Secrets need `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (step 3 of "Content management → Setup" above).
+Commits from content management saves or the YouTube sync are deployed by this workflow.
 
-`public/_redirects`(옛 주소 리다이렉트)와 `public/_headers` 는 정적 파일에 자동 적용됩니다.
-DB 스키마를 바꿀 때는 `migrations/000N_*.sql` 을 추가하고 `npm run db:migrate:local` / `:remote` 를 실행합니다.
+`public/_redirects` (legacy URL redirects) and `public/_headers` apply to static files automatically.
+When changing the DB schema, add `migrations/000N_*.sql` and run `npm run db:migrate:local` / `:remote`.
 
+## Importing data from the old site
+This repository contains **sample data only** (a few recent posts per board, 5 series, 16 stories).
+* `scripts/import/scrape-ckgmc.py` — downloads all posts, attachments, and images from the old site and saves them as JSON (requires `beautifulsoup4`)
+* `scripts/import/json-to-markdown.py` — converts the JSON into Markdown under `src/content/` and copies images/PDFs to `public/`
 
-## 기존 사이트 데이터 가져오기
-이 저장소에는 **확인용 샘플 데이터**만 있습니다 (게시판별 최근 글 몇 개, 시리즈 5개, 이야기 16개).
-* `scripts/import/scrape-ckgmc.py` — 기존 사이트의 모든 글·첨부·이미지를 내려받아 JSON 으로 저장 (`beautifulsoup4` 필요)
-* `scripts/import/json-to-markdown.py` — JSON 을 `src/content/` 마크다운으로 변환하고 이미지·PDF 를 `public/` 으로 복사
+If you have a DB dump, create a `data/<board>.json` per board in the form
+`[{pid, title, datetime "YYYY-MM-DD HH:MM", writer, youtube, thumb, body(HTML), attachments:[{name,file}]}]` and run only the second script.
+Adding every bulletin PDF (about 430 files, 530MB) makes the repository large, so including only the last 1–2 years is recommended.
 
-DB 덤프를 직접 받았다면 게시판별 `data/<board>.json` 을
-`[{pid, title, datetime "YYYY-MM-DD HH:MM", writer, youtube, thumb, body(HTML), attachments:[{name,file}]}]` 형태로 만들어 두 번째 스크립트만 돌리면 됩니다.
-전체 주보 PDF(약 430개, 530MB)를 모두 넣으면 저장소가 커지므로 최근 1~2년치만 넣는 것을 권합니다.
+## Differences from the old site
+* Login, D-Group leader reports, one-on-one discipleship reports — reimplemented on Cloudflare Workers + D1 (see "Members-only features"). No self sign-up by email; admin approval or admin-issued accounts instead.
+* Reply emails, the "support request" (vendor contact) menu, and group statistics charts — dropped. Group statistics are provided as tables.
+* Edits are not instant: commit → auto deploy (2–3 minutes). In exchange, every change is kept in the repository history and can be reverted.
+* Home page — instead of a poster slider: church photo hero + service times/directions info strip + this week's sermon and bulletin + ministry intro + newcomer guide.
+* Facebook feed — requires an API token, so stories are managed as `content/stories/` Markdown (photo stories can be added in the admin UI).
+* URL scheme — English paths such as `/about/staff`. Old Korean URLs are redirected via `public/_redirects`.
+* Fonts — Pretendard + Nanum Myeongjo, self-hosted (no Google Fonts or jsDelivr dependency).
 
-## 기존 사이트와 달라진 점
-* 로그인·D그룹 리더 보고서·일대일 양육보고서 — Cloudflare Workers + D1 로 다시 구현 (위 "교인 전용 기능"). 이메일 자체 가입은 없고 관리자 승인 또는 계정 발급 방식.
-* 답글 이메일 발송, "지원 요청"(제작사 문의) 메뉴, 그룹 통계의 그래프 — 제외. 그룹 통계는 표로 제공.
-* 글 편집은 즉시 반영이 아니라 커밋 → 자동 배포(2~3분). 그 대신 모든 변경 이력이 저장소에 남고 되돌릴 수 있습니다.
-* 메인 화면 — 포스터 슬라이더 대신 교회 사진 첫 화면 + 예배 시간/오시는 길 정보 띠 + 이번 주 설교·주보 + 사역 소개 + 새가족 안내.
-* 페이스북 피드 자동 표시 — API 토큰이 필요해 `content/stories/` 마크다운으로 관리 (관리 화면에서 사진 소식 등록).
-* 주소 체계 — `/about/staff` 같은 영문 주소. 옛 한글 주소는 `public/_redirects` 로 넘겨줍니다.
-* 글꼴 — Pretendard + 나눔명조 자체 호스팅 (Google Fonts·jsDelivr 의존 없음).
-
-## 후속 과제 (선택)
-검색엔진용 구조화 데이터(JSON-LD), 게시글별 공유 이미지, 사이트 내 검색(Pagefind), 공유 버튼, 이미지 라이트박스, Astro `<Image>` 최적화 파이프라인.
+## Follow-ups (optional)
+Structured data for search engines (JSON-LD), per-post share images, on-site search (Pagefind), share buttons, image lightbox, Astro `<Image>` optimization pipeline.
