@@ -17,7 +17,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const ctx = newUploadCtx();
     const url = await stageUpload(ctx, file, 'image');
     const store = getStore();
-    const { sha } = await store.commit({ put: ctx.puts, delete: [] }, `content: 사진 업로드 — ${file.name} (관리 화면, ${user.name})`, { name: user.name, email: user.email });
+    const { sha } = await store.commit({ put: ctx.puts, delete: [] }, `content: upload photo — ${file.name} (admin UI, ${user.name})`, { name: user.name, email: user.email });
     await recordChange({ collection: 'uploads', path: ctx.puts[0].path, title: file.name, action: 'upload', userId: user.id, commitSha: sha });
     return json({ url });
   } catch (e) {

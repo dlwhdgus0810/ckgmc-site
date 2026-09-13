@@ -62,7 +62,7 @@ if (col && store && Astro.request.method === 'POST') {
   const author = { name: user.name, email: user.email };
   try {
     if (action === 'delete' && col.kind === 'folder' && formPath && ownsPath(col, formPath)) {
-      const { sha: commitSha } = await store.commit({ put: [], delete: [formPath] }, `content: ${col.label} 글 삭제 — ${formPath.split('/').pop()} (관리 화면)`, author);
+      const { sha: commitSha } = await store.commit({ put: [], delete: [formPath] }, `content: delete ${col.key} — ${formPath.split('/').pop()} (admin UI)`, author);
       await recordChange({ collection: col.key, path: formPath, title: formPath.split('/').pop() ?? formPath, action: 'delete', userId: user.id, commitSha });
       setFlash(Astro.cookies, 'success', '삭제했습니다. 2~3분 뒤 사이트에서 사라집니다.');
       return Astro.redirect(listHref, 303);
@@ -105,7 +105,7 @@ if (col && store && Astro.request.method === 'POST') {
       if (errors.length === 0 && path) {
         const text = col.kind === 'json' ? JSON.stringify(values, null, 2) + '\n' : serializeFrontmatter(values, body);
         const title = titleOf(values, col.label);
-        const message = `content: ${col.label} ${isNew ? '새 글' : '수정'} — ${title} (관리 화면, ${user.name})`;
+        const message = `content: ${isNew ? 'create' : 'update'} ${col.key} — ${titleOf(values, col.key)} (admin UI, ${user.name})`;
         const { sha: commitSha } = await store.commit({ put: [...ctx.puts, { path, base64: utf8ToBase64(text) }], delete: [] }, message, author);
         await recordChange({ collection: col.key, path, title, action: isNew ? 'create' : 'update', userId: user.id, commitSha });
         for (const up of ctx.uploaded) await recordChange({ collection: col.key, path: up, title: up.split('/').pop() ?? up, action: 'upload', userId: user.id, commitSha });
