@@ -1,13 +1,13 @@
 {
   "name": "캔사스중앙글로벌감리교회",
   "nameEn": "Central Korean Global Methodist Church of Kansas",
-  "description": "캔자스시티 오버랜드파크의 한인 교회, 캔사스중앙글로벌감리교회입니다. 주일예배 오전 9:30·11:00, English Service 11:00, 금요성령집회 저녁 8:00.",
+  "description": "캔자스시티 오버랜드파크의 한인 교회, 캔사스중앙글로벌감리교회입니다. \r\n주일예배 오전 9:30·11:00, English Service 11:00, 금요성령집회 저녁 8:00.",
   "address": "9400 Nall Ave. Overland Park, KS 66207",
   "mapQuery": "9400 Nall Ave, Overland Park, KS 66207",
   "phone": "+1 913-649-2488",
   "email": "mchrissong@gmail.com",
   "logo": "/images/logo.png",
-  "ogImage": "/images/og-default.jpg",
+  "ogImage": "/images/uploads/2026/10/파스텔-느낌-hqlhc.png",
   "social": {
     "facebook": "https://www.facebook.com/ckgmckc",
     "youtube": "https://youtube.com/@ckgmc",
@@ -24,7 +24,7 @@
   "formEndpoint": "https://formsubmit.co/mchrissong@gmail.com",
   "formThanksPath": "/thanks",
   "hero": {
-    "image": "/images/pages/young-adult.jpg",
+    "image": "/images/uploads/2026/10/20261011-CKGMC-Outdoor-131-hqlhc.jpg",
     "alt": "캔사스중앙글로벌감리교회 성도들이 함께 모여 웃고 있는 모습",
     "eyebrow": "Central Korean Global Methodist Church of Kansas",
     "headline": "예수님과 친밀히 동행하는 교회",
