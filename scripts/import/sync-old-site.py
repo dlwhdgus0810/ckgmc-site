@@ -17,10 +17,12 @@ json-to-markdown.py 와 달리 기존 파일을 지우지 않으므로, 관리 �
 - 설교 시리즈: 이미 있는 시리즈는 빠진 에피소드만 뒤에 덧붙이고 진행 여부·수정일만 갱신
   (`hidden: true` 로 숨긴 영상과 제목이 같은 에피소드는 넣지 않음)
 - 기존 사이트에서도 열리지 않는 이미지·파일은 본문에서 뺍니다
+- 유튜브에서 비공개·삭제된 영상의 글은 `hidden: true` 로 가져옵니다 (눌러도 재생되지 않으므로 목록에 내지 않음.
+  영상을 다시 공개하면 관리 화면에서 숨김을 풀면 됩니다)
 
 유튜브 영상이 있는 글의 목록 썸네일은 내려받지 않습니다 (사이트가 유튜브 썸네일을 씁니다).
 """
-import argparse, glob, json, os, re, sys, time, urllib.parse, urllib.request
+import argparse, glob, json, os, re, sys, time, urllib.error, urllib.parse, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from html import escape as html_escape
 from bs4 import BeautifulSoup
@@ -94,6 +96,18 @@ def download(url, folder):
         downloaded['count'] += 1
         downloaded['bytes'] += len(b)
     return name
+
+
+def video_available(youtube_id):
+    """공개(또는 일부 공개) 영상인지 — 비공개·삭제 영상은 유튜브가 썸네일을 주지 않습니다(404)."""
+    try:
+        req = urllib.request.Request(f'https://i.ytimg.com/vi/{youtube_id}/hqdefault.jpg', method='HEAD', headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=30):
+            return True
+    except urllib.error.HTTPError as e:
+        return e.code != 404
+    except Exception:
+        return True  # 확인하지 못했으면 숨기지 않음
 
 
 def ystr(s):  # YAML 에서도 유효한 JSON 문자열
@@ -235,6 +249,8 @@ def write_post(board, it):
         for a in it['attachments']:
             fm.append(f'  - name: {ystr(a["name"])}')
             fm.append(f'    file: {ystr(a["file"])}')
+    if it.get('hidden'):
+        fm.append('hidden: true')
     fm.append('---')
     body = it.get('body') or ''
     path = os.path.join(POSTS, board, f'{dt[:10]}-{it["pid"]}.md')
@@ -259,6 +275,8 @@ def sync_board(board, path, since, dry_run):
             return None  # 유튜브 자동 등록으로 이미 있는 영상
         if board in DATE_DEDUPE and service_date(it['title']) in dates:
             return None
+        if it['youtube'] and not video_available(it['youtube']):
+            it['hidden'] = True
         if it['thumb'] and not it['youtube']:  # 영상이 있으면 사이트가 유튜브 썸네일을 씀
             name = os.path.basename(it['thumb']) if dry_run else download(it['thumb'], IMG)
             if name:
@@ -269,7 +287,7 @@ def sync_board(board, path, since, dry_run):
         new = [r for r in ex.map(one, items) if r]
     for it in new:
         if dry_run:
-            print(f'  + {it["datetime"][:10]} [{it["pid"]}] {it["title"]}' + (f'  (첨부 {len(it["attachments"])})' if it['attachments'] else ''))
+            print(f'  + {it["datetime"][:10]} [{it["pid"]}] {it["title"]}' + (f'  (첨부 {len(it["attachments"])})' if it['attachments'] else '') + ('  (영상 비공개 — 숨김)' if it.get('hidden') else ''))
         else:
             write_post(board, it)
     print(f'== {board}: {len(new)}개 {"추가 예정" if dry_run else "추가"}' + (f' ({since} 이후만)' if since else ''), flush=True)

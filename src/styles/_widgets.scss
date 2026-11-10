@@ -36,3 +36,23 @@
 }
 .contact-form { max-width: 36rem; label { font-weight: 600; } }
 .service-times__time { font-size: 1.0625rem; color: $navy-900; }
+// 필수 입력 표시
+.req { color: $danger; font-weight: 700; }
+
+// 세례 안내: 물방울 그림이 휴대전화에서 화면을 가득 채우지 않게
+#baptize .col-sm-2 img { max-width: 7rem; }
+
+// 예배 안내: 휴대전화에서는 사진을 왼쪽에 작게 두어 예배 시간이 바로 보이게
+#worship-service .col-sm-4 {
+  @include media-breakpoint-down(xs) {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    column-gap: 1rem;
+    align-items: start;
+    padding-top: 1rem;
+    padding-bottom: .25rem;
+    & + .col-sm-4 { border-top: 1px solid $line; }
+    > img { grid-column: 1; grid-row: 1 / span 8; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: $border-radius-sm; margin: 0 !important; }
+    > :not(img) { grid-column: 2; min-width: 0; }
+  }
+}

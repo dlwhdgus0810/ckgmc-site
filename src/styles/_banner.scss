@@ -21,7 +21,7 @@
   &__scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba($navy-900, .2) 0%, rgba($navy-900, .55) 55%, rgba($navy-900, .85) 100%);
+    background: linear-gradient(180deg, rgba($navy-900, .5) 0%, rgba($navy-900, .62) 50%, rgba($navy-900, .88) 100%);
   }
   &:not(.page-banner--image) &__scrim { display: none; }
   &__content {
@@ -37,6 +37,7 @@
     letter-spacing: .14em;
     text-transform: uppercase;
     color: $gold-300;
+    text-shadow: 0 1px 6px rgba($navy-900, .8);
   }
   &__title {
     margin: 0;
@@ -54,11 +55,12 @@
   padding: 0;
   background: transparent;
   font-size: .8125rem;
-  color: rgba(#fff, .85);
+  color: rgba(#fff, .9);
+  text-shadow: 0 1px 6px rgba($navy-900, .8);
   flex-wrap: nowrap;
   overflow: hidden;
   .breadcrumb-item { white-space: nowrap; }
   .breadcrumb-item.active { color: #fff; overflow: hidden; text-overflow: ellipsis; }
   .breadcrumb-item + .breadcrumb-item::before { color: rgba(#fff, .5); }
-  a { color: rgba(#fff, .85); &:hover { color: #fff; } }
+  a { color: rgba(#fff, .9); &:hover { color: #fff; } }
 }

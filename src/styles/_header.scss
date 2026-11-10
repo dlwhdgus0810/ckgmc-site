@@ -23,6 +23,7 @@
     align-items: center;
     flex: 0 1 auto;   // 아주 좁은 화면(≤320px)에서는 로고가 줄어들고 메뉴 버튼(44px)은 그대로
     min-width: 0;
+    min-height: 44px;
     img { display: block; height: 34px; width: auto; max-width: 100%; object-fit: contain; object-position: left center; }
     @include media-breakpoint-up(lg) { img { height: 36px; } }
     @include media-breakpoint-up(xl) { img { height: 40px; } }
@@ -86,7 +87,8 @@
     top: $header-height;
     right: 0;
     bottom: 0;
-    width: min(100%, 380px);
+    width: 100%;
+    @media (min-width: 480px) { width: 380px; }
     padding: .5rem 1.25rem 2rem;
     background: $navy-900;
     overflow-y: auto;

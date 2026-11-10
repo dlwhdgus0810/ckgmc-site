@@ -3,6 +3,7 @@
  */
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
+import { shrinkImage, shrinkSummary } from './image-shrink';
 
 // ── 목록(첨부·에피소드·예배 시간 …) 행 추가/삭제 ─────────────────────
 document.querySelectorAll<HTMLElement>('[data-list]').forEach((list) => {
@@ -33,14 +34,45 @@ document.querySelectorAll<HTMLElement>('[data-list]').forEach((list) => {
 });
 
 // ── 사진 올리기 → 저장소에 커밋 → 주소 ───────────────────────────────
-async function uploadImage(file: File): Promise<string> {
+async function uploadImage(original: File): Promise<string> {
+  const file = await shrinkImage(original); // 큰 사진은 올리기 전에 줄임
   const fd = new FormData();
-  fd.append('file', file);
+  fd.append('file', file, file.name);
   const res = await fetch('/manage/content/upload', { method: 'POST', body: fd });
   const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string };
   if (!res.ok || !data.url) throw new Error(data.error ?? `업로드 실패 (${res.status})`);
   return data.url;
 }
+
+// 폼에 붙은 사진 칸(대표 사진·앨범 등): 고른 사진을 저장 전에 줄여서 바꿔 넣음
+document.querySelectorAll<HTMLInputElement>('input[type="file"][accept^="image"]:not([data-inline-upload])').forEach((input) => {
+  const note = document.createElement('small');
+  note.className = 'text-muted d-block';
+  note.setAttribute('role', 'status');
+  input.insertAdjacentElement('afterend', note);
+  input.addEventListener('change', async () => {
+    const before = Array.from(input.files ?? []);
+    if (!before.length || input.dataset.shrinking) return;
+    const submits = Array.from(input.form?.querySelectorAll<HTMLButtonElement>('button[type="submit"]') ?? []);
+    input.dataset.shrinking = '1';
+    submits.forEach((b) => (b.disabled = true)); // 줄이는 동안 저장되지 않게
+    note.textContent = '사진 크기를 줄이는 중…';
+    try {
+      const after = await Promise.all(before.map(shrinkImage));
+      if (after.some((f, i) => f !== before[i])) {
+        const dt = new DataTransfer();
+        after.forEach((f) => dt.items.add(f));
+        input.files = dt.files;
+      }
+      note.textContent = shrinkSummary(before, after);
+    } catch {
+      note.textContent = '';
+    } finally {
+      delete input.dataset.shrinking;
+      submits.forEach((b) => (b.disabled = false));
+    }
+  });
+});
 
 const inlineInput = document.querySelector<HTMLInputElement>('[data-inline-upload]');
 const inlineResult = document.querySelector<HTMLElement>('[data-inline-upload-result]');

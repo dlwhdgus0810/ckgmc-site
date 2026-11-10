@@ -3,7 +3,7 @@
  * 게시글 상세: 제목·메타 → 유튜브 영상 → 본문 → PDF(주보) → 첨부 → 이전/다음 글
  * 유튜브에서 자동 등록된 설교는 제목을 "예배 종류 · 설교자 · 날짜"로 나눠 보여주고, 설명의 상용구(예배 안내·헌금·저작권)는 접어 둡니다.
  */
-import { render } from 'astro:content';
+import { render, getCollection } from 'astro:content';
 import Icon from './Icon.astro';
 import { slugOf, formatKoreanDate, displayDate, dateTimeAttr, pdfOf, fileUrl, textExcerpt, titleParts, displayTitle, splitDescription, type Post } from '../lib/posts';
 
@@ -27,6 +27,16 @@ const hasBody = (post.body ?? '').trim().length > 0 && !bodyIsPdfLink;
 // 영상 설명: 구분선 아래는 접기
 const split = post.data.youtube ? splitDescription(post.body) : null;
 const metaItems = [t.service, t.preacher ?? post.data.writer].filter(Boolean) as string[];
+// 이 영상이 들어 있는 설교 시리즈 (있으면 시리즈로 가는 링크를 보여줌)
+let inSeries: { title: string; href: string; no: number; total: number } | undefined;
+if (post.data.youtube) {
+  const [allSeries, pages] = await Promise.all([getCollection('series'), getCollection('pages')]);
+  const found = allSeries.find((s) => s.data.episodes.some((e) => e.youtube === post.data.youtube));
+  const seriesPage = pages.find((p) => p.data.board === 'series');
+  if (found && seriesPage) {
+    inSeries = { title: found.data.title, href: `/${seriesPage.id}/${found.id}`, no: found.data.episodes.findIndex((e) => e.youtube === post.data.youtube) + 1, total: found.data.episodes.length };
+  }
+}
 ---
 <article class="post">
   <header class="post__header">
@@ -47,6 +57,14 @@ const metaItems = [t.service, t.preacher ?? post.data.writer].filter(Boolean) as
         loading="lazy"
       ></iframe>
     </div>
+  )}
+
+  {inSeries && (
+    <p class="post__series">
+      <span class="card-tile__eyebrow">설교 시리즈</span>
+      <a href={inSeries.href}>{inSeries.title}</a>
+      <small>{inSeries.total}편 중 {inSeries.no}번째</small>
+    </p>
   )}
 
   {hasBody && (split ? (

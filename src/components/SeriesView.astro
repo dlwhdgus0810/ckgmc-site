@@ -2,13 +2,22 @@
 /** 설교 시리즈 상세: 플레이어 + 소개 + 에피소드 목록 (재생 버튼으로 영상 전환) */
 import { render, type CollectionEntry } from 'astro:content';
 import Icon from './Icon.astro';
-import { formatKoreanDate } from '../lib/posts';
+import { formatKoreanDate, parseSermonTitle, parseTitleDate } from '../lib/posts';
 
 interface Props { series: CollectionEntry<'series'>; base: string }
 const { series, base } = Astro.props;
 const { Content } = await render(series);
 const total = series.data.episodes.length;
 const hasContent = (series.body ?? '').trim().length > 0;
+// 회차 제목(예배 | 제목 | 설교자 | 날짜)은 설교 목록처럼 나눠서: 제목은 크게, 나머지는 아랫줄에
+const episodes = series.data.episodes.map((ep, i) => {
+  const t = parseSermonTitle(ep.title);
+  const date = parseTitleDate(t.date);
+  return { ...ep, no: i + 1, name: t.title, info: [t.service, t.preacher, date ? formatKoreanDate(date) : t.date].filter(Boolean).join(' · ') };
+});
+// 진행 중인 시리즈는 새 회차를 바로 찾도록 최신 회차부터, 끝난 시리즈는 1편부터 (번호는 그대로)
+const newestFirst = series.data.ongoing && total > 1;
+const ordered = newestFirst ? [...episodes].reverse() : episodes;
 ---
 <article class="series">
   <header class="series__header">
@@ -26,17 +35,27 @@ const hasContent = (series.body ?? '').trim().length > 0;
   {total === 0 ? (
     <p class="text-muted text-center">등록된 영상이 없습니다.</p>
   ) : (
-    <ol class="episode-list">
-      {series.data.episodes.map((ep, i) => (
-        <li class="episode">
-          <span class="episode__no" aria-hidden="true">{i + 1}</span>
-          <span class="episode__title">{ep.title}</span>
-          <button type="button" class="btn btn-outline-primary btn-sm" data-youtube-id={ep.youtube} data-title={ep.title} aria-pressed="false" aria-label={`${i + 1}편 재생: ${ep.title}`}>
-            <Icon name="play" size={14} /> 재생
-          </button>
-        </li>
-      ))}
-    </ol>
+    <>
+      {total > 5 && (
+        <p class="episode-tools">
+          <button type="button" class="btn btn-link btn-sm" data-episode-order>{newestFirst ? '1편부터 보기' : '최신 회차부터 보기'}</button>
+        </p>
+      )}
+      <ol class="episode-list" reversed={newestFirst} data-order={newestFirst ? 'newest' : 'oldest'}>
+        {ordered.map((ep) => (
+          <li class="episode">
+            <span class="episode__no" aria-hidden="true">{ep.no}</span>
+            <span class="episode__title">
+              <strong>{ep.name}</strong>
+              {ep.info && <small>{ep.info}</small>}
+            </span>
+            <button type="button" class="btn btn-outline-primary btn-sm" data-youtube-id={ep.youtube} data-title={ep.title} aria-pressed="false" aria-label={`${ep.no}편 재생: ${ep.name}`}>
+              <Icon name="play" size={14} /> 재생
+            </button>
+          </li>
+        ))}
+      </ol>
+    </>
   )}
 </article>
 <p class="text-center mt-4"><a href={base} class="btn btn-outline-primary">목록으로</a></p>
@@ -60,4 +79,17 @@ const hasContent = (series.body ?? '').trim().length > 0;
       player.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   });
+
+  // 회차 순서 바꾸기 (최신 회차부터 ↔ 1편부터)
+  const list = document.querySelector<HTMLOListElement>('.episode-list');
+  const orderBtn = document.querySelector<HTMLButtonElement>('[data-episode-order]');
+  if (list && orderBtn) {
+    orderBtn.addEventListener('click', () => {
+      const newest = list.dataset.order !== 'newest';
+      for (const li of Array.from(list.children).reverse()) list.appendChild(li);
+      list.dataset.order = newest ? 'newest' : 'oldest';
+      list.reversed = newest;
+      orderBtn.textContent = newest ? '1편부터 보기' : '최신 회차부터 보기';
+    });
+  }
 </script>

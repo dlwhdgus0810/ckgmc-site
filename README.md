@@ -57,6 +57,7 @@ wrangler.jsonc          Cloudflare Workers config (D1 binding, static assets dir
 .dev.vars.example       example local env vars → copy to .dev.vars
 scripts/
   import-youtube.mjs    new YouTube channel videos → posts/sermons (run weekly by GitHub Actions)
+  optimize-images.mjs   shrink heavy photos already in public/images (npm run optimize:images)
   fetch-fonts.mjs       download Nanum Myeongjo web fonts
   import/               tools for importing data from the old site
 .github/workflows/
@@ -179,6 +180,18 @@ Accessibility: all color pairs meet WCAG AA contrast (4.5:1), with keyboard focu
 adds videos not yet present to `src/content/posts/sermons/`, and commits → Cloudflare rebuilds automatically.
 You can also run it immediately from the GitHub repository → Actions tab → *Run workflow*. Locally, use `npm run import:youtube`.
 Titles and bodies are copied from the YouTube title and description, so polish them in the admin UI if needed.
+When the same service is uploaded again with the same title, only the later upload stays visible; the earlier post gets `hidden: true`.
+
+## Board lists, search, and photos
+* **List layout is automatic**: boards whose posts have their own picture (video, thumbnail, photo in the body) show as cards;
+  boards without pictures (bulletins, discussion sheets) show as a compact list with an "open PDF" button (`boardLayout` in `src/lib/posts.ts`).
+* **Search** appears on boards with more than two pages. It filters by title, preacher, Bible passage (sermons), and year, in the browser,
+  using `/search/<board>.json`, which is generated at build time (`src/pages/search/[board].json.ts`). Hidden posts are not included.
+* **Videos that are private or deleted on YouTube** cannot be played, so their posts are kept with `hidden: true`.
+  If a video is made public again, untick "hidden" for that post in the admin UI.
+* **Photos are shrunk before upload** in the admin UI (long side 2000px, JPEG quality 85; transparent PNGs stay PNG) — `src/scripts/image-shrink.ts`.
+  For photos added to `public/images` by hand, run `npm run optimize:images` (add `-- --dry-run` to preview) and commit the result.
+  It converts opaque PNGs to JPEG and updates the paths in `src/`.
 
 ## Contact form · baptism application form
 A static site has no server, so it uses the free form service [FormSubmit](https://formsubmit.co) (no sign-up).

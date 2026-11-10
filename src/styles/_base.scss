@@ -66,14 +66,21 @@ h1, h2 { text-wrap: balance; }
   img { max-width: 100%; height: auto; }
   iframe { max-width: 100%; }
   .table td, .table th { word-break: keep-all; }
-  h2 small, h3 small, h4 small { font-size: .6em; color: $ink-600; font-weight: 500; }
+  // 제목 옆 영문 보조 글자: 작은 제목(.h6 등)에서도 13px 아래로 내려가지 않게
+  h2 small, h3 small, h4 small { font-size: max(.6em, .8125rem); color: $ink-600; font-weight: 500; }
+  h5 small, h6 small, .h5 small, .h6 small { font-size: max(.8em, .8125rem); }
   h2 { margin-top: .5rem; }
-  h4 { font-size: 1.25rem; margin-top: 1.5rem; }
-  h5 { font-size: 1.125rem; font-weight: 700; margin-top: 1rem; }
+  // 본문 제목은 단계를 건너뛰지 않도록 h2 부터 쓰고, 크기는 .h3~.h5 클래스로 정합니다 (예: <h2 class="h4">)
+  .h3 { margin-top: 0; }
+  h4, .h4 { font-size: 1.25rem; margin-top: 1.5rem; }
+  h5, .h5 { font-size: 1.125rem; font-weight: 700; margin-top: 1rem; }
   ol li { padding: .2rem 0; }
   dl dt { margin-top: .75rem; }
   dt .no { display: inline-block; min-width: 1.6em; color: $navy; font-weight: 700; }
   .lead { font-weight: 400; }
+
+  // 본문 속 링크는 색만으로 구분되지 않도록 밑줄. 버튼·카드·목록 줄 같은 컴포넌트 링크는 모두 클래스가 있으므로 제외됩니다
+  :where(p, li, dd) a:where(:not([class])) { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .18em; }
 }
 
 // 움직임을 줄이도록 설정한 사용자에게는 애니메이션을 끕니다

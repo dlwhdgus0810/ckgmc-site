@@ -14,7 +14,7 @@ const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
 ---
 {total > 1 && (
   <nav aria-label="페이지 이동" class="d-flex justify-content-center py-3">
-    <ul class="pagination pagination-sm mb-0">
+    <ul class="pagination mb-0">
       {current === 1 ? (
         <>
           <li class="page-item disabled"><span class="page-link">처음</span></li>
@@ -30,7 +30,7 @@ const pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
         n === current ? (
           <li class="page-item active" aria-current="page"><span class="page-link">{n}</span></li>
         ) : (
-          <li class="page-item"><a class="page-link" href={href(n)}>{n}</a></li>
+          <li class:list={['page-item', { 'page-item--near': Math.abs(n - current) === 2, 'page-item--far': Math.abs(n - current) > 2 }]}><a class="page-link" href={href(n)}>{n}</a></li>
         )
       )}
       {current === total ? (

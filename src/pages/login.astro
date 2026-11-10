@@ -108,8 +108,7 @@ const formAction = Astro.url.pathname + Astro.url.search;
           <button type="submit" class="btn btn-primary btn-block">로그인</button>
         </form>
         <p class="small text-muted mt-3 mb-0">
-          비밀번호를 잊으셨거나 계정이 없으면 교회 사무실(관리자)에 문의해 주세요.
-          {providers.length === 0 && <><br />소셜 로그인은 준비 중입니다.</>}
+          비밀번호를 잊으셨거나 계정이 없으면 <a href="/about/contact" style="text-decoration: underline;">교회 사무실(관리자)</a>에 문의해 주세요.
         </p>
 
         {isDev && (

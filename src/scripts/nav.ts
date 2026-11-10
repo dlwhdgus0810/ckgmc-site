@@ -12,9 +12,16 @@ function initNav() {
   const desktop = window.matchMedia('(min-width: 992px)');
 
   const menuOf = (btn: HTMLButtonElement) => document.getElementById(btn.getAttribute('aria-controls') ?? '');
+  const isOpen = (btn: HTMLButtonElement) => menuOf(btn)?.classList.contains('is-open') ?? false;
+  /** aria-expanded 를 실제로 보이는 상태에 맞춥니다 — 데스크톱에서는 클릭 말고도 호버·포커스(CSS)로 열리기 때문 */
+  const syncExpanded = (btn: HTMLButtonElement) => {
+    const item = btn.closest('.has-menu');
+    const shownByCss = desktop.matches && !!item && (item.matches(':hover') || item.matches(':focus-within'));
+    btn.setAttribute('aria-expanded', String(isOpen(btn) || shownByCss));
+  };
   const setMenu = (btn: HTMLButtonElement, open: boolean) => {
-    btn.setAttribute('aria-expanded', String(open));
     menuOf(btn)?.classList.toggle('is-open', open);
+    syncExpanded(btn);
   };
   const closeMenus = (except?: HTMLButtonElement) => buttons.forEach((b) => b !== except && setMenu(b, false));
 
@@ -28,17 +35,21 @@ function initNav() {
 
   buttons.forEach((btn) => {
     btn.addEventListener('click', () => {
-      const open = btn.getAttribute('aria-expanded') === 'true';
+      const open = isOpen(btn);
       if (desktop.matches) closeMenus(btn);
       setMenu(btn, !open);
     });
+    const item = btn.closest('.has-menu');
+    for (const type of ['mouseenter', 'mouseleave', 'focusin']) item?.addEventListener(type, () => syncExpanded(btn));
+    // focusout 시점에는 아직 :focus-within 이 남아 있으므로 한 박자 뒤에 확인
+    item?.addEventListener('focusout', () => setTimeout(() => syncExpanded(btn)));
   });
 
   toggle?.addEventListener('click', () => setDrawer(nav?.dataset.open !== 'true'));
 
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    const openBtn = buttons.find((b) => b.getAttribute('aria-expanded') === 'true');
+    const openBtn = buttons.find(isOpen);
     if (desktop.matches) {
       if (openBtn) { closeMenus(); openBtn.focus(); }
     } else if (nav?.dataset.open === 'true') {
