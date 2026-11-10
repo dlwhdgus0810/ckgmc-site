@@ -70,12 +70,13 @@ const DEFAULT_THUMBNAIL = '/images/thumbnail-default.jpg';
 /** 글에 자기 그림(썸네일·영상·본문 사진)이 있는지 — 없으면 목록에서 모두 같은 기본 그림이 됩니다 */
 export const hasOwnImage = (post: Post): boolean => thumbnailOf(post) !== DEFAULT_THUMBNAIL;
 /**
- * 게시판 목록 모양: 글 대부분(80% 이상)에 자기 그림이 없으면(주보·나눔지) 그림 없는 줄 목록 'rows', 아니면 카드 'cards'.
+ * 게시판 목록 모양: 글의 절반 이상에 자기 그림이 없으면(주보·나눔지) 그림 없는 줄 목록 'rows', 아니면 카드 'cards'.
  * 같은 기본 그림이 15장 반복되는 것보다 날짜와 제목이 한눈에 보이는 편이 낫습니다.
+ * (주보는 PDF 가 대부분이지만 2018~2019년 것은 사진이라 약 20% 가 그림 있는 글입니다.)
  */
 export function boardLayout(posts: Post[]): 'cards' | 'rows' {
   if (posts.length === 0) return 'cards';
-  return posts.filter((p) => !hasOwnImage(p)).length / posts.length >= 0.8 ? 'rows' : 'cards';
+  return posts.filter((p) => !hasOwnImage(p)).length / posts.length >= 0.5 ? 'rows' : 'cards';
 }
 
 /**

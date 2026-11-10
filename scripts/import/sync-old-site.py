@@ -47,6 +47,7 @@ BOARDS = {
     'youth':            '/사역-ministries/청소년부-x-youth',
     'young-adult':      '/사역-ministries/청년부-young-adult',
     'camping':          '/사역-ministries/캠핑-사역-camping-ministry',
+    'youth-orchestra':  '/사역-ministries/유스-오케스트라-youth-orchestra',  # 기존 사이트 메뉴에는 없지만 주소는 살아 있는 페이지
     'english':          '/사역-ministries/english-ministry',
     'newcomers':        '/양육과-훈련-next-steps/새가족환영회-dinner-with-pastors',
     'serving':          '/양육과-훈련-next-steps/serving-the-church',
@@ -56,6 +57,7 @@ BOARDS = {
 SINCE = {'bulletins': '2025-01-01', 'resources': '2025-01-01'}
 # 제목의 예배 날짜로 중복을 거르는 게시판
 DATE_DEDUPE = {'bulletins', 'resources'}
+ASSET_LIMIT = 25 * 1024 * 1024  # Cloudflare Workers 정적 파일 한 개의 최대 크기
 DOC_EXT = ('.pdf', '.doc', '.docx', '.ppt', '.pptx', '.xls', '.xlsx', '.hwp', '.zip', '.mp3', '.txt')
 
 downloaded = {'count': 0, 'bytes': 0}
@@ -95,6 +97,8 @@ def download(url, folder):
             f.write(b)
         downloaded['count'] += 1
         downloaded['bytes'] += len(b)
+        if len(b) > ASSET_LIMIT:
+            print(f'  ! {name}: {len(b) / 1048576:.1f}MB — Cloudflare 는 파일 하나가 25MB 를 넘으면 배포가 실패합니다. 나누거나 줄인 뒤 커밋하세요.', file=sys.stderr)
     return name
 
 
