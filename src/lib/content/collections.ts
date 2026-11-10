@@ -50,6 +50,7 @@ export const BOARDS: Array<{ key: string; label: string; urlPrefix: string; yout
   { key: 'youth', label: '부서 소식 · 청소년부', urlPrefix: '/ministries/youth' },
   { key: 'young-adult', label: '부서 소식 · 청년부', urlPrefix: '/ministries/young-adult' },
   { key: 'camping', label: '부서 소식 · 캠핑 미니스트리', urlPrefix: '/ministries/camping' },
+  { key: 'youth-orchestra', label: '부서 소식 · 유스 오케스트라', urlPrefix: '/ministries/youth-orchestra' },
   { key: 'english', label: '부서 소식 · English Ministry', urlPrefix: '/ministries/english' },
   { key: 'newcomers', label: '부서 소식 · 새가족환영회', urlPrefix: '/next-steps/newcomers' },
   { key: 'serving', label: '부서 소식 · 교회 섬김', urlPrefix: '/next-steps/serving' },

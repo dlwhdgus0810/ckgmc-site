@@ -280,19 +280,24 @@ When changing the DB schema, add `migrations/000N_*.sql` and run `npm run db:mig
 
 ## Importing data from the old site
 Synced with the old site on 2026-11-10: every sermon, choir, mission story, and department post, all 28 sermon series,
-and bulletins / small group discussion sheets from 2025 onward (older bulletin PDFs are left out to keep the repository small). Church stories are the 16 imported at first.
+and every bulletin and small group discussion sheet back to 2018 (about 530MB of PDFs in `public/files`). Church stories are the 16 imported at first.
+The Youth Orchestra page and its 10 posts (2019-2020) were no longer in the old site's menu but still online; they are kept at `/ministries/youth-orchestra`,
+hidden from the menu (`hideFromNav: true`).
+
+**Cloudflare refuses to deploy any single file over 25MB.** Two 35MB booklet PDFs from the old site were split in half for that reason
+(`...-1of2.pdf`, `...-2of2.pdf`); the sync script warns when it downloads a file over the limit.
 
 * `scripts/import/sync-old-site.py` — **adds only what is missing** (posts, attachments, images, series episodes) and never deletes, so it is safe to re-run.
   Run it once more right before moving the domain: `python3 scripts/import/sync-old-site.py --dry-run` to preview, then without `--dry-run`, and commit.
   It skips posts already present by old-site post number, YouTube video ID (sermons), or service date in the title (bulletins, discussion sheets).
-  `--all` lifts the 2025 cutoff; pass board names (or `series`) to limit it. Requires `beautifulsoup4`.
+  By default it only looks at bulletins and discussion sheets from 2025 on (everything older is already here); `--all` lifts that cutoff.
+  Pass board names (or `series`) to limit it. Requires `beautifulsoup4`.
 * `scripts/import/scrape-ckgmc.py` — downloads all posts, attachments, and images from the old site and saves them as JSON (requires `beautifulsoup4`)
 * `scripts/import/json-to-markdown.py` — converts the JSON into Markdown under `src/content/` and copies images/PDFs to `public/`.
   **It deletes and recreates `src/content/posts`, `series`, and `stories`** — only for a from-scratch import, not for catching up.
 
 If you have a DB dump, create a `data/<board>.json` per board in the form
 `[{pid, title, datetime "YYYY-MM-DD HH:MM", writer, youtube, thumb, body(HTML), attachments:[{name,file}]}]` and run only the second script.
-Adding every bulletin PDF (about 430 files, 530MB) makes the repository large, so including only the last 1–2 years is recommended.
 
 ## Differences from the old site
 * Login, D-Group leader reports, one-on-one discipleship reports — reimplemented on Cloudflare Workers + D1 (see "Members-only features"). No self sign-up by email; admin approval or admin-issued accounts instead.

@@ -8,7 +8,7 @@
  * - JPEG: 긴 변을 2000px 로 줄이고 품질 82 로 다시 저장 (파일 이름 그대로)
  * - 투명한 부분이 없는 PNG(사진·포스터): JPEG 로 바꾸고(.jpg) src/ 안의 주소를 새 이름으로 고침
  * - 투명한 부분이 있는 PNG(로고·아이콘): 긴 변 2000px, 색 수를 줄인 PNG 로 다시 저장
- * 10% 이상 작아지지 않으면 건드리지 않습니다. 관리 화면에서 올리는 사진은 올릴 때 브라우저가 미리 줄이므로
+ * 10% 이상 작아지지 않으면 건드리지 않습니다. 이미 줄인 JPEG 은 다시 압축하지 않으므로 여러 번 실행해도 됩니다. 관리 화면에서 올리는 사진은 올릴 때 브라우저가 미리 줄이므로
  * (src/scripts/image-shrink.ts) 이 스크립트는 예전에 올라간 사진이나 직접 넣은 사진을 정리할 때 씁니다.
  */
 import { readdirSync, readFileSync, writeFileSync, statSync, unlinkSync, existsSync } from 'node:fs';
@@ -45,6 +45,10 @@ for (const file of walk(ROOT)) {
   const size = statSync(file).size;
   if (size < MIN_BYTES) continue;
   const input = readFileSync(file);
+  // 이미 줄인 JPEG 을 다시 압축하면 실행할 때마다 화질이 떨어집니다. 크기가 한도 안이고 충분히 압축된 것(화소당 0.3바이트 이하)은 건너뜁니다
+  const meta = await sharp(input).metadata();
+  const pixels = (meta.width ?? 0) * (meta.height ?? 0);
+  if (ext !== '.png' && Math.max(meta.width ?? 0, meta.height ?? 0) <= MAX_SIDE && pixels > 0 && size / pixels <= 0.3) continue;
   const base = sharp(input, { failOn: 'none' }).rotate().resize({ width: MAX_SIDE, height: MAX_SIDE, fit: 'inside', withoutEnlargement: true });
   let out, target = file;
   if (ext === '.png') {
