@@ -2,6 +2,7 @@
 title: "남선교회 (믿음으로 사는 남자들)"
 subtitle: "Men Living by Faith"
 headerImage: /images/pages/men.jpg
+headerFocus: 30
 order: 40
 menuTitle: "남선교회 Men Living by Faith"
 image: "/images/pages/men.jpg"

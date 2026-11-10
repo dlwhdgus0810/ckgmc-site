@@ -135,6 +135,8 @@ subtitle: "Our Services"           # English subtitle (optional)
 order: 50                          # menu order within the section (lower = higher)
 menuTitle: "예배 안내"             # menu label (optional; defaults to "title subtitle")
 headerImage: /images/headers/about-services.png   # banner photo (optional)
+headerFocus: 30                    # which height of the banner photo to show, in % (optional). 0 = top, 50 = middle (default), 100 = bottom.
+                                   #   The banner is a wide strip, so only a band of the photo is visible; for group photos use the height of the faces (usually 25-40)
 image: /images/pages/xxx.jpg       # ministry card photo on the home page (ministry pages)
 description: "한 줄 설명"          # for cards and search engines (optional)
 board: sermons                     # board to attach below this page (optional)

@@ -79,7 +79,7 @@ const d = page?.data;
 const Content = page ? (await render(page)).Content : undefined;
 ---
 {kind === 'page' && d && Content && (
-  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} description={d.description}>
+  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} headerFocus={d.headerFocus} description={d.description}>
     {d.widget && d.widgetPosition === 'top' && <Widget name={d.widget} />}
     <Content />
     {d.widget && d.widgetPosition === 'bottom' && <Widget name={d.widget} />}
@@ -91,17 +91,17 @@ const Content = page ? (await render(page)).Content : undefined;
   </SubpageLayout>
 )}
 {kind === 'post' && post && d && (
-  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={displayTitle(post)} description={postDescription(post, d.title)} bannerHeading="p">
+  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} headerFocus={d.headerFocus} leaf={displayTitle(post)} description={postDescription(post, d.title)} bannerHeading="p">
     <PostView post={post} base={base} prev={prev} next={next} />
   </SubpageLayout>
 )}
 {kind === 'series' && series && d && (
-  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} leaf={series.data.title} bannerHeading="p">
+  <SubpageLayout path={base} title={d.title} subtitle={d.subtitle} headerImage={d.headerImage} headerFocus={d.headerFocus} leaf={series.data.title} bannerHeading="p">
     <SeriesView series={series} base={base} />
   </SubpageLayout>
 )}
 {kind === 'section' && section && (
-  <SubpageLayout path={base} title={section.label} subtitle={section.labelEn} headerImage={section.headerImage} description={section.description ?? `${section.label} — ${site.name}`}>
+  <SubpageLayout path={base} title={section.label} subtitle={section.labelEn} headerImage={section.headerImage} headerFocus={section.headerFocus} description={section.description ?? `${section.label} — ${site.name}`}>
     <SectionIndex pages={sectionPages} />
   </SubpageLayout>
 )}

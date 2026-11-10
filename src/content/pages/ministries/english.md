@@ -1,6 +1,7 @@
 ---
 title: "English Ministry"
 headerImage: /images/pages/em-youth.jpg
+headerFocus: 40
 board: english
 order: 90
 image: "/images/pages/em-youth.jpg"

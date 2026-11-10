@@ -20,6 +20,8 @@ export interface NavSection {
   items?: NavItem[];
   /** 섹션 목록 페이지(/about, /ministries …)의 배너 사진 */
   headerImage?: string;
+  /** 배너 사진에서 보여줄 세로 위치(%). 0 = 맨 위, 50 = 가운데(기본) */
+  headerFocus?: number;
   /** 섹션 목록 페이지의 검색엔진용 설명 */
   description?: string;
 }

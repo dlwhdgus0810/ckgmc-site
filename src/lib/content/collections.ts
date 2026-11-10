@@ -86,6 +86,7 @@ const pageFields: Field[] = [
   { name: 'order', label: '메뉴 순서', widget: 'number', hint: '작을수록 위 (10, 20, 30 …)', default: 999 },
   { name: 'hideFromNav', label: '메뉴에서 숨김', widget: 'boolean', default: false },
   { name: 'headerImage', label: '상단 배너 사진', widget: 'image', hint: '권장 1600×500' },
+  { name: 'headerFocus', label: '배너 사진 세로 위치 (%)', widget: 'number', hint: '배너에는 사진의 가로 띠만 보입니다. 0 = 맨 위, 50 = 가운데(비워 두면 가운데), 100 = 맨 아래. 얼굴이 잘려 보이면 얼굴 높이에 맞추세요 (단체 사진은 보통 25~40)' },
   { name: 'image', label: '카드 사진 (메인 사역 소개)', widget: 'image' },
   { name: 'description', label: '한 줄 설명 (카드·검색엔진)', widget: 'text' },
   { name: 'board', label: '이 페이지 아래 게시판', widget: 'select', options: [{ value: 'series', label: '설교 시리즈' }, ...BOARDS.map((b) => ({ value: b.key, label: b.label }))] },

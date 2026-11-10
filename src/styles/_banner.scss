@@ -1,11 +1,13 @@
 // =====================================================================
 //  서브페이지 배너 + 현재 위치(브레드크럼)
 // =====================================================================
+$banner-img-max: 1320px;
 .page-banner {
   position: relative;
   display: flex;
   align-items: flex-end;
-  min-height: clamp(128px, 18vw, 220px);
+  // 사진이 가로 띠로 잘려 보이므로 넓은 화면일수록 조금 더 높게 (휴대전화 128px ~ 데스크톱 280px)
+  min-height: clamp(128px, 19vw, 280px);
   background: linear-gradient(135deg, $navy-700, $navy-900);
   color: #fff;
   --focus-ring: #fff;
@@ -17,6 +19,16 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    // 아주 넓은 화면에서 사진을 화면 폭만큼 늘리면 위아래가 더 많이 잘리고(단체 사진의 얼굴이 사라짐) 흐려집니다.
+    // 사진은 #{$banner-img-max} 까지만 넓히고 가운데에 두어, 양옆은 배너의 남색으로 자연스럽게 이어지게 합니다.
+    @media (min-width: #{$banner-img-max + 1px}) {
+      left: 50%;
+      right: auto;
+      width: $banner-img-max;
+      transform: translateX(-50%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+      mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
+    }
   }
   &__scrim {
     position: absolute;

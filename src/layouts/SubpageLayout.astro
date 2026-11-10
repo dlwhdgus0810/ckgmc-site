@@ -13,6 +13,8 @@ interface Props {
   title: string;
   subtitle?: string;
   headerImage?: string;
+  /** 배너 사진에서 보여줄 세로 위치(%) — PageBanner 의 focus */
+  headerFocus?: number;
   description?: string;
   /** 게시글 제목 등 현재 위치의 마지막 항목 (브라우저 제목으로도 쓰임) */
   leaf?: string;
@@ -23,11 +25,11 @@ interface Props {
   /** @deprecated 예전 호환용. 더 이상 본문 제목을 그리지 않습니다 */
   showTitle?: boolean;
 }
-const { path, title, subtitle, headerImage, description, leaf, parentHref, bannerHeading = 'h1' } = Astro.props;
+const { path, title, subtitle, headerImage, headerFocus, description, leaf, parentHref, bannerHeading = 'h1' } = Astro.props;
 const hasSideNav = !!findSection(await getNav(), path);
 ---
 <BaseLayout title={leaf ?? title} description={description}>
-  <PageBanner title={title} subtitle={subtitle} image={headerImage} heading={bannerHeading} path={path} leaf={leaf} parentHref={parentHref} />
+  <PageBanner title={title} subtitle={subtitle} image={headerImage} focus={headerFocus} heading={bannerHeading} path={path} leaf={leaf} parentHref={parentHref} />
   <div class="container page-body">
     <div class="row">
       {hasSideNav && (

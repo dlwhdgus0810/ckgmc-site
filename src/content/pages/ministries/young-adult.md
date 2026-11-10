@@ -2,6 +2,7 @@
 title: "청년부"
 subtitle: "Young Adult"
 headerImage: /images/pages/young-adult.jpg
+headerFocus: 26
 board: young-adult
 showTitle: false
 order: 30
