@@ -1,7 +1,7 @@
 ---
 title: "새가족환영회"
 subtitle: "Newcomers' Reception"
-headerImage: /images/headers/next-steps-newcomers.png
+headerImage: /images/headers/next-steps-newcomers.jpg
 board: newcomers
 order: 50
 ---
