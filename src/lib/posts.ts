@@ -102,7 +102,15 @@ export function parseSermonTitle(raw: string): ParsedTitle {
   let preacher: string | undefined;
   let service: string | undefined;
   const rest: string[] = [];
-  for (const p of parts) {
+  // 옛 사이트 제목 `[주일예배 LIVE] 2024.02.11 | 제목 | 설교자` 처럼 한 칸에 붙어 있는 예배 종류와 날짜를 따로 나눕니다
+  const pieces = parts.flatMap((p) => {
+    const bracket = p.match(/^\[([^\]]+)\]\s*(\S.*)$/);
+    return (bracket ? [bracket[1].trim(), bracket[2]] : [p]).flatMap((q) => {
+      const tail = q.match(/^(.*\S)\s+(\d{4}[.\-/]\s?\d{1,2}[.\-/]\s?\d{1,2}\.?)$/);
+      return tail ? [tail[1], tail[2]] : [q];
+    });
+  });
+  for (const p of pieces) {
     const clean = p.replace(/^\[|\]$/g, '').trim();
     if (!date && /^\d{4}[.\-/]\s?\d{1,2}[.\-/]\s?\d{1,2}\.?(\s*\(.\))?$/.test(clean)) date = clean.replace(/\.$/, '');
     else if (!preacher && clean.length <= 24 && /(목사|전도사|간사|장로|사모|선교사|교수|집사|Pastor|Rev\.|Dr\.)/.test(clean)) preacher = clean;
