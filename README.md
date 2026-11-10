@@ -61,7 +61,7 @@ scripts/
   fetch-fonts.mjs       download Nanum Myeongjo web fonts
   import/               tools for importing data from the old site
 .github/workflows/
-  youtube-sync.yml      weekly Monday YouTube sync, then commit
+  youtube-sync.yml      weekly Monday YouTube sync, then commit and start the deploy
   deploy-cloudflare.yml deploy to Cloudflare Workers on every commit to main
 ```
 
@@ -177,7 +177,8 @@ Accessibility: all color pairs meet WCAG AA contrast (4.5:1), with keyboard focu
 
 ## Automatic YouTube sermon posts
 `.github/workflows/youtube-sync.yml` reads the YouTube channel RSS (`youtubeChannelId` in `site.json`) **every Monday**,
-adds videos not yet present to `src/content/posts/sermons/`, and commits → Cloudflare rebuilds automatically.
+adds videos not yet present to `src/content/posts/sermons/`, commits them, and then starts the deploy workflow itself
+(commits pushed with a workflow's own `GITHUB_TOKEN` do not trigger other workflows, so the deploy has to be started explicitly).
 You can also run it immediately from the GitHub repository → Actions tab → *Run workflow*. Locally, use `npm run import:youtube`.
 Titles and bodies are copied from the YouTube title and description, so polish them in the admin UI if needed.
 When the same service is uploaded again with the same title, only the later upload stays visible; the earlier post gets `hidden: true`.
