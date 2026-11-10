@@ -13,6 +13,11 @@ export const pageSchema = z.object({
   subtitle: z.string().optional(),
   /** 헤더 배경 이미지 (public/ 기준 경로). 없으면 단색 배경 */
   headerImage: z.string().optional(),
+  /**
+   * 배너에 보여줄 사진의 세로 위치(%). 배너는 가로로 긴 띠라 사진의 일부 높이만 보입니다.
+   * 0 = 맨 위, 50 = 가운데(기본), 100 = 맨 아래. 단체 사진은 얼굴 높이(보통 25~40)에 맞춥니다.
+   */
+  headerFocus: z.number().min(0).max(100).optional(),
   /** 상단 배너에 제목을 표시할지 (게시글처럼 본문이 제목을 가진 경우 false) */
   showTitle: z.boolean().default(true),
   /** 메뉴에 표시할 짧은 이름 (없으면 "제목 부제목") */

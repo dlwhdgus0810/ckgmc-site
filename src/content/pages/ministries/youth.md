@@ -2,6 +2,7 @@
 title: "청소년부"
 subtitle: "X-Youth"
 headerImage: /images/pages/em-youth.jpg
+headerFocus: 40
 board: youth
 showTitle: false
 order: 20

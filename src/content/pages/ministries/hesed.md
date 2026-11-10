@@ -2,6 +2,7 @@
 title: "헤세드 워십"
 subtitle: "Hesed Ministry"
 headerImage: /images/pages/hesed-team.jpg
+headerFocus: 25
 showTitle: false
 order: 70
 image: "/images/pages/hesed-team.jpg"

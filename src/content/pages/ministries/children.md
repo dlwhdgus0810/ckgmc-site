@@ -2,6 +2,7 @@
 title: "유아·어린이부"
 subtitle: "Toddler & Children Ministry"
 headerImage: /images/pages/service-children.jpg
+headerFocus: 30
 board: children
 order: 10
 image: "/images/pages/service-children.jpg"
