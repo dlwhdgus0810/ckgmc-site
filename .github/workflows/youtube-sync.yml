@@ -1,12 +1,15 @@
 # 매주 유튜브 채널의 새 영상을 영상 설교 게시판에 자동으로 추가합니다.
-# 새 글이 커밋되면 Cloudflare Pages 가 사이트를 다시 빌드합니다.
+# 새 글을 커밋한 뒤 배포 워크플로(deploy-cloudflare.yml)를 직접 실행합니다.
+# (이 워크플로의 기본 토큰 GITHUB_TOKEN 으로 push 한 커밋은 GitHub 규칙상 다른 워크플로를 깨우지 않습니다.
+#  그대로 두면 새 설교가 저장소에만 올라가고 사이트에는 다음 배포 때까지 나타나지 않습니다.)
 name: 유튜브 설교 자동 등록
 on:
   schedule:
     - cron: '0 13 * * 1'   # 매주 월요일 13:00 UTC (캔자스 오전 7~8시)
   workflow_dispatch:        # Actions 탭에서 수동 실행도 가능
 permissions:
-  contents: write
+  contents: write   # 새 설교 글 커밋
+  actions: write    # 배포 워크플로 실행
 concurrency:
   group: youtube-sync
   cancel-in-progress: false
@@ -22,6 +25,7 @@ jobs:
       - run: npm ci
       - run: npm run import:youtube
       - name: 새 영상이 있으면 커밋
+        id: commit
         run: |
           git add src/content/posts/sermons
           if git diff --cached --quiet; then
@@ -32,3 +36,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: auto-add YouTube sermons"
           git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+      # workflow_dispatch 는 기본 토큰으로도 실행되는 예외라서, 방금 올린 커밋을 이렇게 배포합니다
+      - name: 새 설교를 사이트에 배포
+        if: steps.commit.outputs.pushed == 'true'
+        run: gh workflow run deploy-cloudflare.yml --ref "$GITHUB_REF_NAME"
+        env:
+          GH_TOKEN: ${{ github.token }}
