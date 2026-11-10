@@ -23,11 +23,11 @@ order: 0
 <h2>자녀와 함께 오시나요? <small>Kids &amp; Youth</small></h2>
 <div class="row">
 <div class="col-md-6 mb-3">
-<h5>유아·어린이부</h5>
+<h3 class="h5">유아·어린이부</h3>
 <p>주일 오전 11시, 유아/어린이부실에서 아이들만의 예배와 성경 공부가 있습니다. <a href="/ministries/children">자세히 보기</a></p>
 </div>
 <div class="col-md-6 mb-3">
-<h5>청소년부 X-Youth</h5>
+<h3 class="h5">청소년부 X-Youth</h3>
 <p>중고등학생은 주일 오전 11시 English Service 와 함께 예배드리고, 월간 YES! Ministry 모임으로 교제합니다. <a href="/ministries/youth">자세히 보기</a></p>
 </div>
 </div>

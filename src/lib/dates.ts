@@ -30,7 +30,7 @@ export function formatKoreanDate(d: Date, withWeekday = false): string {
 export function isoDate(d: Date): string {
   return d.toISOString().slice(0, 16);
 }
-/** 30일 이내 글이면 NEW 배지 (빌드 시점 기준) */
+/** 14일 이내 글이면 NEW 배지 (빌드 시점 기준) */
 export function isNew(d: Date, now = new Date()): boolean {
-  return now.getTime() - d.getTime() < 30 * 24 * 3600 * 1000;
+  return now.getTime() - d.getTime() < 14 * 24 * 3600 * 1000;
 }

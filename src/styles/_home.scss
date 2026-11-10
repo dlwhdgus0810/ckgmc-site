@@ -16,10 +16,10 @@
     position: absolute; inset: 0;
     background: linear-gradient(to top, rgba($navy-900, .9) 0%, rgba($navy-900, .55) 45%, rgba($navy-900, .15) 100%);
   }
-  &__content { position: relative; padding-top: 4rem; padding-bottom: 5.5rem; max-width: 100%; @include media-breakpoint-up(lg) { padding-bottom: 7rem; } }
-  &__eyebrow { margin-bottom: .75rem; font-size: .8125rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: $gold-300; }
+  &__content { position: relative; padding-top: 4rem; padding-bottom: 5.5rem; @include media-breakpoint-up(lg) { padding-bottom: 7rem; } }
+  &__eyebrow { margin-bottom: .75rem; font-size: .8125rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: $gold-300; text-shadow: 0 1px 8px rgba($navy-900, .85), 0 0 2px rgba($navy-900, .6); }
   &__title { max-width: 18ch; margin-bottom: 1rem; font-size: clamp(2rem, 1.2rem + 3.5vw, 3.75rem); line-height: 1.15; color: #fff; text-shadow: 0 2px 16px rgba($navy-900, .6); }
-  &__sub { max-width: 40rem; margin-bottom: 1.75rem; font-size: 1.0625rem; color: rgba(#fff, .9); @include media-breakpoint-up(md) { font-size: 1.125rem; } }
+  &__sub { max-width: 40rem; margin-bottom: 1.75rem; font-size: 1.0625rem; color: rgba(#fff, .95); text-shadow: 0 1px 10px rgba($navy-900, .7); @include media-breakpoint-up(md) { font-size: 1.125rem; } }
   &__actions { display: flex; flex-wrap: wrap; gap: .75rem; .btn-outline-light { border-color: rgba(#fff, .7); } }
 }
 
@@ -233,9 +233,15 @@ a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: i
   &__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .75rem; .btn-outline-light { border-color: rgba(#fff, .7); } }
 }
 .partners {
-  padding: 2rem 0;
-  border-bottom: 1px solid $line;
+  padding: 2.5rem 0;
   &__list { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 1.5rem 3rem; list-style: none; margin: 0; padding: 0; }
-  img { height: 40px; width: auto; opacity: .75; transition: opacity .2s; }
-  a:hover img { opacity: 1; }
+  a { display: inline-flex; align-items: center; min-height: 48px; }
+  img { height: 48px; width: auto; max-width: 100%; opacity: .9; transition: opacity .2s; }
+  a:hover img, a:focus-visible img { opacity: 1; }
+}
+
+// 터치 기기(휴대전화·태블릿): 글자만 있는 작은 링크도 손가락 크기(44px)로
+@media (pointer: coarse) {
+  .section__more, .info-strip__more { display: inline-flex; align-items: center; min-height: 44px; }
+  .card-tile__title > a { display: block; padding: .5rem 0; margin: -.5rem 0; }
 }

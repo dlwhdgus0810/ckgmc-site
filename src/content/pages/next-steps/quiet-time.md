@@ -9,7 +9,7 @@ order: 60
 <p class="lead mb-0">본 교회는 연합감리교회의 말씀 묵상집인 "기쁨의 언덕으로"를 사용하여 매일 말씀 묵상을 합니다.</p>
 </blockquote>
 <div class="my-3"></div>
-<h4>기쁨의 언덕으로 묵상집은 이렇게 구성되어 있습니다.</h4>
+<h2 class="h4">기쁨의 언덕으로 묵상집은 이렇게 구성되어 있습니다.</h2>
 <hr>
 <div class="row">
 <div class="col-sm">
@@ -35,7 +35,7 @@ order: 60
 <div class="col-sm-3"><img class="img-fluid" src="/images/pages/pleasant-hill.jpeg" alt="기쁨의 언덕으로"></div>
 </div>
 <div class="my-4"></div>
-<h4>"기쁨의 언덕으로"를 완료할 경우</h4>
+<h2 class="h4">"기쁨의 언덕으로"를 완료할 경우</h2>
 <hr>
 <dl>
 <dt class="py-2"><span class="no">1</span> 3년에 자동 신구약 일독</dt>
@@ -44,7 +44,7 @@ order: 60
 <dt class="py-2"><span class="no">4</span> 소그룹 모임 내용과 함께 1,000개의 적용 질문을 통해 말씀을 삶에 구체적으로 적용해 볼 수 있습니다.</dt>
 </dl>
 <div class="my-4"></div>
-<h4>"기쁨의 언덕으로" 200% 활용법 - 성경일독 혼자서도 문제 없다!</h4>
+<h2 class="h4">"기쁨의 언덕으로" 200% 활용법 - 성경일독 혼자서도 문제 없다!</h2>
 <hr>
 <dl>
 <dt><span class="no">1</span> 시간을 정해 놓고 읽기</dt>

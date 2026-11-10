@@ -6,7 +6,8 @@
   background: $navy-900;
   color: rgba(#fff, .85);
   font-size: .9375rem;
-  a { color: #fff; &:hover { color: $gold-300; text-decoration: underline; } }
+  // 버튼(.btn)은 제외 — 금색 버튼은 진한 글자여야 읽힘. :where 로 명시도는 그대로 둠
+  a:where(:not(.btn)) { color: #fff; &:hover { color: $gold-300; text-decoration: underline; } }
 
   &__grid { padding: 3.5rem 0 2rem; row-gap: 2rem; }
   &__heading {
@@ -44,4 +45,13 @@
     .container { gap: .5rem 1.5rem; }
   }
   &__policy { display: flex; gap: 1.25rem; a { color: rgba(#fff, .7); } }
+
+  // 터치 기기: 링크 한 줄의 높이를 손가락 크기(44px)로
+  @media (pointer: coarse) {
+    &__links li + li, &__social li + li { margin-top: 0; }
+    &__links a, &__social a, &__policy a { display: inline-flex; align-items: center; min-height: 44px; }
+    &__address { gap: 0; a { min-height: 44px; align-items: center; .icon { margin-top: 0; } } }
+  }
 }
+// 협력 단체 띠(홈) 바로 다음에는 여백 없이 붙임 — 흰 빈 띠가 생기지 않게
+main:has(> .partners:last-child) + .site-footer { margin-top: 0; }

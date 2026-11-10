@@ -1,7 +1,12 @@
 ---
-/** 게시판 목록 (카드 3열) + 페이지네이션 */
+/**
+ * 게시판 목록 + 검색 + 페이지네이션
+ *  - 모양은 글에 따라 자동: 그림이 있는 게시판은 카드 3열, 주보·나눔지처럼 그림이 없는 게시판은 줄 목록 (lib/posts.ts boardLayout)
+ *  - 글이 두 쪽을 넘으면 검색 상자가 나옵니다. 검색 목록은 /search/<게시판>.json (빌드 때 생성)을 처음 쓸 때 한 번 내려받습니다.
+ */
 import Pagination from './Pagination.astro';
-import { getBoardPosts, slugOf, excerptOf, thumbAttrs, formatKoreanDate, isoDate, isNew, titleParts, displayDate, dateTimeAttr, PARSED_BOARDS } from '../lib/posts';
+import Icon from './Icon.astro';
+import { getBoardPosts, slugOf, excerptOf, thumbAttrs, formatKoreanDate, isoDate, isNew, titleParts, displayDate, dateTimeAttr, pdfOf, fileUrl, boardLayout, PARSED_BOARDS } from '../lib/posts';
 
 interface Props {
   board: string;
@@ -16,42 +21,216 @@ const totalPages = Math.max(1, Math.ceil(all.length / perPage));
 const posts = all.slice((page - 1) * perPage, page * perPage);
 // 유튜브 제목(예배 | 제목 | 설교자 | 날짜)은 나눠서 보여주고, 유튜브 설명 요약은 생략
 const parsed = PARSED_BOARDS.has(board);
+const layout = boardLayout(all);
+const searchable = all.length > perPage * 2;
+const years = searchable ? [...new Set(all.map((p) => displayDate(p).getUTCFullYear()))].sort((a, b) => b - a) : [];
+/** 줄 목록의 요약: 본문이 PDF 파일 이름뿐이거나(옮겨온 주보) 제목을 되풀이한 것이면 생략 */
+const squash = (s: string) => s.replace(/\s+/g, '').replace(/(^|\/)0(?=\d)/g, '$1');
+const rowText = (text: string, title: string) => (/\.(pdf|docx?|pptx?|xlsx?|hwp)$/i.test(text.trim()) || squash(text) === squash(title) ? '' : text);
 ---
-<section id="loop-blog" aria-label="글 목록">
-  {posts.length === 0 ? (
-    <p class="text-muted py-4 text-center">아직 등록된 글이 없습니다.</p>
-  ) : (
-    <div class="row">
-      {posts.map((post) => (
-        <div class="col-sm-6 col-lg-4 mb-4">
-          <a class="card-tile" href={`${base}/${slugOf(post)}`}>
-            <div class="card-tile__media"><img {...thumbAttrs(post)} alt="" loading="lazy" width="640" height="360" /></div>
-            <div class="card-tile__body">
-              {parsed ? (() => { const t = titleParts(post); return (
-                <>
-                  {t.service && <span class="card-tile__eyebrow">{t.service}</span>}
-                  <h2 class="card-tile__title h6">{t.title}</h2>
-                  {t.preacher && <p class="card-tile__text">{t.preacher}</p>}
-                  <p class="card-tile__meta">
-                    <time datetime={dateTimeAttr(post)}>{formatKoreanDate(displayDate(post), true)}</time>
-                    {isNew(post.data.date) && <span class="badge-new">NEW</span>}
-                  </p>
-                </>
-              ); })() : (
-                <>
-                  <h2 class="card-tile__title h6">{post.data.title}</h2>
-                  <p class="card-tile__text">{excerptOf(post)}</p>
-                  <p class="card-tile__meta">
-                    <time datetime={isoDate(post.data.date)}>{formatKoreanDate(post.data.date)}</time>
-                    {isNew(post.data.date) && <span class="badge-new">NEW</span>}
-                  </p>
-                </>
-              )}
-            </div>
-          </a>
+<section id="loop-blog" aria-label="글 목록" data-base={base} data-layout={layout} data-parsed={parsed ? 'true' : 'false'}>
+  {searchable && (
+    <>
+      <form class="board-search" role="search" aria-label="이 게시판에서 검색" hidden data-board-search data-index={`/search/${board}.json`}>
+        <div class="board-search__field">
+          <Icon name="search" size={18} />
+          <label class="sr-only" for="board-q">검색어</label>
+          <input id="board-q" name="q" type="search" class="form-control" placeholder={parsed ? '제목·설교자·성경으로 검색 (예: 사도행전 16)' : '제목·내용으로 검색'} autocomplete="off" enterkeyhint="search" />
         </div>
-      ))}
-    </div>
+        <label class="sr-only" for="board-year">연도</label>
+        <select id="board-year" name="year" class="form-control board-search__year">
+          <option value="">전체 연도</option>
+          {years.map((y) => <option value={String(y)}>{y}년</option>)}
+        </select>
+        <button type="button" class="btn btn-outline-primary board-search__reset" hidden data-search-reset>지우기</button>
+      </form>
+      <p class="board-search__status" role="status" aria-live="polite" hidden data-search-status></p>
+      <div data-search-results hidden></div>
+    </>
   )}
-  <Pagination current={page} total={totalPages} base={base} />
+
+  <div data-board-list>
+    {posts.length === 0 ? (
+      <p class="text-muted py-4 text-center">아직 등록된 글이 없습니다.</p>
+    ) : layout === 'rows' ? (
+      <ul class="post-rows">
+        {posts.map((post) => { const pdf = pdfOf(post); const t = titleParts(post); const text = rowText(excerptOf(post, 90), post.data.title); return (
+          <li class="post-row">
+            <a class="post-row__main" href={`${base}/${slugOf(post)}`}>
+              <span class="post-row__title">{t.title}</span>
+              {text && <span class="post-row__text">{text}</span>}
+              <span class="post-row__meta">
+                <time datetime={isoDate(post.data.date)}>{formatKoreanDate(post.data.date)}</time>
+                {isNew(post.data.date) && <span class="badge-new">NEW</span>}
+              </span>
+            </a>
+            {pdf && (
+              <a class="btn btn-outline-primary btn-sm post-row__action" href={fileUrl(pdf.file)} target="_blank" rel="noopener" aria-label={`${t.title} PDF 열기 (새 창)`}>
+                <Icon name="file-text" size={16} /> PDF 열기
+              </a>
+            )}
+          </li>
+        ); })}
+      </ul>
+    ) : (
+      <div class="row">
+        {posts.map((post) => (
+          <div class="col-sm-6 col-lg-4 mb-4">
+            <a class="card-tile" href={`${base}/${slugOf(post)}`}>
+              <div class="card-tile__media"><img {...thumbAttrs(post)} alt="" loading="lazy" width="640" height="360" /></div>
+              <div class="card-tile__body">
+                {parsed ? (() => { const t = titleParts(post); return (
+                  <>
+                    {t.service && <span class="card-tile__eyebrow">{t.service}</span>}
+                    <h2 class="card-tile__title h6">{t.title}</h2>
+                    {t.preacher && <p class="card-tile__text">{t.preacher}</p>}
+                    <p class="card-tile__meta">
+                      <time datetime={dateTimeAttr(post)}>{formatKoreanDate(displayDate(post), true)}</time>
+                      {isNew(post.data.date) && <span class="badge-new">NEW</span>}
+                    </p>
+                  </>
+                ); })() : (
+                  <>
+                    <h2 class="card-tile__title h6">{titleParts(post).title}</h2>
+                    <p class="card-tile__text">{excerptOf(post)}</p>
+                    <p class="card-tile__meta">
+                      <time datetime={isoDate(post.data.date)}>{formatKoreanDate(post.data.date)}</time>
+                      {isNew(post.data.date) && <span class="badge-new">NEW</span>}
+                    </p>
+                  </>
+                )}
+              </div>
+            </a>
+          </div>
+        ))}
+      </div>
+    )}
+    <Pagination current={page} total={totalPages} base={base} />
+  </div>
 </section>
+
+<script>
+  /** 검색 목록 한 건 (src/pages/search/[board].json.ts 가 만듦) */
+  type Item = { u: string; t: string; s?: string; p?: string; d: string; i?: string; f?: string; x?: string; k?: string };
+
+  const root = document.getElementById('loop-blog');
+  const form = root?.querySelector<HTMLFormElement>('[data-board-search]');
+  if (root && form) {
+    const input = form.querySelector<HTMLInputElement>('input[name="q"]')!;
+    const year = document.getElementById('board-year') as unknown as HTMLSelectElement;
+    const reset = form.querySelector<HTMLButtonElement>('[data-search-reset]')!;
+    const status = root.querySelector<HTMLElement>('[data-search-status]')!;
+    const results = root.querySelector<HTMLElement>('[data-search-results]')!;
+    const list = root.querySelector<HTMLElement>('[data-board-list]')!;
+    const base = root.dataset.base ?? '';
+    const rows = root.dataset.layout === 'rows';
+    const parsed = root.dataset.parsed === 'true';
+    const STEP = 30;
+    let items: Item[] | null = null;
+    let loading: Promise<Item[]> | null = null;
+    let shown = STEP;
+
+    // 띄어쓰기·문장부호 차이는 무시하고 찾습니다 ("사도행전16" = "사도행전 16")
+    const norm = (s: string) => s.toLowerCase().replace(/[\s·|:,.\-~'"“”‘’()[\]]/g, '');
+    const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+    const dateLabel = (iso: string) => {
+      const d = new Date(iso + 'T00:00:00Z');
+      const s = `${d.getUTCFullYear()}년 ${d.getUTCMonth() + 1}월 ${d.getUTCDate()}일`;
+      return parsed ? `${s} (${WEEKDAYS[d.getUTCDay()]})` : s;
+    };
+    const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls?: string, text?: string) => {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text !== undefined) n.textContent = text;
+      return n;
+    };
+    const timeEl = (iso: string) => { const t = el('time', undefined, dateLabel(iso)); t.dateTime = iso; return t; };
+    // (이 프로젝트는 Cloudflare 타입의 Element.append 와 겹치므로 appendChild 로 붙입니다)
+    const add = <T extends Node>(parent: T, ...kids: Node[]) => { for (const k of kids) parent.appendChild(k); return parent; };
+
+    const card = (it: Item) => {
+      const col = el('div', 'col-sm-6 col-lg-4 mb-4');
+      const a = el('a', 'card-tile'); a.href = `${base}/${it.u}`;
+      const media = el('div', 'card-tile__media');
+      const img = el('img'); img.src = it.i ?? '/images/thumbnail-default.jpg'; img.alt = ''; img.loading = 'lazy'; img.width = 640; img.height = 360;
+      add(media, img);
+      const body = el('div', 'card-tile__body');
+      if (it.s) add(body, el('span', 'card-tile__eyebrow', it.s));
+      add(body, el('h2', 'card-tile__title h6', it.t));
+      if (it.p || it.x) add(body, el('p', 'card-tile__text', it.p ?? it.x));
+      add(body, add(el('p', 'card-tile__meta'), timeEl(it.d)));
+      add(col, add(a, media, body));
+      return col;
+    };
+    const row = (it: Item) => {
+      const li = el('li', 'post-row');
+      const a = el('a', 'post-row__main'); a.href = `${base}/${it.u}`;
+      add(a, el('span', 'post-row__title', it.t));
+      if (it.x) add(a, el('span', 'post-row__text', it.x));
+      add(a, add(el('span', 'post-row__meta'), timeEl(it.d)));
+      add(li, a);
+      if (it.f) {
+        const pdf = el('a', 'btn btn-outline-primary btn-sm post-row__action', 'PDF 열기');
+        pdf.href = it.f; pdf.target = '_blank'; pdf.rel = 'noopener'; pdf.setAttribute('aria-label', `${it.t} PDF 열기 (새 창)`);
+        add(li, pdf);
+      }
+      return li;
+    };
+
+    const load = () => (loading ??= fetch(form.dataset.index!).then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.json() as Promise<Item[]>; }).then((d) => (items = d)));
+
+    const render = () => {
+      const q = input.value.trim();
+      const y = year.value;
+      const active = q !== '' || y !== '';
+      reset.hidden = !active;
+      list.hidden = active;
+      results.hidden = status.hidden = !active;
+      // 주소에 검색 상태를 남겨 새로고침·공유·뒤로 가기에도 유지
+      const url = new URL(location.href);
+      q ? url.searchParams.set('q', q) : url.searchParams.delete('q');
+      y ? url.searchParams.set('year', y) : url.searchParams.delete('year');
+      history.replaceState(null, '', url);
+      if (!active) { results.replaceChildren(); return; }
+      if (!items) {
+        status.textContent = '찾는 중…';
+        load().then(render, () => { status.textContent = '검색 목록을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'; });
+        return;
+      }
+      const words = q.split(/\s+/).map(norm).filter(Boolean);
+      const found = items.filter((it) => {
+        if (y && it.d.slice(0, 4) !== y) return false;
+        const hay = norm([it.t, it.s, it.p, it.x, it.k].filter(Boolean).join(' '));
+        return words.every((w) => hay.includes(w));
+      });
+      status.textContent = found.length ? `${found.length}개를 찾았습니다.` : '찾는 글이 없습니다. 다른 낱말로 검색해 보세요.';
+      const box = rows ? el('ul', 'post-rows') : el('div', 'row');
+      for (const it of found.slice(0, shown)) add(box, rows ? row(it) : card(it));
+      results.replaceChildren(box);
+      if (found.length > shown) {
+        const more = el('button', 'btn btn-outline-primary', `더 보기 (${found.length - shown}개 남음)`);
+        more.type = 'button';
+        more.addEventListener('click', () => { shown += STEP; render(); });
+        add(results, add(el('p', 'text-center py-3'), more));
+      }
+    };
+
+    let timer = 0;
+    const changed = () => { shown = STEP; render(); };
+    input.addEventListener('input', () => { clearTimeout(timer); timer = window.setTimeout(changed, 150); });
+    input.addEventListener('focus', () => { load().catch(() => {}); }, { once: true });
+    year.addEventListener('change', changed);
+    reset.addEventListener('click', () => { input.value = ''; year.value = ''; changed(); input.focus(); });
+    form.addEventListener('submit', (e) => { e.preventDefault(); clearTimeout(timer); changed(); });
+
+    form.hidden = false;
+    const params = new URLSearchParams(location.search);
+    const q0 = params.get('q') ?? '';
+    const y0 = params.get('year') ?? '';
+    if (q0 || y0) {
+      input.value = q0;
+      if ([...year.options].some((o) => o.value === y0)) year.value = y0;
+      render();
+    }
+  }
+</script>

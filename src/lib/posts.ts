@@ -32,7 +32,7 @@ export function decodeEntities(s: string): string {
 
 /** HTML → 태그를 없애고 공백을 정리한 순수 텍스트 */
 export function plainText(html: string | undefined): string {
-  return decodeEntities((html ?? '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+  return decodeEntities((html ?? '').replace(/<[^>]+>/g, ' ')).replace(/\uFFFC/g, '').replace(/\s+/g, ' ').trim();
 }
 const truncate = (text: string, length: number) => (text.length > length ? text.slice(0, length) + '...' : text);
 /** HTML 본문에서 태그를 제거하고 앞부분만 잘라 요약을 만듭니다 */
@@ -64,7 +64,18 @@ export function thumbnailOf(post: Post, size: 'hq' | 'hd' = 'hq'): string {
   if (post.data.youtube) return `https://i.ytimg.com/vi/${post.data.youtube}/${size === 'hd' ? 'hq720' : 'hqdefault'}.jpg`;
   const m = (post.body ?? '').match(/<img[^>]+src="([^"]+)"/);
   if (m) return m[1];
-  return '/images/thumbnail-default.jpg';
+  return DEFAULT_THUMBNAIL;
+}
+const DEFAULT_THUMBNAIL = '/images/thumbnail-default.jpg';
+/** 글에 자기 그림(썸네일·영상·본문 사진)이 있는지 — 없으면 목록에서 모두 같은 기본 그림이 됩니다 */
+export const hasOwnImage = (post: Post): boolean => thumbnailOf(post) !== DEFAULT_THUMBNAIL;
+/**
+ * 게시판 목록 모양: 글 대부분(80% 이상)에 자기 그림이 없으면(주보·나눔지) 그림 없는 줄 목록 'rows', 아니면 카드 'cards'.
+ * 같은 기본 그림이 15장 반복되는 것보다 날짜와 제목이 한눈에 보이는 편이 낫습니다.
+ */
+export function boardLayout(posts: Post[]): 'cards' | 'rows' {
+  if (posts.length === 0) return 'cards';
+  return posts.filter((p) => !hasOwnImage(p)).length / posts.length >= 0.8 ? 'rows' : 'cards';
 }
 
 /**
@@ -122,7 +133,10 @@ export function parseSermonTitle(raw: string): ParsedTitle {
 }
 /** 게시판에 따라 나눈 제목 또는 원래 제목 */
 export function titleParts(post: Post): ParsedTitle {
-  return PARSED_BOARDS.has(boardOf(post)) ? parseSermonTitle(post.data.title) : { title: post.data.title, raw: post.data.title };
+  if (PARSED_BOARDS.has(boardOf(post))) return parseSermonTitle(post.data.title);
+  // 주보·나눔지 제목 앞의 날짜는 9/6/2026, 09/06/2026 이 섞여 있어 두 자리로 맞춰 보여줍니다
+  const title = post.data.title.replace(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/, (_, m: string, d: string, y: string) => `${m.padStart(2, '0')}/${d.padStart(2, '0')}/${y}`);
+  return { title, raw: post.data.title };
 }
 export const displayTitle = (post: Post) => titleParts(post).title;
 
@@ -131,7 +145,11 @@ export const displayTitle = (post: Post) => titleParts(post).title;
 // 홈·목록·상세가 같은 날짜를 보여주도록 예배 날짜를 우선하고, 없으면 게시 시각을 씁니다.
 /** 제목에 적힌 예배 날짜(2026.08.16 / 2026.8.16 (일) …)를 Date(UTC 자정)로. 없으면 undefined */
 export function serviceDate(post: Post): Date | undefined {
-  const m = titleParts(post).date?.match(/^(\d{4})[.\-/]\s?(\d{1,2})[.\-/]\s?(\d{1,2})/);
+  return parseTitleDate(titleParts(post).date);
+}
+/** 제목에서 떼어낸 날짜 글자(2026.08.16)를 Date(UTC 자정)로 */
+export function parseTitleDate(text: string | undefined): Date | undefined {
+  const m = text?.match(/^(\d{4})[.\-/]\s?(\d{1,2})[.\-/]\s?(\d{1,2})/);
   return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])) : undefined;
 }
 /** 화면에 보여줄 날짜: 예배 날짜 → 없으면 게시 시각 */

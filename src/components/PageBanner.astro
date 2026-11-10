@@ -18,7 +18,7 @@ interface Props {
 const { title, subtitle, image, heading = 'h1', path, leaf, parentHref, crumbTitle } = Astro.props;
 const Tag = heading;
 ---
-<div class:list={['page-banner', { 'page-banner--image': !!image }]}>
+<section class:list={['page-banner', { 'page-banner--image': !!image }]} aria-label="페이지 제목">
   {image && <img class="page-banner__img" src={image} alt="" loading="eager" decoding="async" />}
   <div class="page-banner__scrim" aria-hidden="true"></div>
   <div class="container page-banner__content">
@@ -26,4 +26,4 @@ const Tag = heading;
     {subtitle && <p class="page-banner__eyebrow">{subtitle}</p>}
     <Tag class="page-banner__title">{title}</Tag>
   </div>
-</div>
+</section>

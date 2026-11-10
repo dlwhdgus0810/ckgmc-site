@@ -39,7 +39,7 @@ const st = sermon ? titleParts(sermon) : undefined;
             <span class="card-tile__eyebrow">이번 주 주보</span>
             {bulletin ? (
               <>
-                <h3 class="card-tile__title h5"><a href={`/media/bulletins/${slugOf(bulletin)}`}>{bulletin.data.title}</a></h3>
+                <h3 class="card-tile__title h5"><a href={`/media/bulletins/${slugOf(bulletin)}`}>{titleParts(bulletin).title}</a></h3>
                 <p class="card-tile__meta"><time datetime={isoDate(bulletin.data.date)}>{formatKoreanDate(bulletin.data.date)}</time></p>
                 <div class="this-week__actions">
                   {pdf && <a class="btn btn-primary btn-sm" href={fileUrl(pdf.file)} target="_blank" rel="noopener"><Icon name="file-text" size={16} /> 주보 보기 (PDF)</a>}
@@ -56,7 +56,7 @@ const st = sermon ? titleParts(sermon) : undefined;
             <span class="card-tile__eyebrow">소그룹 나눔지</span>
             {resource ? (
               <>
-                <h3 class="card-tile__title h5"><a href={`/media/resources/${slugOf(resource)}`}>{resource.data.title}</a></h3>
+                <h3 class="card-tile__title h5"><a href={`/media/resources/${slugOf(resource)}`}>{titleParts(resource).title}</a></h3>
                 <p class="card-tile__text">{excerptOf(resource, 120)}</p>
                 <p class="card-tile__meta"><time datetime={isoDate(resource.data.date)}>{formatKoreanDate(resource.data.date)}</time> · <a href="/media/resources">자료실</a></p>
               </>
