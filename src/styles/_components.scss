@@ -102,15 +102,8 @@
   padding-top: $section-space;
   padding-bottom: $section-space;
   &--surface { background: $surface; }
-  &--navy {
-    background: $navy-900;
-    color: rgba(#fff, .9);
-    --focus-ring: #fff;
-    // 버튼(.btn)은 제외 — 아니면 흰 버튼 위에 흰 글씨가 됨. :where 로 명시도는 그대로 둠
-    a:where(:not(.btn)) { color: #fff; }
-    .section__eyebrow { color: $gold-300; }
-    .section__title { color: #fff; }
-  }
+  // 옅은 남색 바탕 (홈 "처음 오셨나요" 띠)
+  &--tint { background: $navy-50; }
 }
 .section__header {
   display: flex;

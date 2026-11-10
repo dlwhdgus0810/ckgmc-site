@@ -174,6 +174,12 @@ Body `<img>` tags get their actual pixel size (width/height) added at build time
 
 ## Changing the design
 Only edit the variables in `src/styles/_tokens.scss` — navy (`$navy-*`), gold (`$gold-*`), text colors, fonts, spacing, corner radius.
+
+The overall look is light: a white header, photos shown bright, and navy kept for the footer and headings.
+* **Header** (`_header.scss`) is white, so the logo in Site settings must be the dark-lettered version. A white-lettered logo would be invisible.
+* **Banners and the home hero** (`_banner.scss`, `_home.scss`) do not cover the photo with a dark overlay. Only the corner where the title sits
+  is shaded so the white text stays readable. Banners without a photo use a light background with navy text.
+* On very wide screens the banner photo stops at 1320px and the sides are filled with a blurred copy of the same photo.
 Fonts are Pretendard (body and headings) and Nanum Myeongjo (Bible verses and quotes). To change Nanum Myeongjo, edit `scripts/fetch-fonts.mjs` and run `npm run fetch:fonts`.
 Accessibility: all color pairs meet WCAG AA contrast (4.5:1), with keyboard focus rings, a skip-to-content link, and reduced motion support.
 
