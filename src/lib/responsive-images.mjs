@@ -10,7 +10,8 @@ export async function homeImageVariants(root = process.cwd()) {
   const publicRoot = resolve(root, 'public');
   const output = resolve(publicRoot, 'images/responsive');
   const site = JSON.parse(await readFile(resolve(root, 'src/data/site.json'), 'utf8'));
-  const sources = new Set([site.hero.image, ...site.notices.map((n) => n.image)]);
+  const noticeImages = new Set(site.notices.map((n) => n.image));
+  const sources = new Set([site.hero.image, ...noticeImages]);
   for (const folder of ['series', 'stories', 'pages/ministries']) {
     const dir = resolve(root, 'src/content', folder);
     for (const file of await readdir(dir)) {
@@ -40,7 +41,7 @@ export async function homeImageVariants(root = process.cwd()) {
       const rotated = (meta.orientation ?? 1) >= 5;
       const width = rotated ? meta.height : meta.width;
       const height = rotated ? meta.width : meta.height;
-      const sizes = src === site.hero.image ? [640, 960, 1440, 1920] : [320, 640, 960, 1440];
+      const sizes = src === site.hero.image ? [640, 960, 1440, 1920] : noticeImages.has(src) ? [320, 640, 960, 1600] : [320, 640, 960, 1440];
       const widths = [...new Set(sizes.map((w) => Math.min(w, width)))];
       const hash = createHash('sha256').update(input).update('webp-78-v1').digest('hex').slice(0, 20);
       const variants = [];

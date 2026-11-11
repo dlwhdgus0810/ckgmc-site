@@ -2,36 +2,72 @@
 //  메인 화면 섹션들
 // =====================================================================
 
-// 히어로
+// 상단 배너 — 데스크톱 이미지는 1600px 고정, 모바일은 전체 이미지를 표시합니다.
 .hero {
   position: relative;
-  display: flex;
-  align-items: flex-end;
-  min-height: clamp(420px, 52vh, 560px);
   background: #f9f8f2;
   color: $navy-900;
-  overflow: hidden;
-  &__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 63%; }
+  &__viewport { overflow: hidden; }
+  &__slide { position: relative; display: flex; align-items: center; height: 500px; min-width: 0; overflow: hidden; }
+  &__slide--notice { background: #f4f6fa; }
+  &__img { position: absolute; top: 50%; left: 50%; width: 1600px; max-width: none; height: auto; transform: translate(-50%, -57%); }
+  &__poster-link { position: absolute; left: 50%; width: 1600px; transform: translateX(-50%); }
+  &__poster { display: block; width: 1600px; max-width: none; height: 500px; object-fit: contain; }
+  &__caption { display: none; }
   &__scrim {
     position: absolute; inset: 0;
-    // 별도 카드나 블러 없이 밝은 배경 위에서 진한 글자가 읽히도록 합니다.
     background: linear-gradient(90deg, rgba(#fff, .92) 0%, rgba(#fff, .7) 38%, rgba(#fff, .22) 64%, rgba(#fff, 0) 100%);
   }
-  &__content { position: relative; padding-top: 2rem; padding-bottom: 2rem; @include media-breakpoint-up(lg) { padding-top: 3rem; padding-bottom: 7rem; } }
+  &__content { position: relative; padding-top: 2rem; padding-bottom: 2rem; }
   &__eyebrow { margin-bottom: .75rem; font-size: .875rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: $navy-700; }
   &__title { max-width: 18ch; margin-bottom: 1rem; font-size: clamp(2rem, 1.2rem + 3.5vw, 3.75rem); line-height: 1.15; color: $navy-900; }
   &__sub { max-width: 40rem; margin-bottom: 1.75rem; font-size: 1.0625rem; color: $navy-900; @include media-breakpoint-up(md) { font-size: 1.125rem; } }
   &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
   &__english { color: $navy-700; text-decoration: underline; padding: .5rem 0; font-size: .875rem; }
+  &__controls { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; padding-top: .5rem; padding-bottom: 1rem; }
+  &__controls[hidden] { display: none; }
+  &__toggle { min-height: 44px; }
+  &__dots { display: flex; justify-content: center; flex-wrap: wrap; flex: 1 1 auto; }
+  &__dot, &__arrow {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: 44px; height: 44px; padding: 0; color: $navy; background: #fff;
+    border: 1px solid $navy-200; border-radius: 50%;
+    &:hover { background: $navy-100; }
+  }
+  &__dot { border: 0; background: transparent;
+    span { display: block; width: 10px; height: 10px; border: 1px solid $navy-500; border-radius: 50%; }
+    &[aria-current] span { background: $navy; border-color: $navy; }
+  }
+  &__navigation { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+  &__count { min-width: 3rem; text-align: center; color: $ink-600; font-size: .875rem; }
+  &.is-ready &__viewport { touch-action: pan-y pinch-zoom; }
+  &.is-ready &__track { display: flex; transition: transform .35s ease; }
+  &.is-ready &__slide { flex: 0 0 100%; }
+  @include media-breakpoint-up(lg) {
+    padding-bottom: 3.5rem;
+  }
   @include media-breakpoint-down(sm) {
-    min-height: 0;
-    &__scrim { background: linear-gradient(90deg, rgba(#fff, .9), rgba(#fff, .65)); }
+    &__slide { height: 480px; }
+    &__slide--welcome { align-items: flex-end; background: #fff; }
+    &__img { top: 0; width: 100%; transform: translateX(-50%); }
+    &__slide--notice { flex-direction: column; align-items: stretch; justify-content: flex-start; background: #fff; }
+    &__poster-link { position: static; width: 100%; transform: none; }
+    &__poster { width: 100%; height: auto; max-height: 480px; object-fit: contain; }
+    &__caption {
+      display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+      flex: 1; padding: 1.5rem 15px; gap: 1rem;
+      h2 { font-size: 1.5rem; line-height: 1.4; margin: 0; }
+      p { font-size: 1rem; margin: 0; }
+    }
+    &__scrim { background: linear-gradient(0deg, #fff 45%, rgba(#fff, 0) 78%); }
+    &__content { padding-top: 1rem; padding-bottom: 1.5rem; }
     &__eyebrow { display: none; }
     &__sub { margin-bottom: 1rem; font-size: 1rem; }
     &__title { font-size: 2rem; }
     &__actions { gap: .5rem; .btn-lg { padding: .65rem .9rem; font-size: 1rem; } }
     &__english { flex-basis: 100%; }
   }
+  @media (prefers-reduced-motion: reduce) { &.is-ready &__track { transition: none; } }
 }
 
 // 정보 띠
@@ -40,8 +76,10 @@
   z-index: 2;
   @include media-breakpoint-up(lg) {
     margin-top: -3.5rem;
-    > .container { width: 94%; max-width: 1800px; padding-inline: 0; }
+    // 기존 카드 폭과 확장했던 폭의 중간값을 사용합니다.
+    > .container { width: calc(47% + 465px); max-width: 1455px; padding-inline: 0; }
   }
+  @include media-breakpoint-up(xl) { > .container { width: calc(47% + 555px); } }
   &__card {
     display: grid;
     gap: 1px;
@@ -114,51 +152,6 @@
 }
 a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: inherit; transform: translateY(-2px); box-shadow: 0 .5rem 1.25rem rgba($navy-900, .1); .event-card__title { color: $navy; } }
 
-// 교회 소식 — 한 장씩 넘기는 배너, JavaScript가 없으면 모든 소식을 세로로 표시합니다.
-.notice-banner {
-  &__viewport { border: 1px solid $line; border-radius: .75rem; background: #fff; }
-  &__slide { display: grid; grid-template-columns: minmax(0, 1fr); background: #fff; min-width: 0; }
-  &__slide + &__slide { margin-top: 1rem; border-top: 1px solid $line; }
-  &__image {
-    display: flex; align-items: center; justify-content: center; min-width: 0;
-    padding: 1rem; background: $navy-50;
-    picture { display: block; width: 100%; }
-    img { display: block; width: 100%; height: clamp(160px, 52vw, 260px); object-fit: contain; }
-  }
-  &__body {
-    display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; padding: 1.25rem;
-    h3 { margin: 0; font-size: clamp(1.25rem, 2vw, 1.625rem); line-height: 1.4; }
-    p { margin: 0; font-size: .9375rem; }
-    dl { display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem; margin: 0; font-size: .9375rem; }
-    dd { margin: 0; }
-  }
-  &__status { margin-top: auto !important; color: $ink-600; font-size: .875rem !important; }
-  &__controls { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
-  &__controls[hidden] { display: none; }
-  &__toggle { min-height: 44px; }
-  &__dots { display: flex; justify-content: center; flex-wrap: wrap; flex: 1 1 auto; }
-  &__dot, &__arrow {
-    display: inline-flex; align-items: center; justify-content: center; flex: none;
-    width: 44px; height: 44px; padding: 0; color: $navy; background: #fff;
-    border: 1px solid $navy-200; border-radius: 50%;
-    &:hover { background: $navy-100; }
-  }
-  &__dot { border: 0; background: transparent;
-    span { display: block; width: 10px; height: 10px; border: 1px solid $navy-500; border-radius: 50%; }
-    &[aria-current] span { background: $navy; border-color: $navy; }
-  }
-  &__navigation { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
-  &__count { min-width: 3rem; text-align: center; color: $ink-600; font-size: .875rem; }
-  &.is-ready &__viewport { overflow: hidden; touch-action: pan-y pinch-zoom; }
-  &.is-ready &__track { display: flex; align-items: stretch; transition: transform .35s ease; }
-  &.is-ready &__slide { flex: 0 0 100%; margin: 0; border: 0; }
-  @include media-breakpoint-up(md) {
-    &__slide { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
-    &__image img { height: clamp(280px, 28vw, 360px); }
-    &__body { padding: clamp(1.25rem, 2.5vw, 2rem); }
-  }
-  @media (prefers-reduced-motion: reduce) { &.is-ready &__track { transition: none; } }
-}
 .flip-x { transform: scaleX(-1); }
 .info-strip__note { font-size: .875rem; font-weight: 600; color: $gold-700; }
 
