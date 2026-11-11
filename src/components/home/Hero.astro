@@ -41,8 +41,8 @@ const titles = [h.headline, ...notices.map((notice) => notice.title ?? '교회 �
     </div>
   </div>
   {notices.length > 0 && (
-    <div class="container hero__controls" data-banner-controls hidden>
-      <button type="button" class="btn btn-outline-primary btn-sm hero__toggle" data-banner-toggle>자동 재생</button>
+    <div class="hero__controls" data-banner-controls hidden>
+      <button type="button" class="hero__toggle" data-banner-toggle>자동 재생</button>
       <div class="hero__dots" aria-label="배너 선택">
         {titles.map((title, index) => <button type="button" class="hero__dot" data-banner-dot data-banner-index={index} aria-label={`${index + 1}번째 배너: ${title}`} aria-controls="hero-banner-track"><span aria-hidden="true"></span></button>)}
       </div>

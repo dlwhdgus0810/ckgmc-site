@@ -5,18 +5,26 @@
 // 상단 배너 — 데스크톱 이미지는 1600px 고정, 모바일은 전체 이미지를 표시합니다.
 .hero {
   position: relative;
-  background: #f9f8f2;
+  padding-bottom: 1.5rem;
+  background: #fff;
   color: $navy-900;
   &__viewport { overflow: hidden; }
   &__slide { position: relative; display: flex; align-items: center; height: 500px; min-width: 0; overflow: hidden; }
-  &__slide--notice { background: #f4f6fa; }
-  &__img { position: absolute; top: 50%; left: 50%; width: 1600px; max-width: none; height: auto; transform: translate(-50%, -57%); }
+  &__slide--notice { background: #fff; }
+  &__img {
+    position: absolute; top: 50%; left: 50%; width: 1600px; max-width: none; height: auto;
+    transform: translate(-50%, -57%);
+    // 고정 폭 이미지의 끝을 흰 배경으로 연결합니다. 이미지 자체에는 블러를 적용하지 않습니다.
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 86%, transparent);
+  }
   &__poster-link { position: absolute; left: 50%; width: 1600px; transform: translateX(-50%); }
   &__poster { display: block; width: 1600px; max-width: none; height: 500px; object-fit: contain; }
   &__caption { display: none; }
   &__scrim {
     position: absolute; inset: 0;
-    background: linear-gradient(90deg, rgba(#fff, .92) 0%, rgba(#fff, .7) 38%, rgba(#fff, .22) 64%, rgba(#fff, 0) 100%);
+    background:
+      linear-gradient(0deg, #fff, rgba(#fff, 0) 24%),
+      linear-gradient(90deg, rgba(#fff, .92) 0%, rgba(#fff, .7) 38%, rgba(#fff, .22) 64%, rgba(#fff, 0) 100%);
   }
   &__content { position: relative; padding-top: 2rem; padding-bottom: 2rem; }
   &__eyebrow { margin-bottom: .75rem; font-size: .875rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: $navy-700; }
@@ -24,32 +32,36 @@
   &__sub { max-width: 40rem; margin-bottom: 1.75rem; font-size: 1.0625rem; color: $navy-900; @include media-breakpoint-up(md) { font-size: 1.125rem; } }
   &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
   &__english { color: $navy-700; text-decoration: underline; padding: .5rem 0; font-size: .875rem; }
-  &__controls { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; padding-top: .5rem; padding-bottom: 1rem; }
+  &__controls {
+    display: flex; align-items: center; justify-content: center; gap: .75rem;
+    width: fit-content; max-width: calc(100% - 30px); margin: .5rem auto 0;
+  }
   &__controls[hidden] { display: none; }
-  &__toggle { min-height: 44px; }
-  &__dots { display: flex; justify-content: center; flex-wrap: wrap; flex: 1 1 auto; }
+  &__toggle {
+    min-height: 44px; width: 88px; flex: none; padding: .5rem;
+    border: 0; border-radius: .375rem; background: transparent; color: $ink-600; font-size: .8125rem;
+    &:hover { color: $navy; background: $navy-50; }
+  }
+  &__dots { display: flex; justify-content: center; flex-wrap: wrap; }
   &__dot, &__arrow {
     display: inline-flex; align-items: center; justify-content: center; flex: none;
     width: 44px; height: 44px; padding: 0; color: $navy; background: #fff;
-    border: 1px solid $navy-200; border-radius: 50%;
+    border: 1px solid $line; border-radius: 50%;
     &:hover { background: $navy-100; }
   }
   &__dot { border: 0; background: transparent;
-    span { display: block; width: 10px; height: 10px; border: 1px solid $navy-500; border-radius: 50%; }
-    &[aria-current] span { background: $navy; border-color: $navy; }
+    span { display: block; width: 6px; height: 6px; background: $navy-500; border-radius: 3px; }
+    &[aria-current] span { width: 18px; background: $navy; }
   }
-  &__navigation { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
-  &__count { min-width: 3rem; text-align: center; color: $ink-600; font-size: .875rem; }
+  &__navigation { display: flex; align-items: center; gap: .5rem; }
+  &__count { min-width: 3rem; text-align: center; color: $ink-600; font-size: .8125rem; font-variant-numeric: tabular-nums; }
   &.is-ready &__viewport { touch-action: pan-y pinch-zoom; }
   &.is-ready &__track { display: flex; transition: transform .35s ease; }
   &.is-ready &__slide { flex: 0 0 100%; }
-  @include media-breakpoint-up(lg) {
-    padding-bottom: 3.5rem;
-  }
   @include media-breakpoint-down(sm) {
     &__slide { height: 480px; }
     &__slide--welcome { align-items: flex-end; background: #fff; }
-    &__img { top: 0; width: 100%; transform: translateX(-50%); }
+    &__img { top: 0; width: 100%; transform: translateX(-50%); mask-image: none; }
     &__slide--notice { flex-direction: column; align-items: stretch; justify-content: flex-start; background: #fff; }
     &__poster-link { position: static; width: 100%; transform: none; }
     &__poster { width: 100%; height: auto; max-height: 480px; object-fit: contain; }
@@ -66,6 +78,8 @@
     &__title { font-size: 2rem; }
     &__actions { gap: .5rem; .btn-lg { padding: .65rem .9rem; font-size: 1rem; } }
     &__english { flex-basis: 100%; }
+    &__controls { display: grid; grid-template-columns: auto auto; gap: 0 .75rem; margin-top: 0; }
+    &__dots { grid-column: 1 / -1; grid-row: 1; }
   }
   @media (prefers-reduced-motion: reduce) { &.is-ready &__track { transition: none; } }
 }
@@ -75,7 +89,6 @@
   position: relative;
   z-index: 2;
   @include media-breakpoint-up(lg) {
-    margin-top: -3.5rem;
     // 기존 카드 폭과 확장했던 폭의 중간값을 사용합니다.
     > .container { width: calc(47% + 465px); max-width: 1455px; padding-inline: 0; }
   }
@@ -87,7 +100,7 @@
     border: 1px solid $line;
     border-radius: $border-radius;
     overflow: hidden;
-    box-shadow: 0 1rem 2.5rem rgba($navy-900, .12);
+    box-shadow: 0 .5rem 1.5rem rgba($navy-900, .06);
     grid-template-columns: 1fr;
     @include media-breakpoint-up(md) { grid-template-columns: repeat(2, 1fr); }
     @include media-breakpoint-up(lg) { grid-template-columns: repeat(5, 1fr); }
