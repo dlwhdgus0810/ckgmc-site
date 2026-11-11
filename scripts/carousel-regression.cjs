@@ -128,12 +128,12 @@ const passed = [];
       const frame = await reduced.root.locator('.hero__frame').boundingBox();
       if (total > 1) {
         const controls = await reduced.root.locator('[data-banner-controls]').boundingBox();
-        assert.ok(Math.abs(controls.x - frame.x - 24) < 1);
-        assert.ok(controls.y > frame.y + frame.height / 2);
+        assert.ok(Math.abs(frame.x + frame.width - controls.x - controls.width - 24) < 1);
+        assert.ok(Math.abs(frame.y + frame.height - controls.y - controls.height - 24) < 1);
       }
       assert.equal(await reduced.root.locator('[data-banner-viewport]').evaluate(el => getComputedStyle(el).borderTopLeftRadius), '24px');
     }
-    passed.push('Desktop images keep their fixed width, rounded corners and lower-left arrows');
+    passed.push('Desktop images keep their fixed width and rounded corners with arrows overlaid at the lower right');
     const before = await index(reduced.root);
     await reduced.page.clock.fastForward(21000);
     assert.equal(await index(reduced.root), before);
@@ -153,6 +153,12 @@ const passed = [];
         assert.equal((await reduced.root.boundingBox()).height, height);
       }
       assert.equal(await reduced.root.locator('[data-banner-viewport]').evaluate(el => getComputedStyle(el).borderTopLeftRadius), '16px');
+      if (total > 1) {
+        const frame = await reduced.root.locator('.hero__frame').boundingBox();
+        const controls = await reduced.root.locator('[data-banner-controls]').boundingBox();
+        assert.ok(Math.abs(frame.x + frame.width - controls.x - controls.width - 16) < 1);
+        assert.ok(Math.abs(frame.y + frame.height - controls.y - controls.height - 16) < 1);
+      }
       assert.equal(await reduced.page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
     }
     passed.push('Mobile shows complete images with stable height and rounded corners');
