@@ -1,18 +1,18 @@
 export {};
 
-/** One notice at a time; content stays fully readable when JavaScript is unavailable. */
-document.querySelectorAll<HTMLElement>('[data-notice-carousel]').forEach((carousel) => {
-  const track = carousel.querySelector<HTMLElement>('[data-notice-track]');
-  const slides = [...carousel.querySelectorAll<HTMLElement>('[data-notice-slide]')];
-  const viewport = carousel.querySelector<HTMLElement>('[data-notice-viewport]');
+/** One banner at a time; content stays fully readable when JavaScript is unavailable. */
+document.querySelectorAll<HTMLElement>('[data-banner-carousel]').forEach((carousel) => {
+  const track = carousel.querySelector<HTMLElement>('[data-banner-track]');
+  const slides = [...carousel.querySelectorAll<HTMLElement>('[data-banner-slide]')];
+  const viewport = carousel.querySelector<HTMLElement>('[data-banner-viewport]');
   if (!track || !viewport || !slides.length) return;
-  const controls = carousel.querySelector<HTMLElement>('[data-notice-controls]');
-  const previous = carousel.querySelector<HTMLButtonElement>('[data-notice-prev]');
-  const next = carousel.querySelector<HTMLButtonElement>('[data-notice-next]');
-  const toggle = carousel.querySelector<HTMLButtonElement>('[data-notice-toggle]');
-  const dots = [...carousel.querySelectorAll<HTMLButtonElement>('[data-notice-dot]')];
-  const count = carousel.querySelector<HTMLElement>('[data-notice-count]');
-  const status = carousel.querySelector<HTMLElement>('[data-notice-status]');
+  const controls = carousel.querySelector<HTMLElement>('[data-banner-controls]');
+  const previous = carousel.querySelector<HTMLButtonElement>('[data-banner-prev]');
+  const next = carousel.querySelector<HTMLButtonElement>('[data-banner-next]');
+  const toggle = carousel.querySelector<HTMLButtonElement>('[data-banner-toggle]');
+  const dots = [...carousel.querySelectorAll<HTMLButtonElement>('[data-banner-dot]')];
+  const count = carousel.querySelector<HTMLElement>('[data-banner-count]');
+  const status = carousel.querySelector<HTMLElement>('[data-banner-status]');
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let current = 0;
   let playing = slides.length > 1 && !reducedMotion.matches;
@@ -24,10 +24,10 @@ document.querySelectorAll<HTMLElement>('[data-notice-carousel]').forEach((carous
 
   const syncPlayback = () => {
     window.clearTimeout(timer);
-    carousel.dataset.noticePlaying = String(playing);
+    carousel.dataset.bannerPlaying = String(playing);
     if (toggle) {
       toggle.textContent = playing ? '일시정지' : '자동 재생';
-      toggle.setAttribute('aria-label', playing ? '소식 자동 넘김 일시정지' : '소식 자동 넘김 시작');
+      toggle.setAttribute('aria-label', playing ? '배너 자동 넘김 일시정지' : '배너 자동 넘김 시작');
     }
     if (playing && onScreen && !hovered && !document.hidden) {
       timer = window.setTimeout(() => { show(current + 1); syncPlayback(); }, 6000);
@@ -36,7 +36,7 @@ document.querySelectorAll<HTMLElement>('[data-notice-carousel]').forEach((carous
   const setPlaying = (value: boolean) => { playing = slides.length > 1 && value; syncPlayback(); };
   const show = (index: number, announce = false) => {
     current = (index + slides.length) % slides.length;
-    carousel.dataset.noticeCurrent = String(current);
+    carousel.dataset.bannerCurrent = String(current);
     slides.forEach((slide, number) => {
       const active = number === current;
       slide.inert = !active;
@@ -48,7 +48,7 @@ document.querySelectorAll<HTMLElement>('[data-notice-carousel]').forEach((carous
     });
     track.style.transform = `translateX(-${current * 100}%)`;
     if (count) count.textContent = `${current + 1} / ${slides.length}`;
-    if (announce && status) status.textContent = `${current + 1} / ${slides.length}, ${slides[current].dataset.noticeTitle}`;
+    if (announce && status) status.textContent = `${current + 1} / ${slides.length}, ${slides[current].dataset.bannerTitle}`;
   };
   const manual = (index: number) => {
     setPlaying(false);
