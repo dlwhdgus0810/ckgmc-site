@@ -8,7 +8,8 @@
   padding-bottom: 1.5rem;
   background: #fff;
   color: $navy-900;
-  &__viewport { overflow: hidden; }
+  &__frame { position: relative; width: 100%; max-width: 1600px; margin-inline: auto; }
+  &__viewport { overflow: hidden; border-radius: 24px; }
   &__slide { position: relative; display: flex; align-items: center; height: 500px; min-width: 0; overflow: hidden; }
   &__slide--notice { background: #fff; }
   &__img {
@@ -33,32 +34,25 @@
   &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
   &__english { color: $navy-700; text-decoration: underline; padding: .5rem 0; font-size: .875rem; }
   &__controls {
-    display: flex; align-items: center; justify-content: center; gap: .75rem;
-    width: fit-content; max-width: calc(100% - 30px); margin: .5rem auto 0;
+    display: flex; align-items: center; gap: .5rem;
+    width: fit-content; margin: .75rem 24px 0;
   }
   &__controls[hidden] { display: none; }
-  &__toggle {
-    min-height: 44px; width: 88px; flex: none; padding: .5rem;
-    border: 0; border-radius: .375rem; background: transparent; color: $ink-600; font-size: .8125rem;
-    &:hover { color: $navy; background: $navy-50; }
-  }
-  &__dots { display: flex; justify-content: center; flex-wrap: wrap; }
-  &__dot, &__arrow {
+  &__arrow {
     display: inline-flex; align-items: center; justify-content: center; flex: none;
     width: 44px; height: 44px; padding: 0; color: $navy; background: #fff;
     border: 1px solid $line; border-radius: 50%;
     &:hover { background: $navy-100; }
   }
-  &__dot { border: 0; background: transparent;
-    span { display: block; width: 6px; height: 6px; background: $navy-500; border-radius: 3px; }
-    &[aria-current] span { width: 18px; background: $navy; }
-  }
-  &__navigation { display: flex; align-items: center; gap: .5rem; }
-  &__count { min-width: 3rem; text-align: center; color: $ink-600; font-size: .8125rem; font-variant-numeric: tabular-nums; }
   &.is-ready &__viewport { touch-action: pan-y pinch-zoom; }
-  &.is-ready &__track { display: flex; transition: transform .35s ease; }
-  &.is-ready &__slide { flex: 0 0 100%; }
+  &.is-ready &__track { display: grid; }
+  &.is-ready &__slide {
+    grid-area: 1 / 1; opacity: 0; visibility: hidden; pointer-events: none;
+    &[aria-hidden="false"] { opacity: 1; visibility: visible; pointer-events: auto; z-index: 1; transition-delay: 0s; }
+  }
+  &.is-animated &__slide { transition: opacity 1.2s cubic-bezier(.4, 0, .2, 1), visibility 0s 1.2s; }
   @include media-breakpoint-down(sm) {
+    &__viewport { border-radius: 16px; }
     &__slide { height: 480px; }
     &__slide--welcome { align-items: flex-end; background: #fff; }
     &__img { top: 0; width: 100%; transform: translateX(-50%); mask-image: none; }
@@ -78,10 +72,9 @@
     &__title { font-size: 2rem; }
     &__actions { gap: .5rem; .btn-lg { padding: .65rem .9rem; font-size: 1rem; } }
     &__english { flex-basis: 100%; }
-    &__controls { display: grid; grid-template-columns: auto auto; gap: 0 .75rem; margin-top: 0; }
-    &__dots { grid-column: 1 / -1; grid-row: 1; }
+    &__controls { margin-inline: 16px; }
   }
-  @media (prefers-reduced-motion: reduce) { &.is-ready &__track { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { &.is-animated &__slide { transition: none; } }
 }
 
 // 정보 띠
