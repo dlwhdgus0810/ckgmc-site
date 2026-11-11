@@ -18,6 +18,15 @@ body {
   letter-spacing: -.01em;
   -webkit-font-smoothing: antialiased;
 }
+// 짧은 페이지는 본문 영역을 늘려 푸터를 화면 아래에 두고, 긴 페이지는 자연스럽게 스크롤합니다.
+.site-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  > * { flex-shrink: 0; }
+  > main, > .page-body { flex: 1 0 auto; }
+}
 [id] { scroll-margin-top: calc(#{$header-height-lg} + 1rem); }
 
 h1, .h1 { font-size: clamp(1.75rem, 1.25rem + 2vw, 2.5rem); }

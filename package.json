@@ -9,7 +9,7 @@
     "build": "wrangler types && astro build",
     "preview": "wrangler types && astro preview",
     "check": "wrangler types && astro check",
-    "test:ui": "node scripts/ui-regression.cjs && node scripts/content-regression.cjs",
+    "test:ui": "node scripts/ui-regression.cjs && node scripts/content-regression.cjs && node scripts/carousel-regression.cjs",
     "test:editor": "node scripts/editor-regression.cjs",
     "deploy": "npm run build && wrangler deploy",
     "cms-auth:deploy": "wrangler deploy --config cms-auth/wrangler.toml",
