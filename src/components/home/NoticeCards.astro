@@ -14,7 +14,7 @@ const notices = all.filter((n) => !n.until || n.until >= today);
 {notices.length > 0 && (
   <section class="section section--surface" aria-labelledby="notices-title">
     <div class="container">
-      <SectionHeader id="notices-title" eyebrow="Announcements" title="교회 소식" />
+      <SectionHeader id="notices-title" eyebrow="Announcements" title="교회 소식" icon="megaphone" />
       <div class="notice-strip" data-notice-strip>
         <ul class="notice-strip__track" data-notice-track>
           {notices.map((n) => {

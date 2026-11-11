@@ -49,7 +49,7 @@ const stories = (await getCollection('stories')).sort((a, b) => b.data.date.getT
     {stories.length > 0 && (
       <section class="section section--surface" aria-labelledby="stories-title">
         <div class="container">
-          <SectionHeader id="stories-title" eyebrow="Our Story" title="우리 교회 이야기" more={{ href: '/story', label: '모든 이야기' }} />
+          <SectionHeader id="stories-title" eyebrow="Our Story" title="우리 교회 이야기" icon="camera" more={{ href: '/story', label: '모든 이야기' }} />
           <StoryGrid stories={stories} limit={8} />
         </div>
       </section>

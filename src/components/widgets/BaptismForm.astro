@@ -1,5 +1,6 @@
 ---
 import { site } from '../../data/site';
+import Emoji from '../Emoji.astro';
 const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
 ---
 <div class="p-3 bg-light row rounded">
@@ -39,7 +40,7 @@ const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
           <label for="bp-message">남기실 말씀</label>
           <textarea id="bp-message" class="form-control" name="message" rows="3"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">신청하기</button>
+        <button type="submit" class="btn btn-primary"><Emoji name="send" size={20} />신청하기</button>
         <p class="form-note mt-2 mb-0"><span class="req" aria-hidden="true">*</span> 표시는 꼭 적어 주세요. 적어 주신 내용은 세례 준비 연락에만 쓰입니다 (<a href="/privacy-policy">개인정보 처리방침</a>).</p>
       </form>
     ) : (

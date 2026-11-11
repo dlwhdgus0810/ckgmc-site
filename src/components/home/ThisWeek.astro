@@ -1,6 +1,7 @@
 ---
 /** 이번 주: 최신 설교(클릭 시 영상 재생) + 이번 주 주보(PDF) + 소그룹 나눔지 */
 import SectionHeader from '../SectionHeader.astro';
+import Emoji from '../Emoji.astro';
 import Icon from '../Icon.astro';
 import { slugOf, excerptOf, thumbAttrs, pdfOf, fileUrl, formatKoreanDate, isoDate, titleParts, displayDate, dateTimeAttr, type Post } from '../../lib/posts';
 interface Props { sermon?: Post; bulletin?: Post; resource?: Post }
@@ -10,7 +11,7 @@ const st = sermon ? titleParts(sermon) : undefined;
 ---
 <section class="section" aria-labelledby="thisweek-title">
   <div class="container">
-    <SectionHeader id="thisweek-title" eyebrow="This Week" title="이번 주" more={{ href: '/media/sermons', label: '모든 설교' }} />
+    <SectionHeader id="thisweek-title" eyebrow="This Week" title="이번 주" icon="calendar" more={{ href: '/media/sermons', label: '모든 설교' }} />
     <div class="row">
       <div class="col-lg-7 mb-4 mb-lg-0">
         {sermon ? (
@@ -42,7 +43,7 @@ const st = sermon ? titleParts(sermon) : undefined;
                 <h3 class="card-tile__title h5"><a href={`/media/bulletins/${slugOf(bulletin)}`}>{titleParts(bulletin).title}</a></h3>
                 <p class="card-tile__meta"><time datetime={isoDate(bulletin.data.date)}>{formatKoreanDate(bulletin.data.date)}</time></p>
                 <div class="this-week__actions">
-                  {pdf && <a class="btn btn-primary btn-sm" href={fileUrl(pdf.file)} target="_blank" rel="noopener"><Icon name="file-text" size={16} /> 주보 보기 (PDF)</a>}
+                  {pdf && <a class="btn btn-primary btn-sm" href={fileUrl(pdf.file)} target="_blank" rel="noopener"><Emoji name="doc" size={18} /> 주보 보기 (PDF)</a>}
                   <a class="btn btn-link btn-sm" href="/media/bulletins">지난 주보</a>
                 </div>
               </>

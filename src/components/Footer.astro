@@ -3,6 +3,7 @@
 import { site, telHref, mapsDirectionsUrl, liveUrl } from '../data/site';
 import { footerMemberLinks, footerNav, footerQuickLinks } from '../data/nav';
 import Icon from './Icon.astro';
+import Emoji from './Emoji.astro';
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
@@ -46,8 +47,8 @@ const year = new Date().getFullYear();
           <li><a href={site.social.instagram} target="_blank" rel="noopener"><Icon name="instagram" size={18} /> Instagram</a></li>
         </ul>
         <div class="site-footer__actions">
-          <a class="btn btn-gold" href="/offering"><Icon name="heart" size={18} /> 온라인헌금</a>
-          <a class="btn btn-outline-primary" href={liveUrl} target="_blank" rel="noopener"><Icon name="youtube" size={18} /> YouTube Live</a>
+          <a class="btn btn-gold" href="/offering"><Emoji name="heart" size={20} /> 온라인헌금</a>
+          <a class="btn btn-outline-primary" href={liveUrl} target="_blank" rel="noopener"><Emoji name="play" size={20} /> YouTube Live</a>
         </div>
       </div>
     </div>
