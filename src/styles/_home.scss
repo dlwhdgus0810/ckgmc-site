@@ -38,7 +38,10 @@
 .info-strip {
   position: relative;
   z-index: 2;
-  @include media-breakpoint-up(lg) { margin-top: -3.5rem; }
+  @include media-breakpoint-up(lg) {
+    margin-top: -3.5rem;
+    > .container { width: 94%; max-width: 1800px; padding-inline: 0; }
+  }
   &__card {
     display: grid;
     gap: 1px;
