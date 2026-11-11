@@ -177,7 +177,9 @@ Only edit the variables in `src/styles/_tokens.scss` — navy (`$navy-*`), gold 
 
 The overall look is light: a white header, photos shown bright, a light footer, and navy kept for headings and text.
 * **Header** (`_header.scss`) is white, so the logo in Site settings must be the dark-lettered version. A white-lettered logo would be invisible.
-* **Banners and the home hero** (`_banner.scss`, `_home.scss`) do not cover the photo with a dark overlay. Only the corner where the title sits
+* **Home hero** (`_home.scss`): the first slide keeps its text and buttons small (title at most 40px) and at the lower left, so the sky
+  and the church building stay visible. Only that corner fades to white behind the navy text; nothing dark is laid over the photo.
+* **Page banners** (`_banner.scss`) do not cover the photo with a dark overlay. Only the corner where the title sits
   is shaded so the white text stays readable. Banners without a photo use a light background with navy text.
 * On very wide screens the banner photo stops at 1320px and the sides are filled with a blurred copy of the same photo.
 * **Buttons** (`_components.scss`) are not filled with dark navy. The main button (`.btn-primary`) is a soft tint with navy text and

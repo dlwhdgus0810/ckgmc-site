@@ -12,6 +12,8 @@
   &__viewport { overflow: hidden; border-radius: 24px; }
   &__slide { position: relative; display: flex; align-items: center; height: 500px; min-width: 0; overflow: hidden; }
   &__slide--notice { background: #fff; }
+  // 첫 장의 글자와 버튼은 배너 아래쪽에 둡니다 — 위쪽 하늘과 오른쪽 건물이 그대로 보이도록
+  &__slide--welcome { align-items: flex-end; }
   &__img {
     position: absolute; top: 50%; left: 50%; width: 1600px; max-width: none; height: auto;
     transform: translate(-50%, -57%);
@@ -21,16 +23,24 @@
   &__poster-link { position: absolute; left: 50%; width: 1600px; transform: translateX(-50%); }
   &__poster { display: block; width: 1600px; max-width: none; height: 500px; object-fit: contain; }
   &__caption { display: none; }
+  // 흰 음영은 글자가 놓이는 왼쪽 아래 모서리에만 둡니다 (사진 전체를 덮지 않습니다)
   &__scrim {
     position: absolute; inset: 0;
     background:
       linear-gradient(0deg, #fff, rgba(#fff, 0) 24%),
-      linear-gradient(90deg, rgba(#fff, .92) 0%, rgba(#fff, .7) 38%, rgba(#fff, .22) 64%, rgba(#fff, 0) 100%);
+      radial-gradient(ellipse 58% 80% at 10% 100%, rgba(#fff, .9) 0%, rgba(#fff, .78) 50%, rgba(#fff, .3) 78%, rgba(#fff, 0) 100%);
+    // 태블릿은 글자가 화면 폭의 절반을 넘게 차지하므로 음영을 조금 더 넓게 둡니다 (글자 대비 확보)
+    @include media-breakpoint-only(md) {
+      background:
+        linear-gradient(0deg, #fff, rgba(#fff, 0) 24%),
+        radial-gradient(ellipse 100% 92% at 4% 100%, rgba(#fff, .92) 0%, rgba(#fff, .82) 55%, rgba(#fff, .45) 80%, rgba(#fff, 0) 100%);
+    }
   }
-  &__content { position: relative; padding-top: 2rem; padding-bottom: 2rem; }
-  &__eyebrow { margin-bottom: .75rem; font-size: .875rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: $navy-700; }
-  &__title { max-width: 18ch; margin-bottom: 1rem; font-size: clamp(2rem, 1.2rem + 3.5vw, 3.75rem); line-height: 1.15; color: $navy-900; }
-  &__sub { max-width: 40rem; margin-bottom: 1.75rem; font-size: 1.0625rem; color: $navy-900; @include media-breakpoint-up(md) { font-size: 1.125rem; } }
+  &__content { position: relative; padding-top: 2rem; padding-bottom: 2.5rem; }
+  // 글자와 버튼은 사진(교회 건물)을 가리지 않도록 작게 둡니다 — 제목은 최대 40px, 소개는 두 줄로 접습니다
+  &__eyebrow { margin-bottom: .5rem; font-size: .75rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: $navy-700; }
+  &__title { max-width: 22ch; margin-bottom: .75rem; font-size: clamp(1.75rem, 1.15rem + 1.5vw, 2.5rem); line-height: 1.2; color: $navy-900; }
+  &__sub { max-width: 27rem; margin-bottom: 1.25rem; font-size: 1rem; line-height: 1.65; color: $navy-900; }
   &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
   &__english { color: $navy-700; text-decoration: underline; padding: .5rem 0; font-size: .875rem; }
   &__controls {
@@ -55,7 +65,8 @@
   &.is-animated &__slide { transition: opacity 1.2s cubic-bezier(.4, 0, .2, 1), visibility 0s 1.2s; }
   @include media-breakpoint-down(sm) {
     &__viewport { border-radius: 16px; }
-    &__slide { height: 480px; }
+    // 글자가 줄어든 만큼 높이도 줄여 사진과 제목 사이가 비지 않게 합니다 (소식 슬라이드가 들어갈 높이는 유지)
+    &__slide { height: clamp(400px, 330px + 20vw, 480px); }
     &__slide--welcome { align-items: flex-end; background: #fff; }
     &__img { top: 0; width: 100%; transform: translateX(-50%); mask-image: none; }
     &__slide--notice { flex-direction: column; align-items: stretch; justify-content: flex-start; background: #fff; }
@@ -67,12 +78,13 @@
       h2 { font-size: 1.5rem; line-height: 1.4; margin: 0; }
       p { font-size: 1rem; margin: 0; }
     }
-    &__scrim { background: linear-gradient(0deg, #fff 45%, rgba(#fff, 0) 78%); }
+    // 글자 뒤만 흰색으로 두고 그 위로 짧게 풀어, 사진 아래쪽이 뿌옇게 덮이지 않게 합니다
+    &__scrim { background: linear-gradient(0deg, #fff 13.5rem, rgba(#fff, 0) 17.5rem); }
     &__content { padding-top: 1rem; padding-bottom: 1.5rem; }
     &__eyebrow { display: none; }
-    &__sub { margin-bottom: 1rem; font-size: 1rem; }
-    &__title { font-size: 2rem; }
-    &__actions { gap: .5rem; .btn-lg { padding: .65rem .9rem; font-size: 1rem; } }
+    &__sub { max-width: none; margin-bottom: .875rem; font-size: .9375rem; }
+    &__title { max-width: none; margin-bottom: .5rem; font-size: clamp(1.5rem, 6.7vw, 1.625rem); }
+    &__actions { gap: .5rem; .btn { padding: .5rem .9rem; font-size: .9375rem; } }
     &__english { flex-basis: 100%; max-width: calc(100% - 112px); margin-right: 112px; }
     &__controls { right: 16px; bottom: 16px; }
   }

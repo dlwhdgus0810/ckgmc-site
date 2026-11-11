@@ -21,8 +21,8 @@ const titles = [h.headline, ...notices.map((notice) => notice.title ?? '교회 �
           <h1 id="hero-title" class="hero__title">{h.headline}</h1>
           {h.subline && <p class="hero__sub">{h.subline}</p>}
           <div class="hero__actions">
-            <a class="btn btn-primary btn-lg" href={h.primary.href}>{h.primary.label}</a>
-            <a class="btn btn-outline-primary btn-lg" href={h.secondary.href}>{h.secondary.label}</a>
+            <a class="btn btn-primary" href={h.primary.href}>{h.primary.label}</a>
+            <a class="btn btn-outline-primary" href={h.secondary.href}>{h.secondary.label}</a>
             <a class="hero__english" href="/visit-en" lang="en">English visitor guide</a>
           </div>
         </div>
