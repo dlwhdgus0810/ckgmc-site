@@ -1,13 +1,7 @@
 ---
 /** 메인 첫 화면: 교회 사진 + 환영 문구 + 버튼 2개 (내용은 site.json 의 hero) */
 import { site } from '../../data/site';
-import Emoji from '../Emoji.astro';
-import type { EmojiName } from '../../lib/emoji';
 const h = site.hero;
-/** 버튼이 가는 곳에 맞는 이모티콘 (없으면 글자만) */
-const emojiFor = (href: string): EmojiName | undefined =>
-  /services/.test(href) ? 'church' : /welcome/.test(href) ? 'wave' : /directions/.test(href) ? 'pin' : /offering/.test(href) ? 'heart' : /sermons|series/.test(href) ? 'play' : undefined;
-const [e1, e2] = [emojiFor(h.primary.href), emojiFor(h.secondary.href)];
 ---
 <section class="hero on-dark" aria-labelledby="hero-title">
   <img class="hero__img" src={h.image} alt={h.alt} fetchpriority="high" loading="eager" decoding="async" />
@@ -17,8 +11,8 @@ const [e1, e2] = [emojiFor(h.primary.href), emojiFor(h.secondary.href)];
     <h1 id="hero-title" class="hero__title">{h.headline}</h1>
     {h.subline && <p class="hero__sub">{h.subline}</p>}
     <div class="hero__actions">
-      <a class="btn btn-light btn-lg" href={h.primary.href}>{e1 && <Emoji name={e1} size={24} />}{h.primary.label}</a>
-      <a class="btn btn-outline-light btn-lg" href={h.secondary.href}>{e2 && <Emoji name={e2} size={24} />}{h.secondary.label}</a>
+      <a class="btn btn-light btn-lg" href={h.primary.href}>{h.primary.label}</a>
+      <a class="btn btn-outline-light btn-lg" href={h.secondary.href}>{h.secondary.label}</a>
     </div>
   </div>
 </section>
