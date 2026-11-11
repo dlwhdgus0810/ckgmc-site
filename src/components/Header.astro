@@ -53,7 +53,7 @@ const [welcomeCta, givingCta] = headerCtas;
 
       <div class="site-nav__ctas">
         {welcomeCta && <a class="site-nav__cta" href={welcomeCta.href}>{welcomeCta.label}</a>}
-        {givingCta && <a class="btn btn-gold btn-sm" href={givingCta.href} aria-current={givingCta.href === currentPath ? 'page' : undefined}>{givingCta.label}</a>}
+        {givingCta && <a class="btn btn-outline-primary btn-sm" href={givingCta.href} aria-current={givingCta.href === currentPath ? 'page' : undefined}>{givingCta.label}</a>}
         <a class="site-nav__account" href="/login" data-account-link title="로그인" aria-label="로그인">
           <Icon name="user" size={18} />
           <span class="site-nav__account-label">로그인</span>
@@ -66,6 +66,7 @@ const [welcomeCta, givingCta] = headerCtas;
       </div>
     </nav>
   </div>
+  <div class="nav-backdrop" data-nav-backdrop hidden aria-hidden="true"></div>
 </header>
 <script>
   // 정적 페이지라 서버는 로그인 여부를 모릅니다. 로그인 시 발급되는 ck_auth 쿠키(값 없음)로 링크만 바꿉니다.

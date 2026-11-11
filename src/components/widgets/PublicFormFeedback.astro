@@ -1,0 +1,18 @@
+---
+import { site, telHref } from '../../data/site';
+---
+<div class="public-form-feedback" data-public-feedback hidden>
+  <p class="public-form-status" data-public-status role="status" aria-live="polite" tabindex="-1" hidden></p>
+  <div class="public-form-draft" data-draft-offer hidden>
+    <p>이 탭에 임시 저장한 작성 내용이 있습니다.</p>
+    <button type="button" class="btn btn-outline-primary btn-sm" data-draft-restore>작성 내용 불러오기</button>
+    <button type="button" class="btn btn-link btn-sm" data-draft-discard>임시 저장 삭제</button>
+  </div>
+  <div class="public-form-tools">
+    <button type="button" class="btn btn-outline-secondary btn-sm" data-draft-save>이 탭에 임시 저장</button>
+    <span class="form-note">임시 저장 내용은 이 탭에서만 복원할 수 있습니다.</span>
+  </div>
+  <p class="form-note" data-public-fallback hidden>
+    전송이 어려우시면 <a href={telHref}>{site.phone}</a> 또는 <a href={`mailto:${site.email}`}>{site.email}</a>로 연락해 주세요.
+  </p>
+</div>

@@ -138,6 +138,39 @@
   &__status { margin: -.25rem 0 1rem; color: $ink-600; font-size: .9375rem; }
 }
 
+.board-summary { display: flex; justify-content: space-between; flex-wrap: wrap; gap: .5rem; margin-bottom: 1rem; color: $ink-600; font-size: .875rem; }
+.media-fallback { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1rem; margin: -1rem 0 1.5rem; font-size: .875rem; span { color: $ink-600; } }
+.pdf-card__summary { margin: 0; padding: .75rem 1.125rem; border-top: 1px solid $line; font-size: .9375rem; }
+.series__controls { margin-bottom: 1.5rem; &[hidden] { display: none; } }
+.series__current { font-weight: 600; }
+.series__actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.episode-tools { align-items: flex-end; justify-content: space-between; gap: .75rem; flex-wrap: wrap; margin-bottom: .75rem; > div { flex: 1 1 14rem; max-width: 30rem; } label { font-size: .875rem; font-weight: 600; } }
+.episode-list .episode[hidden] { display: none; }
+
+@include media-breakpoint-down(xs) {
+  .board-cards {
+    > div { flex: 0 0 100%; max-width: 100%; margin-bottom: .75rem !important; }
+    .card-tile { display: flex; flex-direction: row; align-items: flex-start; gap: .75rem; padding: .75rem; }
+    .card-tile__media { flex: 0 0 96px; width: 96px; height: 72px; border-radius: $border-radius-sm; overflow: hidden; }
+    .card-tile__body { padding: 0; flex: 1; min-width: 0; }
+    .card-tile__title { font-size: 1rem; line-height: 1.4; }
+    .card-tile__text { margin-top: .25rem; margin-bottom: .25rem; font-size: .875rem; }
+    .card-tile__meta { margin-top: .25rem; font-size: .875rem; }
+    .card-tile__eyebrow { font-size: .8125rem; }
+  }
+  .board-search__year { flex: 1 1 8rem; }
+  .episode-list .episode { flex-wrap: wrap; gap: .5rem; .episode__title { flex-basis: calc(100% - 3rem); } > .btn { margin-left: 2.5rem; } }
+}
+
+body.gallery-open { overflow: hidden; }
+.story-gallery {
+  width: min(1100px, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); padding: 1rem; border: 0; border-radius: $border-radius; background: $navy-900; color: #fff;
+  &::backdrop { background: rgba(0, 0, 0, .8); }
+  > img { display: block; width: 100%; height: min(70dvh, 800px); object-fit: contain; }
+  &__toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; margin-bottom: .5rem; }
+  &__navigation { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .5rem; p { margin: 0; } }
+}
+
 // ── 그림 없는 게시판(주보·나눔지)의 줄 목록 ─────────────────────────────
 .post-rows { list-style: none; margin: 0 0 1rem; padding: 0; border-top: 1px solid $line; }
 .post-row {

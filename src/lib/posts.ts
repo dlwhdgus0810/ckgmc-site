@@ -85,9 +85,9 @@ export function boardLayout(posts: Post[]): 'cards' | 'rows' {
 export function thumbAttrs(post: Post, size: 'hq' | 'hd' = 'hq'): { src: string; onerror?: string } {
   const src = thumbnailOf(post, size);
   if (size === 'hd' && !post.data.thumbnail && post.data.youtube) {
-    return { src, onerror: `this.onerror=null;this.src='https://i.ytimg.com/vi/${post.data.youtube}/hqdefault.jpg'` };
+    return { src, onerror: `this.onerror=function(){this.onerror=null;this.src='${DEFAULT_THUMBNAIL}'};this.src='https://i.ytimg.com/vi/${post.data.youtube}/hqdefault.jpg'` };
   }
-  return { src };
+  return { src, onerror: `this.onerror=null;this.src='${DEFAULT_THUMBNAIL}'` };
 }
 
 /** 첨부파일 경로: `/` 나 `http` 로 시작하면 그대로, 아니면 public/files/ 안의 파일로 봅니다 */
@@ -108,8 +108,9 @@ export interface ParsedTitle { title: string; service?: string; preacher?: strin
 export const PARSED_BOARDS = new Set(['sermons', 'special-services', 'choir']);
 
 export function parseSermonTitle(raw: string): ParsedTitle {
-  const parts = raw.split('|').map((s) => s.trim()).filter(Boolean);
-  if (parts.length < 2) return { title: raw, raw };
+  const recordedTitle = raw.replace(/\bLIVE\b/gi, '').replace(/\s+/g, ' ').trim();
+  const parts = recordedTitle.split('|').map((s) => s.trim()).filter(Boolean);
+  if (parts.length < 2) return { title: recordedTitle, raw };
   let date: string | undefined;
   let preacher: string | undefined;
   let service: string | undefined;
@@ -126,18 +127,23 @@ export function parseSermonTitle(raw: string): ParsedTitle {
     const clean = p.replace(/^\[|\]$/g, '').trim();
     if (!date && /^\d{4}[.\-/]\s?\d{1,2}[.\-/]\s?\d{1,2}\.?(\s*\(.\))?$/.test(clean)) date = clean.replace(/\.$/, '');
     else if (!preacher && clean.length <= 24 && /(목사|전도사|간사|장로|사모|선교사|교수|집사|Pastor|Rev\.|Dr\.)/.test(clean)) preacher = clean;
-    else if (!service && clean.length <= 28 && /(예배|집회|설교|찬양|간증|LIVE|Live|Service|Worship|Praise)/.test(clean)) service = clean;
+    else if (!service && clean.length <= 28 && /(예배|집회|설교|찬양|간증|LIVE|Live|Service|Worship|Praise)/.test(clean)) service = clean.replace(/\bLIVE\b/gi, '').trim();
     else rest.push(clean);
   }
-  if (rest.length === 0) return { title: service ?? raw, preacher, date, raw };
+  if (rest.length === 0) return { title: service ?? recordedTitle, preacher, date, raw };
   return { title: rest.join(' | '), service, preacher, date, raw };
 }
 /** 게시판에 따라 나눈 제목 또는 원래 제목 */
 export function titleParts(post: Post): ParsedTitle {
   if (PARSED_BOARDS.has(boardOf(post))) return parseSermonTitle(post.data.title);
-  // 주보·나눔지 제목 앞의 날짜는 9/6/2026, 09/06/2026 이 섞여 있어 두 자리로 맞춰 보여줍니다
-  const title = post.data.title.replace(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/, (_, m: string, d: string, y: string) => `${m.padStart(2, '0')}/${d.padStart(2, '0')}/${y}`);
-  return { title, raw: post.data.title };
+  // 주보/나눔지는 등록일 대신 제목에 적힌 예배일을 주 날짜로 표시합니다.
+  const dated = /^(bulletins|resources)$/.test(boardOf(post));
+  const raw = post.data.title;
+  const us = dated ? raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/) : null;
+  const ymd = dated ? raw.match(/^(\d{4})[.\-/]\s?(\d{1,2})[.\-/]\s?(\d{1,2})\.?/) : null;
+  const date = us ? `${us[3]}.${us[1].padStart(2, '0')}.${us[2].padStart(2, '0')}` : ymd ? `${ymd[1]}.${ymd[2].padStart(2, '0')}.${ymd[3].padStart(2, '0')}` : undefined;
+  const match = us ?? ymd;
+  return { title: date && match ? date + raw.slice(match[0].length) : raw, date, raw };
 }
 export const displayTitle = (post: Post) => titleParts(post).title;
 
@@ -151,7 +157,9 @@ export function serviceDate(post: Post): Date | undefined {
 /** 제목에서 떼어낸 날짜 글자(2026.08.16)를 Date(UTC 자정)로 */
 export function parseTitleDate(text: string | undefined): Date | undefined {
   const m = text?.match(/^(\d{4})[.\-/]\s?(\d{1,2})[.\-/]\s?(\d{1,2})/);
-  return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3])) : undefined;
+  if (!m) return undefined;
+  const date = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+  return date.getUTCFullYear() === +m[1] && date.getUTCMonth() === +m[2] - 1 && date.getUTCDate() === +m[3] ? date : undefined;
 }
 /** 화면에 보여줄 날짜: 예배 날짜 → 없으면 게시 시각 */
 export const displayDate = (post: Post): Date => serviceDate(post) ?? post.data.date;

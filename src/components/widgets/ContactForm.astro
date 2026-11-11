@@ -1,8 +1,10 @@
 ---
 import { site, telHref } from '../../data/site';
 import Icon from '../Icon.astro';
-import Emoji from '../Emoji.astro';
-const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
+import PublicFormFeedback from './PublicFormFeedback.astro';
+const thanks = new URL(site.formThanksPath, Astro.site);
+thanks.searchParams.set('form', 'contact');
+const thanksUrl = thanks.href;
 ---
 <div class="row">
   <div class="col-md-5 mb-4">
@@ -19,7 +21,7 @@ const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
   <div class="col-md-7">
     <h2 class="h5 mb-3">문의 메일폼</h2>
     {site.formEndpoint ? (
-      <form action={site.formEndpoint} method="POST" id="request-form" class="contact-form">
+      <form action={site.formEndpoint} method="POST" id="request-form" class="contact-form" data-public-form="contact">
         <input type="hidden" name="_subject" value="[홈페이지 문의]" />
         <input type="hidden" name="_next" value={thanksUrl} />
         <input type="hidden" name="_template" value="table" />
@@ -36,7 +38,8 @@ const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
           <label for="request_content">문의 내용 <span class="text-muted">Message</span> <span class="req" aria-hidden="true">*</span></label>
           <textarea id="request_content" class="form-control" name="message" rows="5" required></textarea>
         </div>
-        <button type="submit" class="btn btn-primary"><Emoji name="send" size={20} />전송하기</button>
+        <button type="submit" class="btn btn-primary"><Icon name="mail" size={20} />전송하기</button>
+        <PublicFormFeedback />
         <p class="form-note mt-2 mb-0"><span class="req" aria-hidden="true">*</span> 표시는 꼭 적어 주세요. 적어 주신 내용은 문의에 답하는 데에만 쓰입니다 (<a href="/privacy-policy">개인정보 처리방침</a>). 전송 후 접수 확인 페이지로 이동합니다.</p>
       </form>
     ) : (

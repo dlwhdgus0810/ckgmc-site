@@ -1,7 +1,7 @@
 /**
  * 게시판 검색 목록 (/search/sermons.json 등). 빌드 때 정적으로 만들어지고, 목록 화면의 검색 상자가 처음 쓰일 때 한 번 내려받습니다.
- * 사이트에 이미 공개된 내용(제목·설교자·날짜·주소)만 담습니다. 숨긴 글(hidden)은 빠집니다.
- *   u 주소 끝부분 · t 제목 · s 예배 종류 · p 설교자 · d 표시 날짜(YYYY-MM-DD) · i 썸네일 · f PDF · x 요약 · k 화면에 안 보이는 검색어(성경 본문)
+ * 사이트에 이미 공개된 내용(제목·설교자·날짜·주소·본문)만 담습니다. 숨긴 글(hidden)은 빠집니다.
+ *   u 주소 끝부분 · t 제목 · s 예배 종류 · p 설교자 · d 표시 날짜(YYYY-MM-DD) · i 썸네일 · f PDF · x 요약 · k 전체 공개 본문 검색어
  */
 export const prerender = true;
 import type { APIRoute, GetStaticPaths } from 'astro';
@@ -34,11 +34,11 @@ export const GET: APIRoute = async ({ params }) => {
       t: t.title,
       s: t.service,
       p: t.preacher,
-      d: formatDate(parsed ? displayDate(post) : post.data.date),
+      d: formatDate(displayDate(post)),
       i: !rows && hasOwnImage(post) ? thumbnailOf(post) : undefined,
       f: rows && pdf ? fileUrl(pdf.file) : undefined,
       x: !parsed && text && !/\.(pdf|docx?|pptx?|xlsx?|hwp)$/i.test(text.trim()) ? text : undefined,
-      k: parsed ? scriptureOf(post.body) : undefined,
+      k: [scriptureOf(post.body), plainText(post.body)].filter(Boolean).join(' '),
     };
   });
   return new Response(JSON.stringify(items), { headers: { 'content-type': 'application/json; charset=utf-8' } });

@@ -1,67 +1,98 @@
 ---
-/** 콘텐츠 편집 폼: 필드들 + 본문 편집기 + 저장/삭제 */
 import FieldInput from './FieldInput.astro';
 import Icon from '../Icon.astro';
 import type { Collection } from '../../lib/content/collections';
 interface Props {
-  collection: Collection;
-  values: Record<string, unknown>;
-  body: string;
-  path: string | null;
-  sha: string | null;
-  errors: string[];
-  backHref: string;
-  previewUrl?: string | null;
+  collection: Collection; values: Record<string, unknown>; body: string;
+  path: string | null; sha: string | null; errors: string[]; backHref: string;
+  previewUrl?: string | null; userId: number;
 }
-const { collection: col, values, body, path, sha, errors, backHref, previewUrl } = Astro.props;
+const { collection: col, values, body, path, sha, errors, backHref, previewUrl, userId } = Astro.props;
 const isNew = !path;
+const draftKey = `content:${userId}:${col.key}:${path ?? 'new'}`;
+const settingsGroups = [
+  { id: 'church', label: '교회 정보', names: ['name', 'nameEn', 'description', 'address', 'phone', 'email', 'logo', 'ogImage'] },
+  { id: 'home', label: '홈 화면', names: ['hero', 'quickLinks', 'verses'] },
+  { id: 'worship', label: '예배 안내', names: ['serviceTimes'] },
+  { id: 'news', label: '공지 · 일정', names: ['notices', 'events'] },
+  { id: 'links', label: '연락 · 연결', names: ['social', 'liveUrl', 'newFamilyFormUrl', 'links'] },
+  { id: 'advanced', label: '고급 설정', names: [] },
+];
+const advancedNames = ['order', 'board', 'perPage', 'widget', 'widgetPosition', 'showTitle', 'headerFocus', 'permalink'];
+const groups = col.kind === 'json' ? settingsGroups.map((g) => ({ ...g, fields: col.fields.filter((f) => g.id === 'advanced' ? !settingsGroups.some((other) => other.names.includes(f.name)) : g.names.includes(f.name)) })) : [
+  { id: 'main', label: '기본 정보', fields: col.fields.filter((f) => !advancedNames.includes(f.name)) },
+  { id: 'advanced', label: '고급 설정', fields: col.fields.filter((f) => advancedNames.includes(f.name)) },
+];
 ---
-<form method="post" enctype="multipart/form-data" class="content-form" novalidate data-content-form>
+<form method="post" enctype="multipart/form-data" class="content-form" novalidate data-content-form data-draft-key={draftKey} data-server-errors={errors.length > 0 ? 'true' : undefined}>
   <input type="hidden" name="action" value="save" />
   <input type="hidden" name="path" value={path ?? ''} />
   <input type="hidden" name="sha" value={sha ?? ''} />
-  {errors.length > 0 && (
-    <div class="alert alert-danger" role="alert">
-      <strong>저장하지 못했습니다.</strong>
-      <ul class="mb-0 pl-3 mt-1">{errors.map((e) => <li>{e}</li>)}</ul>
-    </div>
-  )}
-  {col.hint && <p class="cf-hint">{col.hint}</p>}
-
-  <div class="cf-fields">
-    {col.fields.map((f) => <FieldInput field={f} value={values[f.name]} />)}
+  <p class="cf-hint">필수 항목은 <span aria-hidden="true">*</span>로 표시됩니다. 임시 입력은 현재 브라우저 탭에만 보관되며 게시되지 않습니다.</p>
+  <p data-draft-status class="cf-draft-status" role="status"></p>
+  <div class="alert alert-danger" role="alert" tabindex="-1" data-editor-errors hidden={errors.length === 0}>
+    <strong>게시하지 못했습니다. 아래 항목을 확인해 주세요.</strong>
+    <ul class="mb-0 pl-3 mt-1">{errors.map((e) => <li>{e}</li>)}</ul>
   </div>
-
+  {col.hint && <p class="cf-hint">{col.hint}</p>}
+  <nav class="cf-section-nav" aria-label="편집 항목 바로가기">
+    {groups.filter((g) => g.fields.length).map((g) => <a href={`#editor-${g.id}`}>{g.label}</a>)}
+    {col.body !== 'none' && <a href="#editor-body">본문</a>}
+  </nav>
+  <div class="cf-fields">
+    {groups.filter((g) => g.fields.length).map((g, i) => (
+      <details class="cf-section" id={`editor-${g.id}`} open={i === 0}>
+        <summary>{g.label}<span>{g.fields.length}개 항목</span></summary>
+        <div class="cf-section__body">
+          {g.id === 'advanced' && <p class="cf-hint">서비스 연결과 페이지 동작에 영향을 주는 설정입니다. 현재 값을 확인한 뒤 변경해 주세요.</p>}
+          {g.fields.map((f) => <FieldInput field={f} value={values[f.name]} />)}
+        </div>
+      </details>
+    ))}
+  </div>
   {col.body !== 'none' && (
-    <div class="form-group cf-body" data-body-mode={col.body}>
-      <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap:.5rem">
-        <label for="body" class="mb-0">본문</label>
-        {col.body === 'html' && (
-          <label class="small mb-0"><input type="checkbox" data-raw-toggle /> HTML 직접 편집</label>
-        )}
-      </div>
-      {col.body === 'html' && <div id="quill-editor" class="cf-editor"></div>}
-      <textarea id="body" name="body" class:list={['form-control cf-raw', { 'd-none': col.body === 'html' }]} rows="18" spellcheck="false">{body}</textarea>
-      {col.body === 'raw' && <small class="form-text text-muted">HTML 을 그대로 편집합니다. 사진은 아래 "사진 올리기"로 주소를 만들어 <code>&lt;img src="…"&gt;</code> 에 넣으세요.</small>}
+    <section class="cf-body cf-section" id="editor-body" data-body-mode={col.body}>
+      <h2 class="h5">본문</h2>
+      {col.body === 'html' ? (
+        <>
+          <label class="small"><input type="checkbox" data-raw-toggle /> 고급: HTML 직접 편집</label>
+          <div id="quill-editor" class="cf-editor"></div>
+          <label for="body" class="sr-only">본문 HTML</label>
+          <textarea id="body" name="body" class="form-control cf-raw d-none" rows="18" spellcheck="false">{body}</textarea>
+        </>
+      ) : (
+        <>
+          <p class="cf-hint">문장·링크·사진만 수정하면 기존 배치와 서식이 유지됩니다. HTML은 고급 편집에서 변경할 수 있습니다.</p>
+          <label class="small"><input type="checkbox" data-page-source /> 고급: HTML 원본 편집</label>
+          <div data-page-fields></div>
+          <details class="cf-add-block"><summary>내용 블록 추가</summary><div class="d-flex flex-wrap" style="gap:.5rem;padding:.75rem 0"><button type="button" class="btn btn-outline-secondary btn-sm" data-add-block="heading">제목</button><button type="button" class="btn btn-outline-secondary btn-sm" data-add-block="paragraph">문단</button><button type="button" class="btn btn-outline-secondary btn-sm" data-add-block="link">링크</button><button type="button" class="btn btn-outline-secondary btn-sm" data-add-block="image">사진</button></div></details>
+          <label for="body" class="sr-only">본문 HTML 원본</label>
+          <textarea id="body" name="body" class="form-control cf-raw" rows="18" spellcheck="false">{body}</textarea>
+        </>
+      )}
       <div class="cf-inline-upload mt-2">
-        <label class="btn btn-outline-secondary btn-sm mb-0" for="inline-upload"><Icon name="download" size={14} /> 사진 올리기 (주소 복사)</label>
+        <label class="btn btn-outline-secondary btn-sm mb-0" for="inline-upload"><Icon name="download" size={14} /> 사진 올리기</label>
         <input id="inline-upload" type="file" accept="image/*" class="d-none" data-inline-upload />
-        <span class="small text-muted" data-inline-upload-result></span>
+        <span class="small text-muted" data-inline-upload-result role="status"></span>
       </div>
-    </div>
+    </section>
   )}
-
   <div class="cf-actions">
-    <button type="submit" class="btn btn-primary"><Icon name="check-circle" size={18} /> {isNew ? '만들기' : '저장'}</button>
+    <button type="submit" class="btn btn-primary"><Icon name="check-circle" size={18} /> {isNew ? '만들고 게시' : '저장하고 게시'}</button>
+    <button type="button" class="btn btn-outline-primary" data-preview-open>변경 미리보기</button>
     <a href={backHref} class="btn btn-outline-secondary">목록으로</a>
-    {previewUrl && <a href={previewUrl} class="btn btn-link" target="_blank" rel="noopener">사이트에서 보기 <Icon name="external" size={14} /></a>}
-    <span class="small text-muted ml-auto">저장하면 저장소에 커밋되고 2~3분 뒤 사이트에 반영됩니다.</span>
+    {previewUrl && <a href={previewUrl} class="btn btn-link" target="_blank" rel="noopener">현재 게시본 보기 <Icon name="external" size={14} /></a>}
+    <small>게시 후 사이트 반영까지 약 2~3분 걸립니다.</small>
   </div>
 </form>
+<dialog class="cf-preview" data-editor-preview aria-labelledby="editor-preview-title">
+  <div class="cf-preview__head"><h2 id="editor-preview-title" class="h5 mb-0">게시 전 변경 미리보기</h2><button type="button" class="btn btn-outline-secondary btn-sm" data-preview-close>닫기</button></div>
+  <p class="small text-muted">현재 입력을 확인하는 미리보기입니다. 실제 화면 배치는 게시본과 다를 수 있으며, 아직 사이트에 반영되지 않았습니다.</p>
+  <iframe title="현재 입력 내용 미리보기" sandbox="" data-preview-frame></iframe>
+</dialog>
 {!isNew && col.kind === 'folder' && (
-  <form method="post" class="mt-4 text-right" onsubmit="return confirm('이 글을 삭제할까요? 되돌리려면 저장소 이력에서 복구해야 합니다.')">
-    <input type="hidden" name="action" value="delete" />
-    <input type="hidden" name="path" value={path} />
-    <button type="submit" class="btn btn-outline-danger btn-sm">삭제</button>
+  <form method="post" class="mt-4 text-right" onsubmit="return confirm('이 글을 사이트에서 삭제할까요? 삭제 후에는 관리자의 복구가 필요합니다.')">
+    <input type="hidden" name="action" value="delete" /><input type="hidden" name="path" value={path} />
+    <button type="submit" class="btn btn-outline-danger btn-sm">글 삭제</button>
   </form>
 )}

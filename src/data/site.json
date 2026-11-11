@@ -67,23 +67,36 @@
       "alt": "청년부 수련회 9월 6–7일 Springfield, MO — Prayerful House",
       "title": "청년부 수련회 9/6–7",
       "href": "/ministries/young-adult",
-      "until": "2026-09-07"
+      "until": "2026-09-07",
+      "description": "청년부 수련회 Prayerful House 안내입니다.",
+      "time": "2026년 9월 6–7일",
+      "place": "Springfield, MO",
+      "actionLabel": "청년부 안내"
     },
     {
       "image": "/images/slides/slide-2.jpg",
       "alt": "새로운 주일 설교 시리즈 Who We Are — 그리스도인과 웨슬리안의 정체성, 2026년 6월 14일부터",
-      "title": "새 설교 시리즈 Who We Are",
-      "href": "/media/series/61"
+      "title": "설교 시리즈 Who We Are",
+      "href": "/media/series/61",
+      "description": "그리스도인과 웨슬리안의 정체성을 나누는 설교 시리즈입니다.",
+      "actionLabel": "시리즈 영상 보기"
     },
     {
       "image": "/images/slides/slide-3.jpg",
       "alt": "2026년 표어: 최고의 하나님께 최선의 예배를 (시편 29:2)",
-      "title": "2026 표어 — 최고의 하나님께 최선의 예배를"
+      "title": "2026 표어 — 최고의 하나님께 최선의 예배를",
+      "description": "최고의 하나님께 최선의 예배를 — 시편 29:2",
+      "until": "2026-12-31",
+      "href": "/about/services",
+      "actionLabel": "예배 안내"
     },
     {
       "image": "/images/slides/slide-4.jpg",
       "alt": "기도모임 안내 — 오로지 기도에 힘쓰더라 (행 1:14). 주일 중보기도모임 주일 오전 10:30 2층 청년부실 · 수요 중보기도모임 수요일 오전 10시 도서관 · 가족과 자녀를 위한 기도회 매월 셋째 주 금요성령집회 본당 · 주간 새벽이슬 월요일 오전 6시 본당 · 주품 토요큐티모임 토요일 오전 7시 Apex at Cityplace",
-      "title": "기도모임 안내"
+      "title": "기도모임 안내",
+      "description": "주일·수요 중보기도, 가족과 자녀를 위한 기도회, 새벽이슬과 주품 모임을 안내합니다. 포스터의 시간과 장소는 시즌에 따라 달라질 수 있습니다.",
+      "href": "/about/services",
+      "actionLabel": "모임 안내 확인"
     }
   ],
   "events": [

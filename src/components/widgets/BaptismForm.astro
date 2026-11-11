@@ -1,13 +1,16 @@
 ---
 import { site } from '../../data/site';
-import Emoji from '../Emoji.astro';
-const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
+import Icon from '../Icon.astro';
+import PublicFormFeedback from './PublicFormFeedback.astro';
+const thanks = new URL(site.formThanksPath, Astro.site);
+thanks.searchParams.set('form', 'baptism');
+const thanksUrl = thanks.href;
 ---
 <div class="p-3 bg-light row rounded">
   <div class="col-sm">
     <h2 class="h5">세례 신청</h2>
     {site.formEndpoint ? (
-      <form action={site.formEndpoint} method="POST" id="baptize-request-form">
+      <form action={site.formEndpoint} method="POST" id="baptize-request-form" data-public-form="baptism">
         <input type="hidden" name="_subject" value="[세례 신청]" />
         <input type="hidden" name="_next" value={thanksUrl} />
         <input type="hidden" name="_template" value="table" />
@@ -32,15 +35,16 @@ const thanksUrl = new URL(site.formThanksPath, Astro.site).href;
             <input id="bp-email" class="form-control" name="email" type="email" autocomplete="email" required />
           </div>
           <div class="form-group col-md-6">
-            <label for="bp-phone">전화 Phone</label>
+            <label for="bp-phone">전화 Phone <span class="text-muted">(선택)</span></label>
             <input id="bp-phone" class="form-control" name="phone" type="tel" autocomplete="tel" />
           </div>
         </div>
         <div class="form-group">
-          <label for="bp-message">남기실 말씀</label>
+          <label for="bp-message">남기실 말씀 <span class="text-muted">(선택)</span></label>
           <textarea id="bp-message" class="form-control" name="message" rows="3"></textarea>
         </div>
-        <button type="submit" class="btn btn-primary"><Emoji name="send" size={20} />신청하기</button>
+        <button type="submit" class="btn btn-primary"><Icon name="mail" size={20} />신청하기</button>
+        <PublicFormFeedback />
         <p class="form-note mt-2 mb-0"><span class="req" aria-hidden="true">*</span> 표시는 꼭 적어 주세요. 적어 주신 내용은 세례 준비 연락에만 쓰입니다 (<a href="/privacy-policy">개인정보 처리방침</a>).</p>
       </form>
     ) : (

@@ -35,12 +35,16 @@ if (canView && report && Astro.request.method === 'POST') {
   }
 }
 const comments = canView && report ? await listComments('cell', report.id) : [];
+const clearDraft = canView && report && Astro.cookies.get('ck_report_created')?.value === `cell:${report.id}`;
+if (clearDraft) Astro.cookies.delete('ck_report_created', { path: '/members' });
 const absentees = report ? parseAbsentees(report.absentees) : [];
 const back = admin && report?.user_id !== user.id ? { href: '/manage/cell-reports', label: '리더 보고서 목록' } : { href: '/members', label: '마이페이지' };
 ---
 <MemberLayout title="D그룹 리더 보고서" subtitle="Small Group Leader Report" area={admin && report?.user_id !== user.id ? 'manage' : 'members'}>
   {!canView || !report ? <NotFound back={back.href} backLabel={back.label} /> : (
     <>
+      {clearDraft && <span hidden data-draft-clear={`member:${user.id}:cell-report`}></span>}
+      <span hidden data-reply-user={user.id} data-reply-read={`cell:${report.id}`} data-latest-reply={report.latest_reply_id}></span>
       <div class="d-flex flex-wrap align-items-center justify-content-between mb-3" style="gap:.5rem">
         <h2 class="h4 mb-0">{report.group_name} · {koreanDate(report.meeting_date)}</h2>
         <a href={back.href} class="btn btn-outline-secondary btn-sm">{back.label}</a>
@@ -81,3 +85,9 @@ const back = admin && report?.user_id !== user.id ? { href: '/manage/cell-report
     </>
   )}
 </MemberLayout>
+
+<script>
+  import '../../../scripts/report-replies';
+  import { initFormDrafts } from '../../../scripts/form-drafts';
+  initFormDrafts();
+</script>

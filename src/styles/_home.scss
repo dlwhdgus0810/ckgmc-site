@@ -7,11 +7,11 @@
   position: relative;
   display: flex;
   align-items: flex-end;
-  min-height: clamp(520px, 78vh, 760px);
+  min-height: clamp(420px, 52vh, 560px);
   background: $navy-900;
   color: #fff;
   overflow: hidden;
-  &__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 30%; }
+  &__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 63%; }
   &__scrim {
     position: absolute; inset: 0;
     // 사진은 밝게 두고, 글자가 놓이는 왼쪽·아래쪽만 남색으로 받칩니다
@@ -19,11 +19,24 @@
       linear-gradient(90deg, rgba($navy-900, .52) 0, rgba($navy-900, .34) 42%, rgba($navy-900, 0) 80%),
       linear-gradient(to top, rgba($navy-900, .72) 0%, rgba($navy-900, .3) 38%, rgba($navy-900, 0) 74%);
   }
-  &__content { position: relative; padding-top: 4rem; padding-bottom: 5.5rem; @include media-breakpoint-up(lg) { padding-bottom: 7rem; } }
-  &__eyebrow { margin-bottom: .75rem; font-size: .8125rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: $gold-300; text-shadow: 0 1px 8px rgba($navy-900, .85), 0 0 2px rgba($navy-900, .6); }
+  &__content { position: relative; padding-top: 2rem; padding-bottom: 2rem; @include media-breakpoint-up(lg) { padding-top: 3rem; padding-bottom: 3rem; } }
+  &__eyebrow { margin-bottom: .75rem; font-size: .875rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: $gold-300; text-shadow: 0 1px 8px rgba($navy-900, .85), 0 0 2px rgba($navy-900, .6); }
   &__title { max-width: 18ch; margin-bottom: 1rem; font-size: clamp(2rem, 1.2rem + 3.5vw, 3.75rem); line-height: 1.15; color: #fff; text-shadow: 0 2px 16px rgba($navy-900, .6); }
   &__sub { max-width: 40rem; margin-bottom: 1.75rem; font-size: 1.0625rem; color: rgba(#fff, .95); text-shadow: 0 1px 10px rgba($navy-900, .7); @include media-breakpoint-up(md) { font-size: 1.125rem; } }
-  &__actions { display: flex; flex-wrap: wrap; gap: .75rem; .btn-outline-light { border-color: rgba(#fff, .7); } }
+  &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; .btn-outline-light { border-color: rgba(#fff, .85); } }
+  &__visit { margin: 1rem 0 1.25rem; padding: .75rem 1rem; max-width: 39rem; border-left: 3px solid $gold-300; background: rgba($navy-900, .65); border-radius: 0 .375rem .375rem 0;
+    p { margin: 0 0 .25rem; display: flex; gap: .35rem 1rem; flex-wrap: wrap; font-size: .9375rem; }
+    a { color: #fff; text-decoration: underline; font-size: .875rem; }
+  }
+  &__english { color: #fff; text-decoration: underline; padding: .5rem 0; font-size: .875rem; }
+  @include media-breakpoint-down(sm) {
+    min-height: 0;
+    &__eyebrow { display: none; }
+    &__sub { margin-bottom: 1rem; font-size: 1rem; }
+    &__title { font-size: 2rem; }
+    &__actions { gap: .5rem; .btn-lg { padding: .65rem .9rem; font-size: 1rem; } }
+    &__english { flex-basis: 100%; }
+  }
 }
 
 // 정보 띠
@@ -72,7 +85,7 @@
   &__quote {
     max-width: 46rem; margin: 0 auto; padding: 0; border: 0; text-align: center;
     p { margin: 0 0 .5rem; font-family: $font-family-serif; font-size: clamp(1.0625rem, .95rem + .5vw, 1.3125rem); line-height: 1.8; color: $navy-700; text-wrap: balance; }
-    cite { display: inline-block; font-style: normal; font-size: .8125rem; font-weight: 600; letter-spacing: .1em; color: $gold-700; &::before { content: '— '; } }
+    cite { display: inline-block; font-style: normal; font-size: .875rem; font-weight: 600; letter-spacing: .1em; color: $gold-700; &::before { content: '— '; } }
   }
 }
 
@@ -91,14 +104,14 @@
   &__date {
     flex: none; width: 3.75rem; padding: .375rem 0; text-align: center;
     border-radius: $border-radius-sm; background: $navy-50; color: $navy-900;
-    span { display: block; font-size: .6875rem; font-weight: 600; letter-spacing: .04em; color: $navy; }
+    span { display: block; font-size: .8125rem; font-weight: 600; letter-spacing: .04em; color: $navy; }
     strong { display: block; font-size: 1.5rem; line-height: 1.1; }
-    small { display: block; font-size: .6875rem; color: $ink-600; }
+    small { display: block; font-size: .8125rem; color: $ink-600; }
   }
   &__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: .2rem; }
   &__title { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.4; color: $ink-900; }
-  &__meta { display: flex; flex-wrap: wrap; gap: .2rem .875rem; margin: 0; font-size: .8125rem; color: $ink-600; span { display: inline-flex; align-items: center; gap: .3rem; } .icon { color: $gold-700; } }
-  &__desc { margin: 0; font-size: .8125rem; color: $ink-600; }
+  &__meta { display: flex; flex-wrap: wrap; gap: .2rem .875rem; margin: 0; font-size: .875rem; color: $ink-600; span { display: inline-flex; align-items: center; gap: .3rem; } .icon { color: $gold-700; } }
+  &__desc { margin: 0; font-size: .875rem; color: $ink-600; }
   &__arrow { flex: none; color: $navy; }
 }
 a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: inherit; transform: translateY(-2px); box-shadow: 0 .5rem 1.25rem rgba($navy-900, .1); .event-card__title { color: $navy; } }
@@ -120,14 +133,14 @@ a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: i
   }
   // 80vw: 휴대전화에서 다음 포스터가 살짝 보여 넘길 수 있음을 알림
   // position: relative — 카드 안의 sr-only(절대 위치) 텍스트가 트랙 밖으로 나가 페이지를 넓히지 않도록
-  &__item { position: relative; flex: none; scroll-snap-align: start; max-width: min(80vw, 720px); }
+  &__item { position: relative; flex: 0 0 min(85vw, 350px); scroll-snap-align: start; min-width: 0; }
   &__card {
     display: flex; flex-direction: column;
     height: 100%;
     border: 1px solid $line; border-radius: $border-radius; background: #fff;
     overflow: hidden; color: inherit;
     transition: transform .2s ease, box-shadow .2s ease;
-    img { display: block; height: clamp(170px, 24vw, 260px); width: auto; max-width: 100%; object-fit: contain; background: $surface; }
+    img { display: block; height: 160px; width: 100%; object-fit: contain; background: $surface; }
     &:hover, &:focus-visible { text-decoration: none; color: inherit; }
   }
   a.notice-strip__card:hover, a.notice-strip__card:focus-visible { transform: translateY(-3px); box-shadow: 0 .75rem 1.5rem rgba($navy-900, .12); }
@@ -143,15 +156,15 @@ a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: i
   }
   &.no-scroll &__nav { display: none; }
   &__btn {
-    width: 36px; height: 36px;
+    width: 44px; height: 44px;
     display: inline-flex; align-items: center; justify-content: center;
     border: 1px solid $line; border-radius: 50%; background: #fff; color: $navy;
     &:hover { background: $navy; color: #fff; border-color: $navy; }
   }
-  &.at-start [data-notice-prev], &.at-end [data-notice-next] { opacity: .35; pointer-events: none; }
+  &__btn:disabled { opacity: .35; cursor: default; }
 }
 .flip-x { transform: scaleX(-1); }
-.info-strip__note { font-size: .75rem; font-weight: 600; color: $gold-700; }
+.info-strip__note { font-size: .875rem; font-weight: 600; color: $gold-700; }
 
 // 이번 주
 .stack { display: grid; gap: 1rem; align-content: start; }
@@ -188,7 +201,7 @@ a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: i
     margin: .75rem 0 0; padding-top: .75rem; border-top: 1px solid $line;
     font-size: .9375rem; color: $ink-900;
     .icon { color: $gold-700; flex: none; align-self: center; }
-    span { font-size: .8125rem; font-weight: 600; color: $ink-600; }
+    span { font-size: .875rem; font-weight: 600; color: $ink-600; }
   }
   &__side { display: grid; gap: .75rem; align-content: start; }
 }
@@ -197,7 +210,8 @@ a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: i
   padding: .75rem .875rem;
   border: 1px solid $line; border-radius: $border-radius; background: #fff; color: inherit;
   transition: transform .2s ease, box-shadow .2s ease;
-  img { flex: none; width: 128px; aspect-ratio: 16 / 9; height: auto; object-fit: cover; border-radius: $border-radius-sm; background: $surface; }
+  picture { flex: none; width: 112px; }
+  img { display: block; width: 112px; aspect-ratio: 16 / 9; height: auto; object-fit: cover; border-radius: $border-radius-sm; background: $surface; }
   > div { display: flex; flex-direction: column; gap: .125rem; min-width: 0; flex: 1; }
   strong { font-size: .9375rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   small { color: $ink-600; }
@@ -247,4 +261,25 @@ a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: i
 @media (pointer: coarse) {
   .section__more, .info-strip__more { display: inline-flex; align-items: center; min-height: 44px; }
   .card-tile__title > a { display: block; padding: .5rem 0; margin: -.5rem 0; }
+}
+
+// Frequent tasks stay near the introduction on every screen size.
+.home-shortcuts {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; padding-top: 1rem; padding-bottom: 1rem;
+  @include media-breakpoint-up(md) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  > a { display: flex; align-items: center; gap: .75rem; padding: .875rem; color: $navy-900; background: $navy-50; border: 1px solid $navy-200; border-radius: $border-radius; min-height: 76px;
+    &:hover { background: $navy-100; text-decoration: none; }
+    svg { flex: none; color: $navy; }
+    strong, small { display: block; }
+    strong { font-size: 1rem; }
+    small { color: $ink-600; font-size: .875rem; }
+  }
+  @media(max-width:359px) { > a { padding: .625rem; gap: .5rem; } small { display: none!important; } }
+}
+.notice-strip__body { display: flex; flex: 1; flex-direction: column; align-items: flex-start; padding: 1rem; gap: .625rem;
+  h3 { font-size: 1.125rem; margin: 0; }
+  p { font-size: .9375rem; margin: 0; }
+  dl { font-size: .875rem; margin: 0; display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem; }
+  dd { margin: 0; }
+  .notice-strip__status { font-size: .875rem; color: $ink-600; margin-top: auto; }
 }

@@ -1,8 +1,8 @@
 ---
-/** 그룹 통계: 연도별 그룹 요약 + 월별 평균 출석 (원본 사이트에서 "준비 중"이던 기능) */
+/** 그룹 통계: 실제 제출 기록을 연도·월별로 요약합니다. */
 export const prerender = false;
 import MemberLayout from '../../layouts/MemberLayout.astro';
-import { groupYearStats, monthlyStats, reportYears } from '../../lib/reports';
+import { groupYearStats, listGroups, monthlyStats, reportYears } from '../../lib/reports';
 import { todayLocal } from '../../lib/http';
 
 const years = await reportYears();
@@ -10,51 +10,87 @@ const thisYear = todayLocal().slice(0, 4);
 if (!years.includes(thisYear)) years.unshift(thisYear);
 const param = Astro.url.searchParams.get('year') ?? '';
 const year = /^\d{4}$/.test(param) ? param : thisYear;
-const [summary, monthly] = await Promise.all([groupYearStats(year), monthlyStats(year)]);
+if (!years.includes(year)) years.push(year);
+years.sort((a, b) => b.localeCompare(a));
+const [summary, monthly, activeGroups] = await Promise.all([groupYearStats(year), monthlyStats(year), listGroups(true)]);
 const months = Array.from({ length: 12 }, (_, i) => `${year}-${String(i + 1).padStart(2, '0')}`);
 const cell = new Map(monthly.map((m) => [`${m.group_id}|${m.ym}`, m]));
+const totals = months.map((ym) => ({ ym, reports: monthly.filter((m) => m.ym === ym).reduce((total, m) => total + m.reports, 0) }));
+const totalReports = totals.reduce((total, m) => total + m.reports, 0);
+const maxReports = Math.max(1, ...totals.map((m) => m.reports));
+const activeIds = new Set(activeGroups.map((g) => g.id));
+const missing = summary.filter((s) => activeIds.has(s.group_id) && s.reports === 0);
+const referenceIndex = year === thisYear ? Number(todayLocal().slice(5, 7)) - 1 : 11;
+const current = totals[referenceIndex];
+const previous = referenceIndex > 0 ? totals[referenceIndex - 1] : null;
+const difference = previous ? current.reports - previous.reports : null;
 ---
 <MemberLayout title="그룹 통계" subtitle="Statistics" area="manage">
   <form method="get" class="filter-bar">
     <div class="form-group">
-      <label for="year">연도</label>
-      <select id="year" name="year" class="form-control" onchange="this.form.submit()">
+      <label for="year">조회 연도</label>
+      <select id="year" name="year" class="form-control">
         {years.map((y) => <option value={y} selected={y === year}>{y}년</option>)}
       </select>
     </div>
-    <noscript><button type="submit" class="btn btn-primary">보기</button></noscript>
+    <button type="submit" class="btn btn-primary">조회</button>
+    <a class="btn btn-outline-secondary ml-auto" href={`/manage/cell-reports?from=${year}-01-01&to=${year}-12-31`}>보고서·CSV 보기</a>
   </form>
 
-  <h2 class="h5 mb-3">{year}년 그룹별 요약</h2>
-  <div class="table-responsive mb-5">
-    <table class="table table-sm table-report">
-      <thead><tr><th>D그룹</th><th class="num">보고서</th><th class="num">평균 출석</th><th class="num">결석 합계</th><th>최근 모임</th></tr></thead>
-      <tbody>
-        {summary.map((s) => (
-          <tr class:list={{ 'text-muted': s.reports === 0 }}>
-            <td><a href={`/manage/cell-reports?group=${s.group_id}&from=${year}-01-01&to=${year}-12-31`}>{s.group_name}</a></td>
-            <td class="num">{s.reports}</td>
-            <td class="num">{s.reports ? s.avg_attendance : '—'}</td>
-            <td class="num">{s.reports ? s.total_absent : '—'}</td>
-            <td>{s.last_date ?? '—'}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+  {summary.length === 0 ? (
+    <div class="empty-state">
+      <h2 class="h5">아직 등록된 D그룹이 없습니다</h2>
+      <p>그룹을 등록하고 리더가 보고서를 제출하면 출석과 보고 현황을 여기에서 확인할 수 있습니다.</p>
+      <a class="btn btn-primary" href="/manage/groups#add-group">첫 D그룹 등록</a>
+    </div>
+  ) : (
+    <>
+      <div class="stat-grid">
+        <div class="stat"><span class="stat__label">{year}년 보고서</span><strong class="stat__value">{totalReports}건</strong><span class="stat__sub">보고 기록이 있는 그룹 {summary.filter((s) => s.reports > 0).length}개</span></div>
+        <div class="stat"><span class="stat__label">{referenceIndex + 1}월 보고서</span><strong class="stat__value">{current.reports}건</strong><span class="stat__sub">{difference === null ? '1월은 같은 해 비교 월이 없습니다' : `전월 대비 ${difference > 0 ? '+' : ''}${difference}건`}</span></div>
+        <div class:list={['stat', { 'stat--warn': missing.length > 0 }]}><span class="stat__label">해당 연도 보고 기록 없는 활성 그룹</span><strong class="stat__value">{missing.length}개</strong><span class="stat__sub">전체 활성 그룹 {activeGroups.length}개 중</span></div>
+      </div>
+      {missing.length > 0 && <div class="empty-state mb-4"><h2 class="h6">{year}년 보고 기록을 확인할 그룹</h2><p>{missing.map((s, i) => <>{i > 0 && ' · '}<a href={`/manage/groups/${s.group_id}`}>{s.group_name}</a></>)}</p><p class="small text-muted">보고 기록이 없다는 뜻이며, 모임 일정에 따른 제출 의무 여부는 그룹별로 확인해 주세요.</p></div>}
+      {totalReports === 0 ? <div class="empty-state mb-4"><h2 class="h5">{year}년 제출된 보고서가 없습니다</h2><p>다른 연도를 조회하거나 <a href="/manage/cell-reports">전체 보고서</a>를 확인하세요. 새 보고서가 제출되면 추이가 표시됩니다.</p></div> : (
+        <figure class="stats-trend mb-5">
+          <figcaption><h2 class="h5">{year}년 월별 보고서 제출 추이</h2><p class="small text-muted">가로축은 월, 막대와 숫자는 해당 월 모임 날짜의 보고서 수입니다.</p></figcaption>
+          <ol class="stats-trend__bars">
+            {totals.map((m, i) => <li><span class="stats-trend__value">{m.reports}<span class="sr-only">건</span></span><span class="stats-trend__track" aria-hidden="true"><span style={`height:${m.reports / maxReports * 100}%`}></span></span><span>{i + 1}<span class="stats-trend__month-unit">월</span></span></li>)}
+          </ol>
+        </figure>
+      )}
 
-  <h2 class="h5 mb-3">월별 평균 출석 <span class="text-muted small font-weight-normal">(괄호 안은 보고서 수)</span></h2>
-  <div class="table-responsive">
-    <table class="table table-sm table-report text-nowrap">
-      <thead><tr><th>D그룹</th>{months.map((m) => <th class="num">{Number(m.slice(5))}월</th>)}</tr></thead>
-      <tbody>
-        {summary.map((s) => (
-          <tr>
-            <td>{s.group_name}</td>
-            {months.map((m) => { const c = cell.get(`${s.group_id}|${m}`); return <td class="num">{c ? <>{c.avg_attendance} <span class="text-muted small">({c.reports})</span></> : <span class="text-muted">·</span>}</td>; })}
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+      <h2 id="year-summary" class="h5 mb-3">{year}년 그룹별 요약</h2>
+      <div class="table-responsive mb-5">
+        <table class="table table-sm table-report table-mobile-cards" role="table" aria-labelledby="year-summary">
+          <thead><tr><th scope="col">D그룹</th><th scope="col" class="num">보고서</th><th scope="col" class="num">평균 출석</th><th scope="col" class="num">결석 합계</th><th scope="col">최근 모임</th></tr></thead>
+          <tbody>
+            {summary.map((s) => (
+              <tr>
+                <td data-label="D그룹"><a href={`/manage/cell-reports?group=${s.group_id}&from=${year}-01-01&to=${year}-12-31`}>{s.group_name}</a>{!activeIds.has(s.group_id) && <span class="badge badge-secondary ml-1">비활성</span>}</td>
+                <td data-label="보고서" class="num">{s.reports}건</td>
+                <td data-label="평균 출석" class="num">{s.reports ? `${s.avg_attendance}명` : '보고 기록 없음'}</td>
+                <td data-label="결석 합계" class="num">{s.reports ? `${s.total_absent}명` : '—'}</td>
+                <td data-label="최근 모임">{s.last_date ?? '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {totalReports > 0 && <>
+        <h2 id="monthly-attendance" class="h5 mb-2">월별 평균 출석</h2>
+        <p id="monthly-hint" class="table-scroll-hint">괄호 안은 보고서 수입니다. 표를 좌우로 이동하면 나머지 달을 볼 수 있습니다. 키보드로는 표에 초점을 맞춘 뒤 방향키를 사용하세요.</p>
+        <div class="table-scroll" role="region" aria-labelledby="monthly-attendance" aria-describedby="monthly-hint" tabindex="0">
+          <table class="table table-sm table-report text-nowrap">
+            <thead><tr><th scope="col">D그룹</th>{months.map((m) => <th scope="col" class="num">{Number(m.slice(5))}월</th>)}</tr></thead>
+            <tbody>
+              {summary.map((s) => (
+                <tr><th scope="row">{s.group_name}</th>{months.map((m) => { const c = cell.get(`${s.group_id}|${m}`); return <td class="num">{c ? <>{c.avg_attendance} <span class="text-muted small">({c.reports})</span></> : <span class="text-muted" aria-label="보고 기록 없음">—</span>}</td>; })}</tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>}
+    </>
+  )}
 </MemberLayout>

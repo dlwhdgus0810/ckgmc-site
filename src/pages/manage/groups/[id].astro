@@ -10,15 +10,18 @@ const id = Number(Astro.params.id);
 const group = Number.isInteger(id) ? await getGroup(id) : null;
 if (!group) Astro.response.status = 404;
 let error: string | null = null;
+const values = { name: group?.name ?? '', leaders: group?.leaders ?? '', age: group?.age ?? '', meeting_time: group?.meeting_time ?? '', focus: group?.focus ?? '', description: group?.description ?? '', sort_order: String(group?.sort_order ?? 0), is_active: !!group?.is_active };
 
 if (group && Astro.request.method === 'POST') {
   const fd = await Astro.request.formData();
   const action = formStr(fd, 'action', 20);
   if (action === 'delete') {
-    if (await deleteGroup(group.id)) { setFlash(Astro.cookies, 'success', `"${group.name}" 그룹을 삭제했습니다.`); return Astro.redirect('/manage/groups', 303); }
+    if (await deleteGroup(group.id)) { setFlash(Astro.cookies, 'success', `"${values.name}" 그룹을 삭제했습니다.`); return Astro.redirect('/manage/groups', 303); }
     error = '보고서가 있는 그룹은 삭제할 수 없습니다. 대신 비활성으로 바꾸세요.';
   } else {
-    const name = formStr(fd, 'name', 100);
+    for (const key of ['name', 'leaders', 'age', 'meeting_time', 'focus', 'description', 'sort_order'] as const) values[key] = formStr(fd, key, key === 'description' ? 1000 : 200);
+    values.is_active = fd.get('is_active') === '1';
+    const name = values.name;
     if (!name) error = '그룹 이름을 입력해 주세요.';
     else {
       await updateGroup(group.id, { name, leaders: formStr(fd, 'leaders', 100), age: formStr(fd, 'age', 100), meeting_time: formStr(fd, 'meeting_time', 100), focus: formStr(fd, 'focus', 200), description: formStr(fd, 'description', 1000), sort_order: formInt(fd, 'sort_order') ?? 0, is_active: fd.get('is_active') === '1' ? 1 : 0 });
@@ -33,23 +36,23 @@ if (group && Astro.request.method === 'POST') {
     <>
       <p><a href="/manage/groups" class="btn btn-outline-secondary btn-sm">← 그룹 목록</a></p>
       <form method="post" class="form-narrow" novalidate>
-        {error && <div class="alert alert-danger" role="alert">{error}</div>}
+        {error && <div class="alert alert-danger" role="alert" id="group-error">{error}</div>}
         <input type="hidden" name="action" value="save" />
         <div class="form-row">
-          <div class="form-group col-md-6"><label for="name">그룹 이름 <span class="text-danger">*</span></label><input id="name" name="name" class="form-control" value={group.name} required /></div>
-          <div class="form-group col-md-6"><label for="leaders">리더</label><input id="leaders" name="leaders" class="form-control" value={group.leaders} /></div>
+          <div class="form-group col-md-6"><label for="name">그룹 이름 <span class="text-danger">*</span></label><input id="name" name="name" class="form-control" value={values.name} aria-invalid={error ? true : undefined} aria-describedby={error ? "group-error" : undefined} autofocus={!!error} required /></div>
+          <div class="form-group col-md-6"><label for="leaders">리더</label><input id="leaders" name="leaders" class="form-control" value={values.leaders} /></div>
         </div>
         <div class="form-row">
-          <div class="form-group col-md-4"><label for="age">대상</label><input id="age" name="age" class="form-control" value={group.age} /></div>
-          <div class="form-group col-md-4"><label for="meeting_time">모임 시간</label><input id="meeting_time" name="meeting_time" class="form-control" value={group.meeting_time} /></div>
-          <div class="form-group col-md-4"><label for="focus">모임 성격</label><input id="focus" name="focus" class="form-control" value={group.focus} /></div>
+          <div class="form-group col-md-4"><label for="age">대상</label><input id="age" name="age" class="form-control" value={values.age} /></div>
+          <div class="form-group col-md-4"><label for="meeting_time">모임 시간</label><input id="meeting_time" name="meeting_time" class="form-control" value={values.meeting_time} /></div>
+          <div class="form-group col-md-4"><label for="focus">모임 성격</label><input id="focus" name="focus" class="form-control" value={values.focus} /></div>
         </div>
-        <div class="form-group"><label for="description">소개</label><textarea id="description" name="description" class="form-control" rows="2">{group.description}</textarea></div>
+        <div class="form-group"><label for="description">소개</label><textarea id="description" name="description" class="form-control" rows="2">{values.description}</textarea></div>
         <div class="form-row align-items-end">
-          <div class="form-group col-sm-4"><label for="sort_order">정렬 순서</label><input id="sort_order" name="sort_order" type="number" class="form-control" value={group.sort_order} /></div>
+          <div class="form-group col-sm-4"><label for="sort_order">정렬 순서</label><input id="sort_order" name="sort_order" type="number" class="form-control" value={values.sort_order} /></div>
           <div class="form-group col-sm-8">
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" checked={!!group.is_active} />
+              <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" checked={values.is_active} />
               <label class="form-check-label" for="is_active">활성 (보고서 작성 시 선택 가능)</label>
             </div>
           </div>

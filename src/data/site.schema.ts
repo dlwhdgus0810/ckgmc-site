@@ -45,6 +45,11 @@ export const siteSchema = z.object({
     alt: z.string().min(1, '포스터의 대체 텍스트(alt)는 비울 수 없습니다'),
     title: z.string().optional(),
     href: z.string().optional(),
+    description: z.string().optional(),
+    time: z.string().optional(),
+    place: z.string().optional(),
+    actionLabel: z.string().optional(),
+    reviewedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD 형식').optional(),
     /** 이 날짜(포함)까지만 표시. 비우면 계속 표시 */
     until: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'YYYY-MM-DD 형식').optional(),
   })),

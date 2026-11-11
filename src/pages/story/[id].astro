@@ -18,16 +18,17 @@ const images = story.data.images.length ? story.data.images : story.data.image ?
 // 대표 사진의 실제 크기 (빌드 시 계산, 없으면 속성 생략)
 const lead = images[0] ? __IMAGE_SIZES__[images[0]] : undefined;
 ---
-<SubpageLayout path="/story" parentHref="/story" title="우리 교회 이야기" subtitle="Our Story" headerImage="/images/headers/about.jpg" leaf={story.data.title} >
-  <article class="story">
+<SubpageLayout path="/story" parentHref="/story" title="우리 교회 이야기" subtitle="Our Story" headerImage="/images/headers/about.jpg" leaf={story.data.title} bannerHeading="p">
+  <article class="story" data-story-gallery>
+    <h1 class="post__title">{story.data.title}</h1>
     <p><small class="text-muted"><Icon name="calendar" size={14} /> {formatKoreanDate(story.data.date, true)}</small></p>
-    {images[0] && <img src={images[0]} alt="" class="img-fluid w-100 mb-4" {...(lead ?? {})} />}
+    {images[0] && <a href={images[0]} data-gallery-image aria-label={`사진 1 / ${images.length} 크게 보기`} target="_blank" rel="noopener"><img src={images[0]} alt={story.data.title ?? '교회 이야기 대표 사진'} class="img-fluid w-100 mb-4" {...(lead ?? {})} /></a>}
     <div class="story-body"><Content /></div>
     {images.length > 1 && (
       <div class="row mt-4">
         {images.slice(1).map((img, i) => (
           <div class="col-6 col-md-4 mb-3">
-            <a class="story__thumb" href={img} target="_blank" rel="noopener" aria-label={`사진 ${i + 2} / ${images.length} 크게 보기 (새 창)`}>
+            <a class="story__thumb" data-gallery-image href={img} target="_blank" rel="noopener" aria-label={`사진 ${i + 2} / ${images.length} 크게 보기 (새 창)`}>
               <img src={img} alt="" loading="lazy" width="1000" height="750" />
             </a>
           </div>
@@ -37,6 +38,18 @@ const lead = images[0] ? __IMAGE_SIZES__[images[0]] : undefined;
     {story.data.permalink && (
       <p class="mt-3"><a href={story.data.permalink} target="_blank" rel="noopener" class="btn btn-sm btn-primary"><Icon name="facebook" size={16} /> 페이스북에서 보기</a></p>
     )}
+    <dialog class="story-gallery" aria-labelledby="gallery-caption" data-gallery-dialog>
+      <div class="story-gallery__toolbar">
+        <button type="button" class="btn btn-light" data-gallery-close aria-label="사진 보기 닫기">닫기 ✕</button>
+        <a class="btn btn-light" data-gallery-original target="_blank" rel="noopener">원본 보기 (새 창)</a>
+      </div>
+      <img data-gallery-full alt="" />
+      <div class="story-gallery__navigation">
+        <button type="button" class="btn btn-light" data-gallery-prev aria-label="이전 사진">← 이전</button>
+        <p id="gallery-caption" aria-live="polite"></p>
+        <button type="button" class="btn btn-light" data-gallery-next aria-label="다음 사진">다음 →</button>
+      </div>
+    </dialog>
   </article>
   <hr />
   <div class="d-flex justify-content-between">
@@ -45,3 +58,7 @@ const lead = images[0] ? __IMAGE_SIZES__[images[0]] : undefined;
   </div>
   <div class="text-center mt-4"><a href="/story" class="btn btn-light">목록으로</a></div>
 </SubpageLayout>
+
+<script>
+  import '../../scripts/story-gallery';
+</script>

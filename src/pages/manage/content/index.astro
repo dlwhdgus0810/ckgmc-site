@@ -7,7 +7,11 @@ import { COLLECTIONS, GROUPS } from '../../../lib/content/collections';
 import { deployState, latestChange, loadIndex, recentChanges } from '../../../lib/content/changes';
 import { storeStatus } from '../../../lib/content/store';
 import { formatLocal } from '../../../lib/http';
+import { site } from '../../../data/site';
 
+const today = new Date().toISOString().slice(0, 10);
+const reviewBefore = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
+const reviewNotices = site.notices.filter((n) => (!n.until && !n.reviewedAt) || (n.until && n.until < today) || (n.reviewedAt && n.reviewedAt < reviewBefore));
 const status = storeStatus();
 const [index, latest, recent] = await Promise.all([loadIndex(Astro.url), latestChange(), recentChanges(8)]);
 const counts = new Map<string, number>();
@@ -28,6 +32,7 @@ const ACTION_LABEL = { create: '새 글', update: '수정', delete: '삭제', up
     {index && <small>배포된 빌드: {formatLocal(index.builtAt)}{latest && <> · 마지막 저장: {formatLocal(latest.created_at)} ({latest.user_name ?? '—'})</>}</small>}
   </div>
 
+  {reviewNotices.length > 0 && <div class="alert alert-warning" role="status"><strong>공지 {reviewNotices.length}건의 운영 정보를 확인해 주세요.</strong><p class="mb-1">확인일·마감일이 없거나, 마감일이 지났거나, 마지막 확인 후 90일이 지난 공지가 있습니다.</p><ul>{reviewNotices.map((n) => <li>{n.title || n.alt}</li>)}</ul><a href="/manage/content/settings/edit#editor-news">공지 확인·수정하기</a></div>}
   {GROUPS.map((g) => (
     <section class="mb-3" aria-label={g}>
       <h2 class="h6 text-muted text-uppercase mb-2" style="letter-spacing:.08em">{g}</h2>

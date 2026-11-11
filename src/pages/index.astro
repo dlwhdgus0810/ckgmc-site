@@ -39,18 +39,19 @@ const stories = (await getCollection('stories')).sort((a, b) => b.data.date.getT
 <BaseLayout description={site.description}>
   <main id="main" tabindex="-1">
     <Hero />
-    <InfoStrip />
-    <VerseBand verses={site.verses} today={today} />
+    <InfoStrip bulletin={bulletin} />
+    <ThisWeek sermon={sermon} bulletin={bulletin} resource={resource} />
     <EventList events={site.events} today={today} />
     <NoticeCards notices={site.notices} today={today} />
-    <ThisWeek sermon={sermon} bulletin={bulletin} resource={resource} />
+    <VerseBand verses={site.verses} today={today} />
     <SeriesRow series={series} />
     <MinistryGrid pages={ministries} />
     {stories.length > 0 && (
       <section class="section section--surface" aria-labelledby="stories-title">
         <div class="container">
-          <SectionHeader id="stories-title" eyebrow="Our Story" title="우리 교회 이야기" icon="camera" more={{ href: '/story', label: '모든 이야기' }} />
-          <StoryGrid stories={stories} limit={8} />
+          <SectionHeader id="stories-title" eyebrow="Our Story" title="공동체 이야기" icon="camera" more={{ href: '/story', label: '모든 이야기' }} />
+          <p class="text-muted">함께 예배하고 나누었던 순간들입니다. 각 이야기의 날짜를 확인해 주세요.</p>
+          <StoryGrid stories={stories} limit={4} />
         </div>
       </section>
     )}

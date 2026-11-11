@@ -3,6 +3,7 @@
 export const prerender = false;
 import MemberLayout from '../../../layouts/MemberLayout.astro';
 import Pager from '../../../components/members/Pager.astro';
+import PasswordInput from '../../../components/members/PasswordInput.astro';
 import StatusBadge from '../../../components/members/StatusBadge.astro';
 import { countUsers, createUser, findUserByEmail, findUserById, listUsers, updateUser, type UserFilter } from '../../../lib/auth/users';
 import { hashPassword, passwordProblem } from '../../../lib/auth/password';
@@ -64,20 +65,21 @@ const users = await listUsers(filter, pg.perPage, pg.offset);
   </form>
 
   <p class="text-muted small">총 {total}명</p>
-  <div class="table-responsive">
-    <table class="table table-sm table-report">
-      <thead><tr><th>이름</th><th>이메일</th><th>권한 · 상태</th><th>로그인 방법</th><th class="num">보고서</th><th>최근 로그인</th><th>가입일</th><th></th></tr></thead>
+  {users.length === 0 ? <div class="empty-state"><p>조건에 맞는 회원이 없습니다.</p><a href="/manage/users">검색 조건 초기화</a> · <a href="#add-user">새 회원 추가</a></div> : <div class="table-responsive">
+    <table class="table table-sm table-report table-mobile-cards" role="table">
+      <thead><tr><th scope="col">이름</th><th scope="col">이메일</th><th scope="col">권한 · 상태</th><th scope="col">로그인 방법</th><th scope="col" class="num">보고서</th><th scope="col">최근 로그인</th><th scope="col">가입일</th><th scope="col"><span class="sr-only">작업</span></th></tr></thead>
       <tbody>
         {users.map((u) => (
           <tr>
-            <td><a href={`/manage/users/${u.id}`}><strong>{u.name}</strong></a></td>
-            <td>{u.email}</td>
-            <td><StatusBadge role={u.role} status={u.status} /></td>
-            <td class="small text-muted">{[u.password_hash ? '비밀번호' : '', ...(u.providers ?? '').split(',').filter(Boolean)].filter(Boolean).join(', ') || '—'}</td>
-            <td class="num">{u.cell_count + u.care_count}</td>
-            <td>{formatLocal(u.last_login_at) || '—'}</td>
-            <td>{formatLocal(u.created_at, false)}</td>
-            <td class="text-right">
+            <td data-label="이름"><a href={`/manage/users/${u.id}`}><strong>{u.name}</strong></a></td>
+            <td data-label="이메일">{u.email}</td>
+            <td data-label="권한 · 상태"><StatusBadge role={u.role} status={u.status} /></td>
+            <td data-label="로그인 방법" class="small text-muted">{[u.password_hash ? '비밀번호' : '', ...(u.providers ?? '').split(',').filter(Boolean)].filter(Boolean).join(', ') || '—'}</td>
+            <td data-label="보고서" class="num">{u.cell_count + u.care_count}</td>
+            <td data-label="최근 로그인">{formatLocal(u.last_login_at) || '—'}</td>
+            <td data-label="가입일">{formatLocal(u.created_at, false)}</td>
+            <td data-label="작업" class="text-right">
+              <a href={`/manage/users/${u.id}`} class="btn btn-outline-primary btn-sm mr-2">정보 수정</a>
               {u.status === 'pending' && (
                 <form method="post" class="d-inline">
                   <input type="hidden" name="action" value="approve" />
@@ -90,7 +92,7 @@ const users = await listUsers(filter, pg.perPage, pg.offset);
         ))}
       </tbody>
     </table>
-  </div>
+  </div>}
   <Pager paging={pg} />
 
   <section class="mt-5" aria-labelledby="add-user">
@@ -106,7 +108,7 @@ const users = await listUsers(filter, pg.perPage, pg.offset);
       <div class="form-row">
         <div class="form-group col-md-4"><label for="new-role">권한</label><select id="new-role" name="role" class="form-control"><option value="member" selected={draft.role === 'member'}>교인</option><option value="admin" selected={draft.role === 'admin'}>관리자</option></select></div>
         <div class="form-group col-md-4"><label for="new-status">상태</label><select id="new-status" name="status" class="form-control"><option value="active" selected={draft.status === 'active'}>활성</option><option value="pending" selected={draft.status === 'pending'}>승인 대기</option></select></div>
-        <div class="form-group col-md-4"><label for="new-password">초기 비밀번호 <span class="text-muted small">(선택, 8자 이상)</span></label><input id="new-password" name="password" type="text" class="form-control" autocomplete="off" /></div>
+        <div class="form-group col-12"><PasswordInput id="new-password" name="password" label="초기 비밀번호" autocomplete="new-password" minlength={8} required={false} copy help="설정할 경우 8자 이상 입력하세요." /></div>
       </div>
       <button type="submit" class="btn btn-primary">회원 추가</button>
     </form>

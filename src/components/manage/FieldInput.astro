@@ -10,6 +10,7 @@ const { field, value, prefix = '' } = Astro.props;
 const name = prefix + field.name;
 const id = 'f-' + name.replace(/[^\w-]+/g, '-');
 const widget = field.widget;
+const describedBy = field.hint ? id + '-hint' : undefined;
 // 템플릿에서 타입 단언을 쓰지 않도록 여기서 정리
 const sub = (field as { fields?: Field[] }).fields ?? [];
 const itemLabel = (field as { itemLabel?: string }).itemLabel ?? '항목';
@@ -39,31 +40,33 @@ const href = text && !/^(\/|https?:)/.test(text) && widget === 'file' ? '/files/
     <div class="cf-list__rows" data-list-rows>
       {rows.map((row, i) => (
         <div class="cf-list__row" data-list-row>
-          <div class="cf-list__row-head"><span>{itemLabel} {i + 1}</span><button type="button" class="btn btn-link btn-sm text-danger p-0" data-list-remove>삭제</button></div>
+          <div class="cf-list__row-head"><span>{itemLabel} {i + 1}</span><div class="cf-list__tools"><button type="button" class="btn btn-outline-secondary btn-sm" data-list-up aria-label={`${itemLabel} 위로 이동`}>↑</button><button type="button" class="btn btn-outline-secondary btn-sm" data-list-down aria-label={`${itemLabel} 아래로 이동`}>↓</button><button type="button" class="btn btn-link btn-sm text-danger" data-list-remove>삭제</button></div></div>
           {sub.map((f) => <Self field={f} value={row[f.name]} prefix={`${name}[${i}].`} />)}
         </div>
       ))}
     </div>
     <template data-list-template>
       <div class="cf-list__row" data-list-row>
-        <div class="cf-list__row-head"><span>{itemLabel}</span><button type="button" class="btn btn-link btn-sm text-danger p-0" data-list-remove>삭제</button></div>
+        <div class="cf-list__row-head"><span>{itemLabel}</span><div class="cf-list__tools"><button type="button" class="btn btn-outline-secondary btn-sm" data-list-up aria-label={`${itemLabel} 위로 이동`}>↑</button><button type="button" class="btn btn-outline-secondary btn-sm" data-list-down aria-label={`${itemLabel} 아래로 이동`}>↓</button><button type="button" class="btn btn-link btn-sm text-danger" data-list-remove>삭제</button></div></div>
         {sub.map((f) => <Self field={f} value={undefined} prefix={`${name}[__IDX__].`} />)}
       </div>
     </template>
     <button type="button" class="btn btn-outline-secondary btn-sm" data-list-add>+ {itemLabel} 추가</button>
+    <button type="button" class="btn btn-link btn-sm" data-list-undo hidden>마지막 삭제 취소</button>
+    <span class="small text-muted d-block" data-list-status role="status"></span>
   </fieldset>
 ) : (
   <div class:list={['form-group cf-field', `cf-field--${widget}`]}>
-    {widget !== 'boolean' && <label for={id}>{field.label}{field.required && <span class="text-danger"> *</span>}</label>}
+    {widget !== 'boolean' && <label for={id}>{field.label}{field.required ? <span class="text-danger"> *<span class="sr-only"> 필수</span></span> : <span class="cf-optional"> 선택</span>}</label>}
 
-    {widget === 'string' && <input id={id} class="form-control" name={name} value={textOrDefault} required={field.required} placeholder={placeholder} />}
-    {widget === 'youtube' && <input id={id} class="form-control" name={name} value={text} required={field.required} placeholder="https://youtu.be/… 또는 영상 ID" />}
-    {widget === 'text' && <textarea id={id} class="form-control" name={name} rows="3" required={field.required}>{textOrDefault}</textarea>}
-    {widget === 'number' && <input id={id} class="form-control cf-narrow" name={name} type="number" step="any" value={textOrDefault} required={field.required} />}
-    {widget === 'datetime' && <input id={id} class="form-control cf-narrow" name={name} type="datetime-local" value={text.slice(0, 16)} required={field.required} />}
-    {widget === 'date' && <input id={id} class="form-control cf-narrow" name={name} type="date" value={text.slice(0, 10)} required={field.required} />}
+    {widget === 'string' && <input id={id} aria-describedby={describedBy} class="form-control" name={name} value={textOrDefault} required={field.required} placeholder={placeholder} />}
+    {widget === 'youtube' && <input id={id} aria-describedby={describedBy} class="form-control" name={name} value={text} required={field.required} placeholder="https://youtu.be/… 또는 영상 ID" />}
+    {widget === 'text' && <textarea id={id} aria-describedby={describedBy} class="form-control" name={name} rows="3" required={field.required}>{textOrDefault}</textarea>}
+    {widget === 'number' && <input id={id} aria-describedby={describedBy} class="form-control cf-narrow" name={name} type="number" step="any" value={textOrDefault} required={field.required} />}
+    {widget === 'datetime' && <input id={id} aria-describedby={describedBy} class="form-control cf-narrow" name={name} type="datetime-local" value={text.slice(0, 16)} required={field.required} />}
+    {widget === 'date' && <input id={id} aria-describedby={describedBy} class="form-control cf-narrow" name={name} type="date" value={text.slice(0, 10)} required={field.required} />}
     {widget === 'select' && (
-      <select id={id} class="form-control cf-narrow" name={name} required={field.required}>
+      <select id={id} aria-describedby={describedBy} class="form-control cf-narrow" name={name} required={field.required}>
         {!field.required && <option value="">선택 안 함</option>}
         {options.map((o) => <option value={o.value} selected={textOrDefault === o.value}>{o.label}</option>)}
       </select>
@@ -87,7 +90,7 @@ const href = text && !/^(\/|https?:)/.test(text) && widget === 'file' ? '/files/
           </div>
         )}
         <input type="hidden" name={name + '__current'} value={text} />
-        <input id={id} class="form-control-file" type="file" name={name} accept={widget === 'image' ? 'image/*' : undefined} required={field.required && !text} />
+        <input id={id} aria-describedby={describedBy} class="form-control-file" type="file" name={name} accept={widget === 'image' ? 'image/*' : undefined} required={field.required && !text} />
       </div>
     )}
     {widget === 'imagelist' && (
@@ -99,10 +102,10 @@ const href = text && !/^(\/|https?:)/.test(text) && widget === 'file' ? '/files/
             ))}
           </ul>
         )}
-        <input id={id} class="form-control-file" type="file" name={name} accept="image/*" multiple />
+        <input id={id} aria-describedby={describedBy} class="form-control-file" type="file" name={name} accept="image/*" multiple />
         <small class="text-muted d-block">체크를 풀면 앨범에서 빠집니다. 여러 장을 한 번에 고를 수 있습니다.</small>
       </div>
     )}
-    {field.hint && <small class="form-text text-muted">{field.hint}</small>}
+    {field.hint && <small id={describedBy} class="form-text text-muted">{field.hint}</small>}
   </div>
 )}

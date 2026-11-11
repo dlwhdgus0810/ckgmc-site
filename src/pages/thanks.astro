@@ -7,8 +7,26 @@ import { site, telHref } from '../data/site';
 <SubpageLayout path="/thanks" title="접수되었습니다" subtitle="Thank you">
   <div class="text-center py-4">
     <p class="text-primary mb-3"><Icon name="check-circle" size={56} /></p>
-    <h2 class="mb-3">소중한 말씀이 접수되었습니다.</h2>
-    <p class="text-muted">확인 후 남겨주신 이메일로 연락드리겠습니다.<br />급한 문의는 <a href={telHref}>{site.phone}</a> 으로 전화해 주세요.</p>
-    <p class="mt-4"><a href="/" class="btn btn-primary">홈으로 돌아가기</a></p>
+    <h2 class="mb-3" data-thanks-title>소중한 말씀이 접수되었습니다.</h2>
+    <p class="text-muted" data-thanks-description>담당자가 내용을 확인한 뒤 남겨주신 이메일로 연락드립니다.</p>
+    <p>답변을 기다리시는 동안 이메일과 스팸함을 확인해 주세요.<br />정확한 연락 시점이나 급한 안내가 필요하시면 <a href={telHref}>{site.phone}</a>로 문의해 주세요.</p>
+    <div class="d-flex flex-wrap justify-content-center mt-4" style="gap:.75rem">
+      <a href="/" class="btn btn-primary">홈으로 돌아가기</a>
+      <a href="/about/contact" class="btn btn-outline-primary">교회 연락처</a>
+      <a href="/next-steps/baptism" class="btn btn-outline-primary" data-baptism-next hidden>세례 안내 다시 보기</a>
+    </div>
   </div>
 </SubpageLayout>
+<script>
+  const kind = new URLSearchParams(location.search).get('form');
+  const title = document.querySelector<HTMLElement>('[data-thanks-title]');
+  const description = document.querySelector<HTMLElement>('[data-thanks-description]');
+  if (kind === 'baptism') {
+    if (title) title.textContent = '세례 신청이 접수되었습니다.';
+    if (description) description.textContent = '담당 교역자가 신청 내용을 확인한 뒤 세례 준비와 일정에 관해 남겨주신 연락처로 안내드립니다.';
+    const next = document.querySelector<HTMLElement>('[data-baptism-next]');
+    if (next) next.hidden = false;
+  } else if (kind === 'contact' && title) {
+    title.textContent = '문의가 접수되었습니다.';
+  }
+</script>

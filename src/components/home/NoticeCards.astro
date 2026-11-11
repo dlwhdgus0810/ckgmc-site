@@ -1,11 +1,7 @@
 ---
-/**
- * 교회 소식 포스터 (site.json 의 notices). 포스터 비율이 제각각이므로 높이를 맞춘 가로 띠로 보여줍니다 (자동 회전 없음).
- * until(YYYY-MM-DD) 이 지난 포스터는 자동으로 빠지고, 비어 있으면 섹션 자체를 그리지 않습니다.
- * 링크가 없는 포스터는 원본 이미지를 새 창으로 엽니다 (작은 글씨를 확대해 볼 수 있게).
- */
 import SectionHeader from '../SectionHeader.astro';
 import Icon from '../Icon.astro';
+import ResponsiveImage from '../ResponsiveImage.astro';
 import type { SiteConfig } from '../../data/site';
 interface Props { notices: SiteConfig['notices']; today: string }
 const { notices: all, today } = Astro.props;
@@ -17,28 +13,29 @@ const notices = all.filter((n) => !n.until || n.until >= today);
       <SectionHeader id="notices-title" eyebrow="Announcements" title="교회 소식" icon="megaphone" />
       <div class="notice-strip" data-notice-strip>
         <ul class="notice-strip__track" data-notice-track>
-          {notices.map((n) => {
-            const inner = (
-              <>
-                <img src={n.image} alt={n.alt} loading="lazy" />
-                {n.title && <span class="notice-strip__caption">{n.title}{n.href && <Icon name="arrow-right" size={14} />}</span>}
-              </>
-            );
-            return (
-              <li class="notice-strip__item">
-                {n.href ? (
-                  <a class="notice-strip__card" href={n.href}>{inner}</a>
-                ) : (
-                  <a class="notice-strip__card" href={n.image} target="_blank" rel="noopener">{inner}<span class="sr-only"> 원본 크게 보기 (새 창)</span></a>
-                )}
-              </li>
-            );
-          })}
+          {notices.map((n) => (
+            <li class="notice-strip__item">
+              <article class="notice-strip__card">
+                <a href={n.image} target="_blank" rel="noopener" class="notice-strip__image" aria-label={`${n.title ?? '공지'} 포스터 크게 보기 (새 창)`}>
+                  <ResponsiveImage src={n.image} alt={n.alt} loading="lazy" sizes="(min-width: 768px) 360px, 85vw" />
+                </a>
+                <div class="notice-strip__body">
+                  <h3>{n.title ?? '교회 안내'}</h3>
+                  {n.description && <p>{n.description}</p>}
+                  {(n.time || n.place) && <dl>{n.time && <><dt>일정</dt><dd>{n.time}</dd></>}{n.place && <><dt>장소</dt><dd>{n.place}</dd></>}</dl>}
+                  <p class="notice-strip__status">
+                    {n.until ? <>안내 기간: {n.until}까지</> : n.reviewedAt ? <>최근 확인: {n.reviewedAt}</> : '참여 전 최신 일정과 운영 여부를 확인해 주세요.'}
+                  </p>
+                  <a href={n.href || '/about/contact'} class="btn btn-outline-primary btn-sm">{n.actionLabel || (n.href ? '자세히 보기' : '일정 문의')} <Icon name="arrow-right" size={16} /></a>
+                </div>
+              </article>
+            </li>
+          ))}
         </ul>
         {notices.length > 1 && (
-          <div class="notice-strip__nav" aria-hidden="true">
-            <button type="button" class="notice-strip__btn" data-notice-prev tabindex="-1"><Icon name="chevron-right" size={20} class="flip-x" /></button>
-            <button type="button" class="notice-strip__btn" data-notice-next tabindex="-1"><Icon name="chevron-right" size={20} /></button>
+          <div class="notice-strip__nav" aria-label="공지 이동">
+            <button type="button" class="notice-strip__btn" data-notice-prev aria-label="이전 공지"><Icon name="chevron-right" size={20} class="flip-x" /></button>
+            <button type="button" class="notice-strip__btn" data-notice-next aria-label="다음 공지"><Icon name="chevron-right" size={20} /></button>
           </div>
         )}
       </div>
@@ -46,20 +43,22 @@ const notices = all.filter((n) => !n.until || n.until >= today);
   </section>
 )}
 <script>
-  // 좌우 버튼으로 한 장씩 넘기기 (스크롤·스와이프도 그대로 됨)
   document.querySelectorAll<HTMLElement>('[data-notice-strip]').forEach((strip) => {
     const track = strip.querySelector<HTMLElement>('[data-notice-track]');
     if (!track) return;
+    const prev = strip.querySelector<HTMLButtonElement>('[data-notice-prev]');
+    const next = strip.querySelector<HTMLButtonElement>('[data-notice-next]');
     const step = () => (track.querySelector<HTMLElement>('.notice-strip__item')?.offsetWidth ?? 320) + 16;
-    strip.querySelector('[data-notice-prev]')?.addEventListener('click', () => track.scrollBy({ left: -step(), behavior: 'smooth' }));
-    strip.querySelector('[data-notice-next]')?.addEventListener('click', () => track.scrollBy({ left: step(), behavior: 'smooth' }));
+    const move = (direction: number) => track.scrollBy({ left: direction * step(), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
+    prev?.addEventListener('click', () => move(-1));
+    next?.addEventListener('click', () => move(1));
     const update = () => {
-      strip.classList.toggle('at-start', track.scrollLeft <= 2);
-      strip.classList.toggle('at-end', track.scrollLeft + track.clientWidth >= track.scrollWidth - 2);
+      if (prev) prev.disabled = track.scrollLeft <= 2;
+      if (next) next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
       strip.classList.toggle('no-scroll', track.scrollWidth <= track.clientWidth + 2);
     };
     track.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
+    new ResizeObserver(update).observe(track);
     update();
   });
 </script>

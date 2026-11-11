@@ -25,6 +25,7 @@ const t = titleParts(post);
 const norm = (s: string) => s.replace(/\s+/g, '');
 const bodyIsPdfLink = !!pdf && norm(textExcerpt(post.body, 300)) === norm(pdf.name);
 const hasBody = (post.body ?? '').trim().length > 0 && !bodyIsPdfLink;
+const pdfSummary = post.data.excerpt || (hasBody ? textExcerpt(post.body, 240) : `${t.title} · ${formatKoreanDate(displayDate(post))} 문서입니다.`);
 // 영상 설명: 구분선 아래는 접기
 const split = post.data.youtube ? splitDescription(post.body) : null;
 const metaItems = [t.service, t.preacher ?? post.data.writer].filter(Boolean) as string[];
@@ -35,7 +36,7 @@ if (post.data.youtube) {
   const found = allSeries.find((s) => s.data.episodes.some((e) => e.youtube === post.data.youtube));
   const seriesPage = pages.find((p) => p.data.board === 'series');
   if (found && seriesPage) {
-    inSeries = { title: found.data.title, href: `/${seriesPage.id}/${found.id}`, no: found.data.episodes.findIndex((e) => e.youtube === post.data.youtube) + 1, total: found.data.episodes.length };
+    inSeries = { title: found.data.title, href: `/${seriesPage.id}/${found.id}?episode=${encodeURIComponent(post.data.youtube)}`, no: found.data.episodes.findIndex((e) => e.youtube === post.data.youtube) + 1, total: found.data.episodes.length };
   }
 }
 ---
@@ -49,7 +50,7 @@ if (post.data.youtube) {
   </header>
 
   {post.data.youtube && (
-    <div class="media-frame post__video">
+    <><div class="media-frame post__video">
       <iframe
         src={`https://www.youtube.com/embed/${post.data.youtube}?rel=0`}
         title={post.data.title}
@@ -57,7 +58,7 @@ if (post.data.youtube) {
         allowfullscreen
         loading="lazy"
       ></iframe>
-    </div>
+    </div><p class="media-fallback"><a href={`https://www.youtube.com/watch?v=${post.data.youtube}`} target="_blank" rel="noopener">YouTube에서 보기 <span class="sr-only">(새 창)</span></a><span>영상이 재생되지 않으면 YouTube에서 확인해 주세요.</span></p></>
   )}
 
   {inSeries && (
@@ -84,17 +85,18 @@ if (post.data.youtube) {
 
   {pdf && (
     <section class="pdf-card" aria-label="PDF 문서">
-      <div class="pdf-card__head">
+      <div class="pdf-card__head" data-file-details={fileUrl(pdf.file)}>
         <Emoji name="doc" size={32} />
         <div>
           <strong>{pdf.name}</strong>
-          <small>PDF 문서 · 휴대전화에서는 새 창으로 여세요</small>
+          <small>PDF 문서<span data-file-size></span> · 휴대전화에서는 새 창으로 여세요</small>
         </div>
         <div class="pdf-card__actions">
           <a class="btn btn-primary btn-sm" href={fileUrl(pdf.file)} target="_blank" rel="noopener"><Icon name="external" size={16} /> 새 창에서 열기</a>
           <a class="btn btn-outline-primary btn-sm" href={fileUrl(pdf.file)} download><Icon name="download" size={16} /> 다운로드</a>
         </div>
       </div>
+      <p class="pdf-card__summary">{pdfSummary} 아래에서 문서를 열거나 기기에 저장할 수 있습니다.</p>
       <iframe class="pdf-card__frame d-none d-md-block" src={`${fileUrl(pdf.file)}#view=FitH`} title={pdf.name} loading="lazy"></iframe>
     </section>
   )}
@@ -128,5 +130,9 @@ if (post.data.youtube) {
   </nav>
 )}
 <div class="text-center mt-4">
-  <a href={base} class="btn btn-outline-primary">목록</a>
+  <a href={base} class="btn btn-outline-primary" data-return-to={base}>목록으로</a>
 </div>
+
+<script>
+  import '../scripts/post-details';
+</script>

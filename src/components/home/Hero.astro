@@ -1,18 +1,24 @@
 ---
 /** 메인 첫 화면: 교회 사진 + 환영 문구 + 버튼 2개 (내용은 site.json 의 hero) */
-import { site } from '../../data/site';
+import { site, mapsDirectionsUrl } from '../../data/site';
+import ResponsiveImage from '../ResponsiveImage.astro';
 const h = site.hero;
 ---
 <section class="hero on-dark" aria-labelledby="hero-title">
-  <img class="hero__img" src={h.image} alt={h.alt} fetchpriority="high" loading="eager" decoding="async" />
+  <ResponsiveImage class="hero__img" src={h.image} alt={h.alt} sizes="100vw" fetchpriority="high" loading="eager" decoding="async" />
   <div class="hero__scrim" aria-hidden="true"></div>
   <div class="container hero__content">
     {h.eyebrow && <p class="hero__eyebrow">{h.eyebrow}</p>}
     <h1 id="hero-title" class="hero__title">{h.headline}</h1>
     {h.subline && <p class="hero__sub">{h.subline}</p>}
+    <div class="hero__visit" aria-label="주일 방문 안내">
+      {site.serviceTimes.slice(0, 2).map((s) => <p><strong>{s.name}</strong> <span>{s.time}</span></p>)}
+      <a href={mapsDirectionsUrl} target="_blank" rel="noopener">{site.address}<span class="sr-only"> 길찾기 (새 창)</span></a>
+    </div>
     <div class="hero__actions">
       <a class="btn btn-light btn-lg" href={h.primary.href}>{h.primary.label}</a>
       <a class="btn btn-outline-light btn-lg" href={h.secondary.href}>{h.secondary.label}</a>
+      <a class="hero__english" href="/visit-en" lang="en">English visitor guide</a>
     </div>
   </div>
 </section>

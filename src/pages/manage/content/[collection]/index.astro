@@ -7,8 +7,11 @@ import Pager from '../../../../components/members/Pager.astro';
 import Icon from '../../../../components/Icon.astro';
 import { getCollection, urlForPath } from '../../../../lib/content/collections';
 import { changesSince, loadIndex, mergeEntries } from '../../../../lib/content/changes';
-import { formatLocal, paging } from '../../../../lib/http';
+import { paging } from '../../../../lib/http';
 
+const savedDraft = Astro.cookies.get('ck_content_saved')?.value;
+const clearDraft = savedDraft?.startsWith(`content:${Astro.locals.user!.id}:`) ? savedDraft : null;
+if (savedDraft) Astro.cookies.delete('ck_content_saved', { path: '/manage/content' });
 const col = getCollection(Astro.params.collection);
 if (!col) Astro.response.status = 404;
 if (col?.kind === 'json') return Astro.redirect(`/manage/content/${col.key}/edit`, 302);
@@ -26,11 +29,13 @@ const rows = entries.slice(pg.offset, pg.offset + pg.perPage);
 const editHref = (path: string) => `/manage/content/${col!.key}/edit?path=${encodeURIComponent(path)}`;
 ---
 <MemberLayout title={col?.label ?? '콘텐츠'} subtitle="Content" area="manage">
+  {clearDraft && <span hidden data-draft-clear={clearDraft}></span>}
   {!col ? <NotFound back="/manage/content" backLabel="콘텐츠 관리로" /> : (
     <>
       <div class="d-flex flex-wrap align-items-center justify-content-between mb-3" style="gap:.5rem">
         <form method="get" class="d-flex" style="gap:.5rem">
-          <input name="q" class="form-control" placeholder="제목 검색" value={q} style="min-height:40px" />
+          <label for="content-query" class="sr-only">제목 또는 파일 이름 검색</label>
+          <input id="content-query" name="q" class="form-control" placeholder="제목 검색" value={q} style="min-height:40px" />
           <button class="btn btn-outline-secondary" type="submit">검색</button>
         </form>
         <div class="d-flex" style="gap:.5rem">
@@ -44,20 +49,20 @@ const editHref = (path: string) => `/manage/content/${col!.key}/edit?path=${enco
 
       {rows.length === 0 ? <p class="text-muted">글이 없습니다.</p> : (
         <div class="table-responsive">
-          <table class="table table-sm table-report">
-            <thead><tr><th>제목</th><th>{col.sortBy === 'order' ? '순서' : '날짜'}</th><th>비고</th><th>상태</th><th></th></tr></thead>
+          <table class="table table-sm table-report table-mobile-cards">
+            <thead><tr><th>제목</th><th>{col.sortBy === 'order' ? '순서' : '날짜'}</th><th>비고</th><th>상태</th><th><span class="sr-only">작업</span></th></tr></thead>
             <tbody>
               {rows.map((e) => {
                 const url = e.pending ? null : urlForPath(col, e.path);
                 return (
                   <tr>
-                    <td><a href={editHref(e.path)}><strong>{e.title}</strong></a><div class="small text-muted text-truncate" style="max-width:28rem">{e.path.replace(col.folder + '/', '')}</div></td>
-                    <td class="text-nowrap">{col.sortBy === 'order' ? e.order ?? '' : (e.date ?? '').slice(0, 16).replace('T', ' ')}</td>
-                    <td class="small text-muted">{e.note ?? ''}</td>
-                    <td>{e.pending ? <span class="badge badge-pending">배포 대기</span> : <span class="badge badge-light border">반영됨</span>}</td>
-                    <td class="text-right text-nowrap">
+                    <td data-label="제목"><a href={editHref(e.path)}><strong>{e.title}</strong></a><div class="small text-muted text-truncate" style="max-width:28rem">{e.path.replace(col.folder + '/', '')}</div></td>
+                    <td data-label={col.sortBy === 'order' ? '순서' : '날짜'} class="text-nowrap">{col.sortBy === 'order' ? e.order ?? '' : (e.date ?? '').slice(0, 16).replace('T', ' ')}</td>
+                    <td data-label="비고" class="small text-muted">{e.note ?? ''}</td>
+                    <td data-label="상태">{e.pending ? <span class="badge badge-pending">배포 대기</span> : <span class="badge badge-light border">반영됨</span>}</td>
+                    <td data-label="작업" class="text-right text-nowrap">
                       <a href={editHref(e.path)} class="btn btn-outline-primary btn-sm">편집</a>
-                      {url && <a href={url} class="btn btn-link btn-sm" target="_blank" rel="noopener" title="사이트에서 보기"><Icon name="external" size={14} /></a>}
+                      {url && <a href={url} class="btn btn-link btn-sm" target="_blank" rel="noopener" title="사이트에서 보기" aria-label={`${e.title} 사이트에서 보기`}><Icon name="external" size={14} /></a>}
                     </td>
                   </tr>
                 );
@@ -70,3 +75,8 @@ const editHref = (path: string) => `/manage/content/${col!.key}/edit?path=${enco
     </>
   )}
 </MemberLayout>
+
+<script>
+  import { initFormDrafts } from '../../../../scripts/form-drafts';
+  initFormDrafts();
+</script>

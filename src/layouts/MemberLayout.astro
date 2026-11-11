@@ -3,7 +3,6 @@
  * 교인 공간(/members) · 관리자(/manage) 공용 레이아웃: 배너 → [메뉴 | 본문]. 로그인이 필요한 서버 렌더링 페이지에서만 사용.
  */
 import BaseLayout from './BaseLayout.astro';
-import PageBanner from '../components/PageBanner.astro';
 import MemberNav from '../components/members/MemberNav.astro';
 import Flash from '../components/members/Flash.astro';
 
@@ -20,19 +19,18 @@ const root = area === 'manage' ? '/manage' : '/members';
 const rootLabel = area === 'manage' ? '관리자' : '교인 공간';
 const path = Astro.url.pathname.replace(/\/$/, '') || '/';
 const isRoot = path === root;
+const Heading = bannerHeading;
 ---
 <BaseLayout title={title} description={`${rootLabel} — 로그인이 필요한 페이지입니다.`}>
   <Fragment slot="head"><meta name="robots" content="noindex, nofollow" /></Fragment>
-  <PageBanner
-    title={title}
-    subtitle={subtitle ?? (area === 'manage' ? 'Admin' : 'Members')}
-    heading={bannerHeading}
-    path={root}
-    leaf={isRoot ? undefined : title}
-    parentHref={root}
-    crumbTitle={rootLabel}
-  />
-  <div class="container page-body">
+  <div class="workspace-heading">
+    <div class="container">
+      <nav aria-label="현재 위치" class="workspace-heading__breadcrumb"><a href="/">홈</a><span aria-hidden="true">/</span>{isRoot ? <span>{rootLabel}</span> : <><a href={root}>{rootLabel}</a><span aria-hidden="true">/</span><span aria-current="page">{title}</span></>}</nav>
+      <Heading class="workspace-heading__title">{title}</Heading>
+      {subtitle && <p class="workspace-heading__subtitle" lang="en">{subtitle}</p>}
+    </div>
+  </div>
+  <div class="container page-body workspace-body">
     <div class="row">
       <div class="col-lg-3 mb-4 mb-lg-0"><MemberNav /></div>
       <div class="col-lg-9">

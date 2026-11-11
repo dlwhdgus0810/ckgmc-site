@@ -1,69 +1,123 @@
-/**
- * 헤더 메뉴 동작 (jQuery/Bootstrap JS 없이 순수 JS)
- * - 데스크톱: 섹션 버튼 클릭/호버로 하위 메뉴 열기, Esc·바깥 클릭으로 닫기 (포커스는 버튼으로 복귀)
- * - 모바일: 햄버거 버튼으로 드로어 열기, 섹션은 아코디언, Esc 로 닫기, 열려 있을 때 배경 스크롤 잠금
- */
+/** Header disclosures share one explicit state for pointer and keyboard users. */
 function initNav() {
   const header = document.querySelector<HTMLElement>('.site-header');
   if (!header) return;
   const toggle = header.querySelector<HTMLButtonElement>('.nav-toggle');
   const nav = header.querySelector<HTMLElement>('#site-nav');
+  const backdrop = header.querySelector<HTMLElement>('[data-nav-backdrop]');
   const buttons = Array.from(header.querySelectorAll<HTMLButtonElement>('.site-nav__link[aria-controls]'));
   const desktop = window.matchMedia('(min-width: 992px)');
+  const inertBeforeOpen = new Map<HTMLElement, boolean>();
+  let drawerOpen = false;
 
-  const menuOf = (btn: HTMLButtonElement) => document.getElementById(btn.getAttribute('aria-controls') ?? '');
-  const isOpen = (btn: HTMLButtonElement) => menuOf(btn)?.classList.contains('is-open') ?? false;
-  /** aria-expanded 를 실제로 보이는 상태에 맞춥니다 — 데스크톱에서는 클릭 말고도 호버·포커스(CSS)로 열리기 때문 */
-  const syncExpanded = (btn: HTMLButtonElement) => {
-    const item = btn.closest('.has-menu');
-    const shownByCss = desktop.matches && !!item && (item.matches(':hover') || item.matches(':focus-within'));
-    btn.setAttribute('aria-expanded', String(isOpen(btn) || shownByCss));
+  const menuOf = (button: HTMLButtonElement) => document.getElementById(button.getAttribute('aria-controls') ?? '');
+  const isOpen = (button: HTMLButtonElement) => button.getAttribute('aria-expanded') === 'true';
+  const setMenu = (button: HTMLButtonElement, open: boolean) => {
+    menuOf(button)?.classList.toggle('is-open', open);
+    button.setAttribute('aria-expanded', String(open));
   };
-  const setMenu = (btn: HTMLButtonElement, open: boolean) => {
-    menuOf(btn)?.classList.toggle('is-open', open);
-    syncExpanded(btn);
-  };
-  const closeMenus = (except?: HTMLButtonElement) => buttons.forEach((b) => b !== except && setMenu(b, false));
+  const closeMenus = (except?: HTMLButtonElement) => buttons.forEach((button) => {
+    if (button !== except) setMenu(button, false);
+  });
+  const focusable = () => Array.from(header.querySelectorAll<HTMLElement>(
+    'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  )).filter((element) => element.getClientRects().length > 0 && getComputedStyle(element).visibility !== 'hidden');
 
-  const setDrawer = (open: boolean) => {
+  const setDrawer = (open: boolean, restoreFocus = false) => {
     if (!nav || !toggle) return;
-    nav.dataset.open = String(open);
-    toggle.setAttribute('aria-expanded', String(open));
-    toggle.setAttribute('aria-label', open ? '메뉴 닫기' : '메뉴 열기');
-    document.body.classList.toggle('drawer-open', open);
+    drawerOpen = open && !desktop.matches;
+    nav.dataset.open = String(drawerOpen);
+    toggle.setAttribute('aria-expanded', String(drawerOpen));
+    toggle.setAttribute('aria-label', drawerOpen ? '메뉴 닫기' : '메뉴 열기');
+    document.body.classList.toggle('drawer-open', drawerOpen);
+    if (backdrop) backdrop.hidden = !drawerOpen;
+    if (drawerOpen) {
+      header.setAttribute('role', 'dialog');
+      header.setAttribute('aria-modal', 'true');
+      header.setAttribute('aria-label', '전체 메뉴');
+      for (const element of Array.from(document.body.children)) {
+        if (element instanceof HTMLElement && element !== header && !['SCRIPT', 'STYLE'].includes(element.tagName)) {
+          inertBeforeOpen.set(element, element.inert);
+          element.inert = true;
+        }
+      }
+      (buttons[0] ?? toggle).focus();
+    } else {
+      header.removeAttribute('role');
+      header.removeAttribute('aria-modal');
+      header.removeAttribute('aria-label');
+      for (const [element, wasInert] of inertBeforeOpen) element.inert = wasInert;
+      inertBeforeOpen.clear();
+      closeMenus();
+      if (restoreFocus) toggle.focus();
+    }
   };
 
-  buttons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const open = isOpen(btn);
-      if (desktop.matches) closeMenus(btn);
-      setMenu(btn, !open);
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => {
+      const open = isOpen(button);
+      if (desktop.matches) closeMenus(button);
+      setMenu(button, !open);
     });
-    const item = btn.closest('.has-menu');
-    for (const type of ['mouseenter', 'mouseleave', 'focusin']) item?.addEventListener(type, () => syncExpanded(btn));
-    // focusout 시점에는 아직 :focus-within 이 남아 있으므로 한 박자 뒤에 확인
-    item?.addEventListener('focusout', () => setTimeout(() => syncExpanded(btn)));
+    button.addEventListener('keydown', (event) => {
+      if (event.key !== 'ArrowDown') return;
+      event.preventDefault();
+      if (desktop.matches) closeMenus(button);
+      setMenu(button, true);
+      menuOf(button)?.querySelector<HTMLElement>('a[href]')?.focus();
+    });
+    const item = button.closest<HTMLElement>('.has-menu');
+    item?.addEventListener('pointerenter', (event) => {
+      if (!desktop.matches || event.pointerType === 'touch') return;
+      closeMenus(button);
+      setMenu(button, true);
+    });
+    item?.addEventListener('pointerleave', () => {
+      if (desktop.matches && !item.contains(document.activeElement)) setMenu(button, false);
+    });
+    item?.addEventListener('focusout', () => {
+      requestAnimationFrame(() => {
+        if (desktop.matches && !item.contains(document.activeElement)) setMenu(button, false);
+      });
+    });
   });
 
-  toggle?.addEventListener('click', () => setDrawer(nav?.dataset.open !== 'true'));
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== 'Escape') return;
-    const openBtn = buttons.find(isOpen);
-    if (desktop.matches) {
-      if (openBtn) { closeMenus(); openBtn.focus(); }
-    } else if (nav?.dataset.open === 'true') {
-      setDrawer(false);
-      toggle?.focus();
+  toggle?.addEventListener('click', () => setDrawer(!drawerOpen, drawerOpen));
+  backdrop?.addEventListener('click', () => setDrawer(false, true));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      if (drawerOpen) {
+        event.preventDefault();
+        setDrawer(false, true);
+      } else {
+        const openButton = buttons.find(isOpen);
+        if (openButton) {
+          event.preventDefault();
+          closeMenus();
+          openButton.focus();
+        }
+      }
+    }
+    if (event.key === 'Tab' && drawerOpen) {
+      const elements = focusable();
+      const first = elements[0];
+      const last = elements.at(-1);
+      if (event.shiftKey && (document.activeElement === first || !header.contains(document.activeElement))) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !header.contains(document.activeElement))) {
+        event.preventDefault();
+        first?.focus();
+      }
     }
   });
-
-  document.addEventListener('click', (e) => {
-    if (desktop.matches && !header.contains(e.target as Node)) closeMenus();
+  document.addEventListener('click', (event) => {
+    if (desktop.matches && !header.contains(event.target as Node)) closeMenus();
   });
-
-  // 화면 크기가 바뀌면 열린 상태를 초기화
-  desktop.addEventListener('change', () => { closeMenus(); setDrawer(false); });
+  nav?.addEventListener('click', (event) => {
+    if ((event.target as Element).closest('a[href]') && drawerOpen) setDrawer(false);
+  });
+  desktop.addEventListener('change', () => setDrawer(false));
 }
 
 initNav();
