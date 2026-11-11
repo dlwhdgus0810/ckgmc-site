@@ -3,11 +3,12 @@
 // =====================================================================
 .site-footer {
   margin-top: $section-space;
-  background: $navy-900;
-  color: rgba(#fff, .85);
+  background: $surface-tint;
+  border-top: 1px solid $line;
+  color: $ink-600;
   font-size: .9375rem;
-  // 버튼(.btn)은 제외 — 금색 버튼은 진한 글자여야 읽힘. :where 로 명시도는 그대로 둠
-  a:where(:not(.btn)) { color: #fff; &:hover { color: $gold-300; text-decoration: underline; } }
+  // 버튼(.btn)은 제외 — 버튼은 제 글자색을 써야 함. :where 로 명시도는 그대로 둠
+  a:where(:not(.btn)) { color: $ink-900; &:hover { color: $navy; text-decoration: underline; } }
 
   &__grid { padding: 3.5rem 0 2rem; row-gap: 2rem; }
   &__heading {
@@ -15,23 +16,23 @@
     font-size: 1rem;
     font-weight: 700;
     letter-spacing: .02em;
-    color: #fff;
+    color: $navy-900;
   }
-  &__sub { margin-top: -.5rem; color: rgba(#fff, .6); font-size: .8125rem; }
+  &__sub { margin-top: -.5rem; color: $ink-600; font-size: .8125rem; }
   &__address {
     display: flex;
     flex-direction: column;
     gap: .5rem;
     margin: 0;
     font-style: normal;
-    a { display: inline-flex; align-items: flex-start; gap: .5rem; color: rgba(#fff, .85); .icon { flex: none; margin-top: .2em; color: $gold-300; } }
+    a { display: inline-flex; align-items: flex-start; gap: .5rem; color: $ink-900; .icon { flex: none; margin-top: .2em; color: $gold-700; } }
   }
   &__times {
     margin: 0;
     div + div { margin-top: .75rem; }
-    dt { font-weight: 600; color: #fff; }
-    dd { margin: 0; color: rgba(#fff, .7); font-size: .875rem; }
-    dd small { display: block; margin-top: .125rem; font-size: .8125rem; color: rgba(#fff, .55); }
+    dt { font-weight: 600; color: $navy-900; }
+    dd { margin: 0; color: $ink-600; font-size: .875rem; }
+    dd small { display: block; margin-top: .125rem; font-size: .8125rem; color: $ink-600; }
   }
   &__links, &__social, &__policy { list-style: none; margin: 0; padding: 0; }
   &__links li + li, &__social li + li { margin-top: .5rem; }
@@ -39,12 +40,12 @@
   &__actions { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.25rem; .btn { min-height: 40px; } }
   &__bottom {
     padding: 1rem 0;
-    border-top: 1px solid rgba(#fff, .1);
+    border-top: 1px solid $line;
     font-size: .8125rem;
-    color: rgba(#fff, .6);
+    color: $ink-600;
     .container { gap: .5rem 1.5rem; }
   }
-  &__policy { display: flex; gap: 1.25rem; a { color: rgba(#fff, .7); } }
+  &__policy { display: flex; gap: 1.25rem; a { color: $ink-600; } }
 
   // 터치 기기: 링크 한 줄의 높이를 손가락 크기(44px)로
   @media (pointer: coarse) {
