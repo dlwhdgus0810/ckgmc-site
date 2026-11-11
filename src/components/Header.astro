@@ -13,7 +13,7 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 const currentKey = currentPath.split('/').filter(Boolean)[0];
 const [welcomeCta, givingCta] = headerCtas;
 ---
-<header class="site-header on-dark">
+<header class="site-header">
   <div class="container site-header__inner">
     <a class="site-header__brand" href="/" aria-label={`${site.name} 홈`}>
       <img src={site.logo} alt="" width="274" height="40" />

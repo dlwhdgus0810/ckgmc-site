@@ -1,13 +1,14 @@
 // =====================================================================
-//  헤더: 남색 바 + 로고 + 주 메뉴 (데스크톱 드롭다운 / 모바일 드로어)
+//  헤더: 흰 바 + 로고 + 주 메뉴 (데스크톱 드롭다운 / 모바일 드로어)
+//  흰 바탕이므로 로고는 어두운 글씨 판을 씁니다 (사이트 설정의 "로고").
 // =====================================================================
 .site-header {
   position: sticky;
   top: 0;
   z-index: 1030;
-  background: $navy-900;
-  color: #fff;
-  box-shadow: 0 1px 0 rgba(#fff, .08);
+  background: #fff;
+  color: $ink-900;
+  box-shadow: 0 1px 0 $line, 0 2px 12px rgba($navy-900, .06);
 
   &__inner {
     display: flex;
@@ -40,7 +41,7 @@
   border: 0;
   border-radius: $border-radius;
   background: transparent;
-  color: #fff;
+  color: $navy-900;
   .nav-toggle__close { display: none; }
   &[aria-expanded="true"] {
     .nav-toggle__open { display: none; }
@@ -57,11 +58,11 @@
     gap: .35rem;
     border: 0;
     background: none;
-    color: #fff;
+    color: $ink-900;
     font: inherit;
     font-weight: 600;
     text-decoration: none;
-    &:hover { color: $gold-300; text-decoration: none; }
+    &:hover { color: $navy; text-decoration: none; }
     .icon { transition: transform .2s ease; }
     &[aria-expanded="true"] .icon { transform: rotate(180deg); }
   }
@@ -76,8 +77,8 @@
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      color: rgba(#fff, .8);
-      &:hover { color: #fff; background: rgba(#fff, .12); }
+      color: $ink-600;
+      &:hover { color: $navy; background: $navy-50; }
     }
   }
 
@@ -90,21 +91,22 @@
     width: 100%;
     @media (min-width: 480px) { width: 380px; }
     padding: .5rem 1.25rem 2rem;
-    background: $navy-900;
+    background: #fff;
+    border-top: 1px solid $line;
     overflow-y: auto;
     transform: translateX(100%);
     visibility: hidden;
     transition: transform .25s ease, visibility .25s;
-    box-shadow: -1rem 0 2rem rgba(#000, .3);
+    box-shadow: -1rem 0 2rem rgba($navy-900, .16);
     &[data-open="true"] { transform: none; visibility: visible; }
 
-    &__item + &__item { border-top: 1px solid rgba(#fff, .1); }
+    &__item + &__item { border-top: 1px solid $line; }
     &__link {
       width: 100%;
       padding: .9rem 0;
       font-size: 1.0625rem;
       text-align: left;
-      small { margin-left: .25rem; font-weight: 500; color: rgba(#fff, .55); }
+      small { margin-left: .25rem; font-weight: 500; color: $ink-600; }
       .icon { margin-left: auto; }
     }
     &__menu {
@@ -113,9 +115,9 @@
       li a {
         display: block;
         padding: .5rem 0;
-        color: rgba(#fff, .85);
-        &:hover { color: #fff; text-decoration: none; }
-        &[aria-current="page"] { color: $gold-300; font-weight: 600; }
+        color: $ink-900;
+        &:hover { color: $navy; text-decoration: none; }
+        &[aria-current="page"] { color: $navy; font-weight: 600; }
       }
     }
     &__ctas {
@@ -125,10 +127,10 @@
       gap: .75rem 1rem;
       margin-top: 1.5rem;
       padding-top: 1.25rem;
-      border-top: 1px solid rgba(#fff, .1);
+      border-top: 1px solid $line;
     }
-    &__cta { color: $gold-300; font-weight: 600; }
-    &__account { display: inline-flex; align-items: center; gap: .4rem; color: rgba(#fff, .85); font-weight: 600; .icon { color: $gold-300; } }
+    &__cta { color: $gold-700; font-weight: 600; }
+    &__account { display: inline-flex; align-items: center; gap: .4rem; color: $ink-900; font-weight: 600; .icon { color: $gold-700; } }
   }
 
   // ── 데스크톱: 가로 메뉴 + 드롭다운 ─────────────────────────────────
@@ -148,7 +150,7 @@
       white-space: nowrap;
       small { display: none; }
     }
-    &__item.is-current > &__link { box-shadow: inset 0 -2px 0 $gold; }
+    &__item.is-current > &__link { color: $navy; box-shadow: inset 0 -2px 0 $gold; }
     &__menu {
       position: absolute;
       top: calc(100% + .25rem);
@@ -176,17 +178,17 @@
       align-items: center;
       gap: .75rem;
       padding-left: 1rem;
-      border-left: 1px solid rgba(#fff, .15);
+      border-left: 1px solid $line;
     }
-    &__cta { color: $gold-300; font-weight: 600; white-space: nowrap; font-size: .9375rem; }
+    &__cta { color: $gold-700; font-weight: 600; white-space: nowrap; font-size: .9375rem; }
     &__account {
       position: relative;
       display: inline-flex; align-items: center; justify-content: center;
       width: 36px; height: 36px; border-radius: 50%;
-      color: rgba(#fff, .8);
-      &:hover, &:focus-visible { color: #fff; background: rgba(#fff, .12); text-decoration: none; }
+      color: $ink-600;
+      &:hover, &:focus-visible { color: $navy; background: $navy-50; text-decoration: none; }
       &-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-      &.is-signed-in::after { content: ''; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: $gold; box-shadow: 0 0 0 2px $navy-900; }
+      &.is-signed-in::after { content: ''; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: $gold; box-shadow: 0 0 0 2px #fff; }
     }
   }
   // 992~1199px: 컨테이너가 960px 이라 더 촘촘하게 (텍스트 강조 링크는 생략, 금색 헌금 버튼은 유지)

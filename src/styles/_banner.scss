@@ -1,5 +1,7 @@
 // =====================================================================
 //  서브페이지 배너 + 현재 위치(브레드크럼)
+//  - 사진 없는 배너: 밝은 바탕에 남색 글자
+//  - 사진 배너(.page-banner--image): 사진을 밝게 두고, 글자가 놓이는 왼쪽·아래쪽만 남색으로 받쳐 흰 글자를 올림
 // =====================================================================
 $banner-img-max: 1320px;
 .page-banner {
@@ -8,10 +10,10 @@ $banner-img-max: 1320px;
   align-items: flex-end;
   // 사진이 가로 띠로 잘려 보이므로 넓은 화면일수록 조금 더 높게 (휴대전화 128px ~ 데스크톱 280px)
   min-height: clamp(128px, 19vw, 280px);
-  background: linear-gradient(135deg, $navy-700, $navy-900);
-  color: #fff;
-  --focus-ring: #fff;
+  background: linear-gradient(135deg, $navy-50, #dde6f5);
+  color: $ink-900;
   overflow: hidden;
+  &--image { background: #c9d4ea; color: #fff; --focus-ring: #fff; }
 
   &__img {
     position: absolute;
@@ -20,7 +22,7 @@ $banner-img-max: 1320px;
     height: 100%;
     object-fit: cover;
     // 아주 넓은 화면에서 사진을 화면 폭만큼 늘리면 위아래가 더 많이 잘리고(단체 사진의 얼굴이 사라짐) 흐려집니다.
-    // 사진은 #{$banner-img-max} 까지만 넓히고 가운데에 두어, 양옆은 배너의 남색으로 자연스럽게 이어지게 합니다.
+    // 사진은 $banner-img-max 까지만 넓히고 가운데에 두며, 양옆은 같은 사진을 흐리게 깐 바탕(__backdrop)으로 이어지게 합니다.
     @media (min-width: #{$banner-img-max + 1px}) {
       left: 50%;
       right: auto;
@@ -30,10 +32,29 @@ $banner-img-max: 1320px;
       mask-image: linear-gradient(90deg, transparent 0, #000 12%, #000 88%, transparent 100%);
     }
   }
+  // 넓은 화면에서 사진 양옆을 채우는 흐린 바탕 (같은 사진이라 추가로 내려받지 않음)
+  &__backdrop {
+    display: none;
+    @media (min-width: #{$banner-img-max + 1px}) {
+      display: block;
+      position: absolute;
+      inset: -30px;
+      width: calc(100% + 60px);
+      height: calc(100% + 60px);
+      object-fit: cover;
+      filter: blur(28px) saturate(1.1);
+      opacity: .9;
+    }
+  }
   &__scrim {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba($navy-900, .5) 0%, rgba($navy-900, .62) 50%, rgba($navy-900, .88) 100%);
+    // 글자는 컨테이너 왼쪽 아래에 놓이므로 그쪽만 받칩니다 (가운데 기준 위치라 화면이 넓어도 글자를 따라감)
+    background:
+      linear-gradient(90deg, rgba($navy-900, .72) 0, rgba($navy-900, .5) calc(50% - 300px), rgba($navy-900, .06) calc(50% + 160px), rgba($navy-900, 0) 100%),
+      linear-gradient(180deg, rgba($navy-900, 0) 45%, rgba($navy-900, .28) 100%);
+    // 휴대전화에서는 글자가 폭을 다 쓰므로 아래쪽을 받침
+    @include media-breakpoint-down(sm) { background: linear-gradient(180deg, rgba($navy-900, .18) 0, rgba($navy-900, .72) 100%); }
   }
   &:not(.page-banner--image) &__scrim { display: none; }
   &__content {
@@ -48,18 +69,18 @@ $banner-img-max: 1320px;
     font-weight: 600;
     letter-spacing: .14em;
     text-transform: uppercase;
-    color: $gold-300;
-    text-shadow: 0 1px 6px rgba($navy-900, .8);
+    color: $gold-700;
   }
   &__title {
     margin: 0;
     font-size: clamp(1.625rem, 1.1rem + 1.9vw, 2.5rem);
     font-weight: 700;
     line-height: 1.2;
-    color: #fff;
+    color: $navy-900;
     text-wrap: balance;
-    text-shadow: 0 1px 12px rgba($navy-900, .5);
   }
+  &--image &__eyebrow { color: $gold-300; text-shadow: 0 1px 6px rgba($navy-900, .85); }
+  &--image &__title { color: #fff; text-shadow: 0 1px 14px rgba($navy-900, .65), 0 0 2px rgba($navy-900, .5); }
 }
 
 .crumbs .breadcrumb {
@@ -67,12 +88,18 @@ $banner-img-max: 1320px;
   padding: 0;
   background: transparent;
   font-size: .8125rem;
-  color: rgba(#fff, .9);
-  text-shadow: 0 1px 6px rgba($navy-900, .8);
+  color: $ink-600;
   flex-wrap: nowrap;
   overflow: hidden;
   .breadcrumb-item { white-space: nowrap; }
-  .breadcrumb-item.active { color: #fff; overflow: hidden; text-overflow: ellipsis; }
-  .breadcrumb-item + .breadcrumb-item::before { color: rgba(#fff, .5); }
-  a { color: rgba(#fff, .9); &:hover { color: #fff; } }
+  .breadcrumb-item.active { color: $ink-900; overflow: hidden; text-overflow: ellipsis; }
+  .breadcrumb-item + .breadcrumb-item::before { color: rgba($ink-600, .7); }
+  a { color: $ink-600; &:hover { color: $navy; } }
+}
+.page-banner--image .crumbs .breadcrumb {
+  color: rgba(#fff, .92);
+  text-shadow: 0 1px 6px rgba($navy-900, .85);
+  .breadcrumb-item.active { color: #fff; }
+  .breadcrumb-item + .breadcrumb-item::before { color: rgba(#fff, .6); }
+  a { color: rgba(#fff, .92); &:hover { color: #fff; } }
 }
