@@ -4,6 +4,7 @@
  * 서버는 빌드 날짜 기준 구절을 넣고, 브라우저에서 오늘 날짜로 다시 골라 매일 바뀌게 합니다 (스크립트 없이도 한 구절은 보임).
  */
 import type { SiteConfig } from '../../data/site';
+import Emoji from '../Emoji.astro';
 interface Props { verses: SiteConfig['verses']; today: string }
 const { verses, today } = Astro.props;
 const dayOfYear = (ymd: string) => { const d = new Date(ymd + 'T00:00:00Z'); return Math.floor((d.getTime() - Date.UTC(d.getUTCFullYear(), 0, 0)) / 86400000); };
@@ -12,7 +13,7 @@ const pick = verses.length ? verses[dayOfYear(today) % verses.length] : null;
 {pick && (
   <section class="verse-band" aria-label="오늘의 말씀" data-verse-band>
     <div class="container">
-      <p class="verse-band__label">오늘의 말씀 <span>Verse of the Day</span></p>
+      <p class="verse-band__label"><Emoji name="sparkle" size={18} /> 오늘의 말씀 <span>Verse of the Day</span></p>
       <blockquote class="verse-band__quote">
         <p data-verse-text>“{pick.text}”</p>
         <cite data-verse-ref>{pick.ref}</cite>

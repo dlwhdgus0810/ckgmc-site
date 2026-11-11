@@ -195,3 +195,9 @@
   .page-item--far { @include media-breakpoint-down(sm) { display: none; } }
   .page-item--near { @include media-breakpoint-down(xs) { display: none; } }
 }
+
+// ── 이모티콘풍 아이콘 (src/components/Emoji.astro) ──────────────────────
+.emoji { flex: none; display: inline-block; vertical-align: -.2em; }
+// 버튼·제목 안에서는 글자 크기에 맞춰 커집니다 (큰 버튼에는 큰 아이콘)
+.btn .emoji { width: 1.4em; height: 1.4em; }
+.section__title .emoji { width: 1.15em; height: 1.15em; margin-right: .5rem; vertical-align: -.2em; }

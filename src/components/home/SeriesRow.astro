@@ -12,7 +12,7 @@ const latestEp = featured?.data.episodes.at(-1);
 {featured && (
   <section class="section section--surface" aria-labelledby="series-title">
     <div class="container">
-      <SectionHeader id="series-title" eyebrow="Sermon Series" title="설교 시리즈" more={{ href: '/media/series', label: '모든 시리즈' }} />
+      <SectionHeader id="series-title" eyebrow="Sermon Series" title="설교 시리즈" icon="book" more={{ href: '/media/series', label: '모든 시리즈' }} />
       <div class="series-feature">
         <a class="card-tile series-feature__main" href={`/media/series/${featured.id}`}>
           <div class="card-tile__media"><img src={featured.data.thumbnail} alt="" loading="lazy" width="960" height="540" /></div>

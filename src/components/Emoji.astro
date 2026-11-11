@@ -1,0 +1,11 @@
+---
+/**
+ * 색이 있는 이모티콘풍 아이콘 (직접 그린 SVG, 그림은 src/lib/emoji.ts).
+ * 버튼과 구역 제목에 눈에 띄는 포인트로 씁니다. 옆에 글자가 항상 있으므로 장식용(aria-hidden)입니다.
+ *   <Emoji name="wave" />  <Emoji name="church" size={28} />
+ */
+import { EMOJI, type EmojiName } from '../lib/emoji';
+interface Props { name: EmojiName; size?: number; class?: string }
+const { name, size = 20, class: cls } = Astro.props;
+---
+<svg class:list={['emoji', cls]} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true" focusable="false" set:html={EMOJI[name]} />

@@ -6,6 +6,7 @@
  */
 import Pagination from './Pagination.astro';
 import Icon from './Icon.astro';
+import Emoji from './Emoji.astro';
 import { getBoardPosts, slugOf, excerptOf, thumbAttrs, formatKoreanDate, isoDate, isNew, titleParts, displayDate, dateTimeAttr, pdfOf, fileUrl, boardLayout, PARSED_BOARDS } from '../lib/posts';
 
 interface Props {
@@ -49,6 +50,7 @@ const rowText = (text: string, title: string) => (/\.(pdf|docx?|pptx?|xlsx?|hwp)
     </>
   )}
 
+  {layout === 'rows' && <template data-row-icon><Emoji name="doc" size={18} /> </template>}
   <div data-board-list>
     {posts.length === 0 ? (
       <p class="text-muted py-4 text-center">아직 등록된 글이 없습니다.</p>
@@ -66,7 +68,7 @@ const rowText = (text: string, title: string) => (/\.(pdf|docx?|pptx?|xlsx?|hwp)
             </a>
             {pdf && (
               <a class="btn btn-outline-primary btn-sm post-row__action" href={fileUrl(pdf.file)} target="_blank" rel="noopener" aria-label={`${t.title} PDF 열기 (새 창)`}>
-                <Icon name="file-text" size={16} /> PDF 열기
+                <Emoji name="doc" size={18} /> PDF 열기
               </a>
             )}
           </li>
@@ -125,6 +127,7 @@ const rowText = (text: string, title: string) => (/\.(pdf|docx?|pptx?|xlsx?|hwp)
     const base = root.dataset.base ?? '';
     const rows = root.dataset.layout === 'rows';
     const parsed = root.dataset.parsed === 'true';
+    const rowIcon = root.querySelector<HTMLTemplateElement>('template[data-row-icon]');
     const STEP = 30;
     let items: Item[] | null = null;
     let loading: Promise<Item[]> | null = null;
@@ -172,6 +175,7 @@ const rowText = (text: string, title: string) => (/\.(pdf|docx?|pptx?|xlsx?|hwp)
       if (it.f) {
         const pdf = el('a', 'btn btn-outline-primary btn-sm post-row__action', 'PDF 열기');
         pdf.href = it.f; pdf.target = '_blank'; pdf.rel = 'noopener'; pdf.setAttribute('aria-label', `${it.t} PDF 열기 (새 창)`);
+        if (rowIcon) pdf.insertBefore(rowIcon.content.cloneNode(true), pdf.firstChild);
         add(li, pdf);
       }
       return li;

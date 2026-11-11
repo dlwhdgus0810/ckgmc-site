@@ -183,6 +183,9 @@ The overall look is light: a white header, photos shown bright, a light footer, 
 * **Buttons** (`_components.scss`) are not filled with dark navy. The main button (`.btn-primary`) is a soft tint with navy text and
   the secondary one (`.btn-outline-primary`) is white with a light border. The gold giving button is unchanged.
 * **Footer** (`_footer.scss`) is a light tint with dark text, matching the header.
+* **Emoji-style icons** give the light buttons and section titles their color. They are hand-drawn SVGs in `src/lib/emoji.ts`,
+  used as `<Emoji name="wave" />` (`src/components/Emoji.astro`). They are decorative, so always keep the text next to them.
+  To add one, draw it on a 24×24 grid with the six colors defined at the top of that file.
 Fonts are Pretendard (body and headings) and Nanum Myeongjo (Bible verses and quotes). To change Nanum Myeongjo, edit `scripts/fetch-fonts.mjs` and run `npm run fetch:fonts`.
 Accessibility: all color pairs meet WCAG AA contrast (4.5:1), with keyboard focus rings, a skip-to-content link, and reduced motion support.
 

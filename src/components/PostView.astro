@@ -5,6 +5,7 @@
  */
 import { render, getCollection } from 'astro:content';
 import Icon from './Icon.astro';
+import Emoji from './Emoji.astro';
 import { slugOf, formatKoreanDate, displayDate, dateTimeAttr, pdfOf, fileUrl, textExcerpt, titleParts, displayTitle, splitDescription, type Post } from '../lib/posts';
 
 interface Props {
@@ -84,7 +85,7 @@ if (post.data.youtube) {
   {pdf && (
     <section class="pdf-card" aria-label="PDF 문서">
       <div class="pdf-card__head">
-        <Icon name="file-text" size={24} />
+        <Emoji name="doc" size={32} />
         <div>
           <strong>{pdf.name}</strong>
           <small>PDF 문서 · 휴대전화에서는 새 창으로 여세요</small>
