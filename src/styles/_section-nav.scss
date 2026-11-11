@@ -58,7 +58,7 @@
         font-size: .9375rem;
         white-space: nowrap;
         &:hover { border-color: $navy; color: $navy; text-decoration: none; }
-        &[aria-current="page"] { background: $navy; border-color: $navy; color: #fff; font-weight: 600; }
+        &[aria-current="page"] { background: $navy-100; border-color: $navy-200; color: $navy-900; font-weight: 700; }
       }
     }
   }

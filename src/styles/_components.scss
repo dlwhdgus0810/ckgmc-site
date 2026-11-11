@@ -143,6 +143,27 @@
   color: $ink-900;
   &:hover, &:focus, &:active { color: #fff; }
 }
+// 주 버튼: 헤더와 같은 밝은 색감 — 옅은 남색 바탕에 남색 글자 (진한 남색으로 채우지 않습니다)
+.btn-primary {
+  @include button-variant($navy-100, $navy-200, $hover-background: #d9e3f6, $hover-border: #bccbe9, $active-background: #ccd9f2, $active-border: #adbfe3);
+  color: $navy-700;
+  &:hover, &:focus, &:not(:disabled):not(.disabled):active, &:not(:disabled):not(.disabled).active { color: $navy-900; }
+  &.disabled, &:disabled { color: rgba($navy-700, .6); }
+}
+// 보조 버튼: 흰 바탕에 옅은 테두리
+.btn-outline-primary {
+  background: #fff;
+  border-color: #cfd6e4;
+  color: $navy;
+  &:hover, &:focus { background: $navy-50; border-color: $navy-200; color: $navy-700; }
+  &:not(:disabled):not(.disabled):active, &:not(:disabled):not(.disabled).active { background: $navy-100; border-color: $navy-200; color: $navy-900; }
+  &.disabled, &:disabled { background: #fff; color: rgba($navy, .55); }
+}
+// 옅은 남색 띠(.section--tint) 위에서는 주 버튼 바탕이 띠와 비슷해지므로 흰 바탕으로 구분합니다
+.section--tint {
+  .btn-primary { background: #fff; border-color: #bccbe9; box-shadow: 0 1px 2px rgba($navy-900, .08); &:hover, &:focus { background: $navy-100; } }
+  .btn-outline-primary { background: transparent; border-color: #bccbe9; &:hover, &:focus { background: rgba(#fff, .7); } }
+}
 
 // ── 미디어 프레임 (유튜브·지도 iframe) ─────────────────────────────────
 .media-frame {
@@ -168,6 +189,8 @@
   }
   // 터치 기기(휴대전화·태블릿)에서는 손가락 크기(44px)
   @media (pointer: coarse) { .page-link { min-width: 44px; min-height: 44px; } }
+  // 현재 쪽: 버튼과 같은 옅은 채움
+  .page-item.active .page-link { background: $navy-100; border-color: $navy-200; color: $navy-900; font-weight: 700; }
   // 좁은 화면에서는 현재 쪽 주변만 남겨 한 줄에 들어가게
   .page-item--far { @include media-breakpoint-down(sm) { display: none; } }
   .page-item--near { @include media-breakpoint-down(xs) { display: none; } }
