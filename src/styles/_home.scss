@@ -114,52 +114,50 @@
 }
 a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: inherit; transform: translateY(-2px); box-shadow: 0 .5rem 1.25rem rgba($navy-900, .1); .event-card__title { color: $navy; } }
 
-// 교회 소식 포스터 — 높이를 맞춘 가로 띠 (포스터 비율은 그대로, 좌우로 넘김)
-.notice-strip {
-  position: relative;
-  &__track {
-    display: flex; gap: 1rem;
-    margin: 0 -15px; padding: 0 15px .75rem;
-    list-style: none;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding-left: 15px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
-    @include media-breakpoint-up(md) { margin: 0; padding: 0 0 .75rem; scroll-padding-left: 0; }
+// 교회 소식 — 한 장씩 넘기는 배너, JavaScript가 없으면 모든 소식을 세로로 표시합니다.
+.notice-banner {
+  &__viewport { border: 1px solid $line; border-radius: .75rem; background: #fff; }
+  &__slide { display: grid; grid-template-columns: minmax(0, 1fr); background: #fff; min-width: 0; }
+  &__slide + &__slide { margin-top: 1rem; border-top: 1px solid $line; }
+  &__image {
+    display: flex; align-items: center; justify-content: center; min-width: 0;
+    padding: 1rem; background: $navy-50;
+    picture { display: block; width: 100%; }
+    img { display: block; width: 100%; height: clamp(160px, 52vw, 260px); object-fit: contain; }
   }
-  // 80vw: 휴대전화에서 다음 포스터가 살짝 보여 넘길 수 있음을 알림
-  // position: relative — 카드 안의 sr-only(절대 위치) 텍스트가 트랙 밖으로 나가 페이지를 넓히지 않도록
-  &__item { position: relative; flex: 0 0 min(85vw, 350px); scroll-snap-align: start; min-width: 0; }
-  &__card {
-    display: flex; flex-direction: column;
-    height: 100%;
-    border: 1px solid $line; border-radius: $border-radius; background: #fff;
-    overflow: hidden; color: inherit;
-    transition: transform .2s ease, box-shadow .2s ease;
-    img { display: block; height: 160px; width: 100%; object-fit: contain; background: $surface; }
-    &:hover, &:focus-visible { text-decoration: none; color: inherit; }
+  &__body {
+    display: flex; flex-direction: column; align-items: flex-start; gap: .75rem; padding: 1.25rem;
+    h3 { margin: 0; font-size: clamp(1.25rem, 2vw, 1.625rem); line-height: 1.4; }
+    p { margin: 0; font-size: .9375rem; }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem; margin: 0; font-size: .9375rem; }
+    dd { margin: 0; }
   }
-  a.notice-strip__card:hover, a.notice-strip__card:focus-visible { transform: translateY(-3px); box-shadow: 0 .75rem 1.5rem rgba($navy-900, .12); }
-  &__caption {
-    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
-    padding: .625rem .875rem; font-size: .9375rem; font-weight: 600; color: $ink-900;
-    .icon { color: $gold-700; flex: none; }
+  &__status { margin-top: auto !important; color: $ink-600; font-size: .875rem !important; }
+  &__controls { display: flex; align-items: center; flex-wrap: wrap; gap: .5rem; margin-bottom: .75rem; }
+  &__controls[hidden] { display: none; }
+  &__toggle { min-height: 44px; }
+  &__dots { display: flex; justify-content: center; flex-wrap: wrap; flex: 1 1 auto; }
+  &__dot, &__arrow {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: 44px; height: 44px; padding: 0; color: $navy; background: #fff;
+    border: 1px solid $navy-200; border-radius: 50%;
+    &:hover { background: $navy-100; }
   }
-  &__nav {
-    position: absolute; top: -3.25rem; right: 0;
-    display: none; gap: .375rem;
-    @include media-breakpoint-up(md) { display: flex; }
+  &__dot { border: 0; background: transparent;
+    span { display: block; width: 10px; height: 10px; border: 1px solid $navy-500; border-radius: 50%; }
+    &[aria-current] span { background: $navy; border-color: $navy; }
   }
-  &.no-scroll &__nav { display: none; }
-  &__btn {
-    width: 44px; height: 44px;
-    display: inline-flex; align-items: center; justify-content: center;
-    border: 1px solid $line; border-radius: 50%; background: #fff; color: $navy;
-    &:hover { background: $navy; color: #fff; border-color: $navy; }
+  &__navigation { display: flex; align-items: center; gap: .5rem; margin-left: auto; }
+  &__count { min-width: 3rem; text-align: center; color: $ink-600; font-size: .875rem; }
+  &.is-ready &__viewport { overflow: hidden; touch-action: pan-y pinch-zoom; }
+  &.is-ready &__track { display: flex; align-items: stretch; transition: transform .35s ease; }
+  &.is-ready &__slide { flex: 0 0 100%; margin: 0; border: 0; }
+  @include media-breakpoint-up(md) {
+    &__slide { grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
+    &__image img { height: clamp(280px, 28vw, 360px); }
+    &__body { padding: clamp(1.25rem, 2.5vw, 2rem); }
   }
-  &__btn:disabled { opacity: .35; cursor: default; }
+  @media (prefers-reduced-motion: reduce) { &.is-ready &__track { transition: none; } }
 }
 .flip-x { transform: scaleX(-1); }
 .info-strip__note { font-size: .875rem; font-weight: 600; color: $gold-700; }
@@ -259,12 +257,4 @@ a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: i
 @media (pointer: coarse) {
   .section__more, .info-strip__more { display: inline-flex; align-items: center; min-height: 44px; }
   .card-tile__title > a { display: block; padding: .5rem 0; margin: -.5rem 0; }
-}
-
-.notice-strip__body { display: flex; flex: 1; flex-direction: column; align-items: flex-start; padding: 1rem; gap: .625rem;
-  h3 { font-size: 1.125rem; margin: 0; }
-  p { font-size: .9375rem; margin: 0; }
-  dl { font-size: .875rem; margin: 0; display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem; }
-  dd { margin: 0; }
-  .notice-strip__status { font-size: .875rem; color: $ink-600; margin-top: auto; }
 }

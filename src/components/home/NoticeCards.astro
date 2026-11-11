@@ -11,54 +11,43 @@ const notices = all.filter((n) => !n.until || n.until >= today);
   <section class="section section--surface" aria-labelledby="notices-title">
     <div class="container">
       <SectionHeader id="notices-title" eyebrow="Announcements" title="교회 소식" icon="megaphone" />
-      <div class="notice-strip" data-notice-strip>
-        <ul class="notice-strip__track" data-notice-track>
-          {notices.map((n) => (
-            <li class="notice-strip__item">
-              <article class="notice-strip__card">
-                <a href={n.image} target="_blank" rel="noopener" class="notice-strip__image" aria-label={`${n.title ?? '공지'} 포스터 크게 보기 (새 창)`}>
-                  <ResponsiveImage src={n.image} alt={n.alt} loading="lazy" sizes="(min-width: 768px) 360px, 85vw" />
+      <div class="notice-banner" data-notice-carousel role="region" aria-roledescription="슬라이드 배너" aria-label="교회 소식 배너">
+        {notices.length > 1 && (
+          <div class="notice-banner__controls" data-notice-controls hidden>
+            <button type="button" class="btn btn-outline-primary btn-sm notice-banner__toggle" data-notice-toggle>자동 재생</button>
+            <div class="notice-banner__dots" aria-label="소식 선택">
+              {notices.map((n, index) => <button type="button" class="notice-banner__dot" data-notice-dot data-notice-index={index} aria-label={`${index + 1}번째 소식: ${n.title ?? '교회 안내'}`} aria-controls="notice-banner-track"><span aria-hidden="true"></span></button>)}
+            </div>
+            <div class="notice-banner__navigation">
+              <span class="notice-banner__count" data-notice-count>1 / {notices.length}</span>
+              <button type="button" class="notice-banner__arrow" data-notice-prev aria-label="이전 소식" aria-controls="notice-banner-track"><Icon name="chevron-right" size={20} class="flip-x" /></button>
+              <button type="button" class="notice-banner__arrow" data-notice-next aria-label="다음 소식" aria-controls="notice-banner-track"><Icon name="chevron-right" size={20} /></button>
+            </div>
+          </div>
+        )}
+        <p class="sr-only" data-notice-status aria-live="polite" aria-atomic="true"></p>
+        <div class="notice-banner__viewport" data-notice-viewport>
+          <div class="notice-banner__track" id="notice-banner-track" data-notice-track aria-live="off">
+            {notices.map((n, index) => (
+              <article class="notice-banner__slide" data-notice-slide data-notice-title={n.title ?? '교회 안내'} role="group" aria-roledescription="슬라이드" aria-label={`${index + 1} / ${notices.length}: ${n.title ?? '교회 안내'}`}>
+                <a href={n.image} target="_blank" rel="noopener" class="notice-banner__image" aria-label={`${n.title ?? '공지'} 포스터 크게 보기 (새 창)`}>
+                  <ResponsiveImage src={n.image} alt={n.alt} loading="lazy" sizes="(min-width: 1200px) 680px, (min-width: 768px) 60vw, 100vw" />
                 </a>
-                <div class="notice-strip__body">
+                <div class="notice-banner__body">
                   <h3>{n.title ?? '교회 안내'}</h3>
                   {n.description && <p>{n.description}</p>}
                   {(n.time || n.place) && <dl>{n.time && <><dt>일정</dt><dd>{n.time}</dd></>}{n.place && <><dt>장소</dt><dd>{n.place}</dd></>}</dl>}
-                  <p class="notice-strip__status">
+                  <p class="notice-banner__status">
                     {n.until ? <>안내 기간: {n.until}까지</> : n.reviewedAt ? <>최근 확인: {n.reviewedAt}</> : '참여 전 최신 일정과 운영 여부를 확인해 주세요.'}
                   </p>
-                  <a href={n.href || '/about/contact'} class="btn btn-outline-primary btn-sm">{n.actionLabel || (n.href ? '자세히 보기' : '일정 문의')} <Icon name="arrow-right" size={16} /></a>
+                  <a href={n.href || '/about/contact'} class="btn btn-primary">{n.actionLabel || (n.href ? '자세히 보기' : '일정 문의')} <Icon name="arrow-right" size={16} /></a>
                 </div>
               </article>
-            </li>
-          ))}
-        </ul>
-        {notices.length > 1 && (
-          <div class="notice-strip__nav" aria-label="공지 이동">
-            <button type="button" class="notice-strip__btn" data-notice-prev aria-label="이전 공지"><Icon name="chevron-right" size={20} class="flip-x" /></button>
-            <button type="button" class="notice-strip__btn" data-notice-next aria-label="다음 공지"><Icon name="chevron-right" size={20} /></button>
+            ))}
           </div>
-        )}
+        </div>
       </div>
     </div>
   </section>
 )}
-<script>
-  document.querySelectorAll<HTMLElement>('[data-notice-strip]').forEach((strip) => {
-    const track = strip.querySelector<HTMLElement>('[data-notice-track]');
-    if (!track) return;
-    const prev = strip.querySelector<HTMLButtonElement>('[data-notice-prev]');
-    const next = strip.querySelector<HTMLButtonElement>('[data-notice-next]');
-    const step = () => (track.querySelector<HTMLElement>('.notice-strip__item')?.offsetWidth ?? 320) + 16;
-    const move = (direction: number) => track.scrollBy({ left: direction * step(), behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth' });
-    prev?.addEventListener('click', () => move(-1));
-    next?.addEventListener('click', () => move(1));
-    const update = () => {
-      if (prev) prev.disabled = track.scrollLeft <= 2;
-      if (next) next.disabled = track.scrollLeft + track.clientWidth >= track.scrollWidth - 2;
-      strip.classList.toggle('no-scroll', track.scrollWidth <= track.clientWidth + 2);
-    };
-    track.addEventListener('scroll', update, { passive: true });
-    new ResizeObserver(update).observe(track);
-    update();
-  });
-</script>
+<script>import '../../scripts/notice-carousel';</script>

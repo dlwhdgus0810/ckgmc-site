@@ -37,7 +37,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="theme-color" content="#ffffff" />
     <slot name="head" />
   </head>
-  <body>
+  <body class="site-layout">
     <a class="skip-link" href="#main">본문으로 건너뛰기</a>
     <Header />
     <slot />

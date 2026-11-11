@@ -40,10 +40,10 @@ const stories = (await getCollection('stories')).sort((a, b) => b.data.date.getT
   <main id="main" tabindex="-1">
     <Hero />
     <InfoStrip />
-    <ThisWeek sermon={sermon} bulletin={bulletin} resource={resource} />
-    <EventList events={site.events} today={today} />
-    <NoticeCards notices={site.notices} today={today} />
     <VerseBand verses={site.verses} today={today} />
+    <NoticeCards notices={site.notices} today={today} />
+    <EventList events={site.events} today={today} />
+    <ThisWeek sermon={sermon} bulletin={bulletin} resource={resource} />
     <SeriesRow series={series} />
     <MinistryGrid pages={ministries} />
     {stories.length > 0 && (
