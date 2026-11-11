@@ -40,7 +40,8 @@ export async function homeImageVariants(root = process.cwd()) {
       const rotated = (meta.orientation ?? 1) >= 5;
       const width = rotated ? meta.height : meta.width;
       const height = rotated ? meta.width : meta.height;
-      const widths = [...new Set([320, 640, 960, 1440].map((w) => Math.min(w, width)))];
+      const sizes = src === site.hero.image ? [640, 960, 1440, 1920] : [320, 640, 960, 1440];
+      const widths = [...new Set(sizes.map((w) => Math.min(w, width)))];
       const hash = createHash('sha256').update(input).update('webp-78-v1').digest('hex').slice(0, 20);
       const variants = [];
       for (const size of widths) {
