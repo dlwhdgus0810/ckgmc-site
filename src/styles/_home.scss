@@ -34,14 +34,16 @@
   &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
   &__english { color: $navy-700; text-decoration: underline; padding: .5rem 0; font-size: .875rem; }
   &__controls {
+    position: absolute; right: 24px; bottom: 24px; z-index: 2;
     display: flex; align-items: center; gap: .5rem;
-    width: fit-content; margin: .75rem 24px 0;
+    width: fit-content; margin: 0;
   }
   &__controls[hidden] { display: none; }
   &__arrow {
     display: inline-flex; align-items: center; justify-content: center; flex: none;
     width: 44px; height: 44px; padding: 0; color: $navy; background: #fff;
     border: 1px solid $line; border-radius: 50%;
+    box-shadow: 0 2px 8px rgba($navy-900, .14);
     &:hover { background: $navy-100; }
   }
   &.is-ready &__viewport { touch-action: pan-y pinch-zoom; }
@@ -71,8 +73,8 @@
     &__sub { margin-bottom: 1rem; font-size: 1rem; }
     &__title { font-size: 2rem; }
     &__actions { gap: .5rem; .btn-lg { padding: .65rem .9rem; font-size: 1rem; } }
-    &__english { flex-basis: 100%; }
-    &__controls { margin-inline: 16px; }
+    &__english { flex-basis: 100%; max-width: calc(100% - 112px); margin-right: 112px; }
+    &__controls { right: 16px; bottom: 16px; }
   }
   @media (prefers-reduced-motion: reduce) { &.is-animated &__slide { transition: none; } }
 }
