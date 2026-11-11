@@ -1,0 +1,5 @@
+---
+interface Props { id: string; message?: string }
+const { id, message } = Astro.props;
+---
+<p id={`${id}-error`} class="small text-danger mt-1 mb-0" data-field-error={id} hidden={!message}>{message}</p>

@@ -9,6 +9,7 @@ declare global {
   const __BUILD_SHA__: string;
   /** 빌드 시 계산한 이야기 사진 크기 (astro.config.mjs 의 vite.define) */
   const __IMAGE_SIZES__: Record<string, { width: number; height: number }>;
+  const __RESPONSIVE_IMAGES__: Record<string, { width: number; height: number; srcset: string }>;
   const __BUILD_AT__: string;
   namespace App {
     interface Locals {

@@ -1,9 +1,8 @@
 ---
 /** 이번 주: 최신 설교(클릭 시 영상 재생) + 이번 주 주보(PDF) + 소그룹 나눔지 */
 import SectionHeader from '../SectionHeader.astro';
-import Emoji from '../Emoji.astro';
 import Icon from '../Icon.astro';
-import { slugOf, excerptOf, thumbAttrs, pdfOf, fileUrl, formatKoreanDate, isoDate, titleParts, displayDate, dateTimeAttr, type Post } from '../../lib/posts';
+import { slugOf, excerptOf, thumbAttrs, pdfOf, fileUrl, formatKoreanDate, titleParts, displayDate, dateTimeAttr, type Post } from '../../lib/posts';
 interface Props { sermon?: Post; bulletin?: Post; resource?: Post }
 const { sermon, bulletin, resource } = Astro.props;
 const pdf = bulletin ? pdfOf(bulletin) : undefined;
@@ -28,6 +27,7 @@ const st = sermon ? titleParts(sermon) : undefined;
               <span class="card-tile__eyebrow">최신 설교{st?.service && ` · ${st.service}`}</span>
               <h3 class="card-tile__title h5"><a href={`/media/sermons/${slugOf(sermon)}`}>{st?.title ?? sermon.data.title}</a></h3>
               <p class="card-tile__meta">{st?.preacher && <span>{st.preacher}</span>}<time datetime={dateTimeAttr(sermon)}>{formatKoreanDate(displayDate(sermon), true)}</time></p>
+              {sermon.data.youtube && <a class="btn btn-outline-primary btn-sm align-self-start" href={`https://www.youtube.com/watch?v=${sermon.data.youtube}`} target="_blank" rel="noopener"><Icon name="external" size={16} /> YouTube에서 보기<span class="sr-only"> (새 창)</span></a>}
             </div>
           </article>
         ) : (
@@ -41,9 +41,9 @@ const st = sermon ? titleParts(sermon) : undefined;
             {bulletin ? (
               <>
                 <h3 class="card-tile__title h5"><a href={`/media/bulletins/${slugOf(bulletin)}`}>{titleParts(bulletin).title}</a></h3>
-                <p class="card-tile__meta"><time datetime={isoDate(bulletin.data.date)}>{formatKoreanDate(bulletin.data.date)}</time></p>
+                <p class="card-tile__meta">예배일 <time datetime={dateTimeAttr(bulletin)}>{formatKoreanDate(displayDate(bulletin))}</time></p>
                 <div class="this-week__actions">
-                  {pdf && <a class="btn btn-primary btn-sm" href={fileUrl(pdf.file)} target="_blank" rel="noopener"><Emoji name="doc" size={18} /> 주보 보기 (PDF)</a>}
+                  {pdf && <a class="btn btn-primary btn-sm" href={fileUrl(pdf.file)} target="_blank" rel="noopener"><Icon name="file-text" size={18} /> 주보 보기 (PDF)<span class="sr-only"> (새 창)</span></a>}
                   <a class="btn btn-link btn-sm" href="/media/bulletins">지난 주보</a>
                 </div>
               </>
@@ -59,7 +59,7 @@ const st = sermon ? titleParts(sermon) : undefined;
               <>
                 <h3 class="card-tile__title h5"><a href={`/media/resources/${slugOf(resource)}`}>{titleParts(resource).title}</a></h3>
                 <p class="card-tile__text">{excerptOf(resource, 120)}</p>
-                <p class="card-tile__meta"><time datetime={isoDate(resource.data.date)}>{formatKoreanDate(resource.data.date)}</time> · <a href="/media/resources">자료실</a></p>
+                <p class="card-tile__meta">모임일 <time datetime={dateTimeAttr(resource)}>{formatKoreanDate(displayDate(resource))}</time> · <a href="/media/resources">자료실</a></p>
               </>
             ) : (
               <p class="text-muted mb-0">등록된 자료가 없습니다.</p>

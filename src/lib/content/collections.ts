@@ -134,7 +134,7 @@ export const COLLECTIONS: Collection[] = [
   ...PAGE_SECTIONS.map<Collection>((s) => ({
     key: pagesCollectionKey(s.key), label: `페이지 · ${s.label}`, group: '페이지', kind: 'folder', folder: `src/content/pages/${s.key}`, urlPrefix: `/${s.key}`,
     fields: pageFields, body: 'raw', sortBy: 'order', schema: pageSchema,
-    hint: '페이지 본문은 Bootstrap 클래스가 들어간 HTML 이라 직접 편집 방식입니다. 새 페이지를 만들면 메뉴에 자동으로 들어갑니다.',
+    hint: '기존 레이아웃을 유지하며 문장·링크·사진을 편집할 수 있습니다. 새 페이지는 메뉴에 자동으로 표시됩니다.',
   })),
   {
     key: 'pages_misc', label: '페이지 · 기타 (처음 오셨나요, 헌금, 정책)', group: '페이지', kind: 'folder', folder: 'src/content/pages', rootOnly: true, urlPrefix: '',
@@ -187,6 +187,11 @@ export const COLLECTIONS: Collection[] = [
         { name: 'image', label: '포스터 이미지', widget: 'image', required: true, hint: '권장 1600×500' },
         { name: 'alt', label: '포스터 설명 (대체 텍스트)', widget: 'string', required: true },
         { name: 'title', label: '제목', widget: 'string' },
+        { name: 'description', label: '안내 내용', widget: 'text', hint: '포스터를 확대하지 않아도 알 수 있도록 핵심 정보를 적어 주세요' },
+        { name: 'time', label: '일시', widget: 'string' },
+        { name: 'place', label: '장소', widget: 'string' },
+        { name: 'actionLabel', label: '버튼 글자', widget: 'string', placeholder: '예: 신청하기 / 자세히 보기' },
+        { name: 'reviewedAt', label: '운영 정보 확인일', widget: 'date', hint: '현재 안내가 맞는지 담당자가 확인한 날짜를 입력하세요' },
         { name: 'href', label: '누르면 이동할 주소', widget: 'string', hint: '비우면 포스터 원본 이미지를 새 창으로 엽니다' },
         { name: 'until', label: '표시 마감일', widget: 'date', hint: '이 날짜까지만 보이고 자동으로 사라집니다. 비우면 계속 표시' },
       ] },

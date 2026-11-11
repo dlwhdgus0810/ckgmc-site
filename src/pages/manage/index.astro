@@ -2,7 +2,6 @@
 /** 관리자 대시보드: 요약 숫자, 승인 대기 회원(바로 승인), 최근 보고서 */
 export const prerender = false;
 import MemberLayout from '../../layouts/MemberLayout.astro';
-import Icon from '../../components/Icon.astro';
 import { dashboardCounts, listCareReports, listCellReports } from '../../lib/reports';
 import { findUserById, listPendingUsers, updateUser } from '../../lib/auth/users';
 import { formInt, formStr, formatLocal, setFlash, todayLocal } from '../../lib/http';
@@ -23,6 +22,16 @@ const month = todayLocal().slice(0, 7);
 const [counts, pending, cells, cares] = await Promise.all([dashboardCounts(month), listPendingUsers(10), listCellReports({}, 5), listCareReports({}, 5)]);
 ---
 <MemberLayout title="관리자 대시보드" subtitle="Dashboard" area="manage">
+  <section aria-labelledby="quick-actions">
+    <h2 id="quick-actions" class="h5">자주 하는 작업</h2>
+    <div class="admin-quick-actions">
+      <a class="btn btn-primary" href="/manage/content/bulletins/edit">주보 올리기</a>
+      <a class="btn btn-outline-primary" href="/manage/content/stories/edit">교회 이야기 쓰기</a>
+      <a class="btn btn-outline-secondary" href="/manage/content">글·사진 관리</a>
+      <a class="btn btn-outline-primary" href="/manage/users?status=pending">승인 대기 {counts.pendingUsers}명</a>
+      <a class="btn btn-outline-secondary" href="/manage/stats">그룹 보고 현황</a>
+    </div>
+  </section>
   <div class="stat-grid">
     <div class="stat"><span class="stat__label">이달 D그룹 보고서</span><span class="stat__value">{counts.cellMonth}</span><span class="stat__sub">전체 {counts.cellTotal}건</span></div>
     <div class="stat"><span class="stat__label">이달 양육보고서</span><span class="stat__value">{counts.careMonth}</span><span class="stat__sub">전체 {counts.careTotal}건</span></div>
@@ -31,27 +40,19 @@ const [counts, pending, cells, cares] = await Promise.all([dashboardCounts(month
     <div class:list={['stat', { 'stat--warn': counts.pendingUsers > 0 }]}><span class="stat__label">승인 대기</span><span class="stat__value">{counts.pendingUsers}</span><span class="stat__sub"><a href="/manage/users?status=pending">대기 목록</a></span></div>
   </div>
 
-  <section class="cms-band mb-5" aria-labelledby="cms-heading">
-    <div>
-      <h2 id="cms-heading" class="h6 mb-1">글·사진 올리기는 콘텐츠 관리에서</h2>
-      <p class="mb-0 small text-muted">주보 PDF, 소그룹 나눔지, 영상 설교, 설교 시리즈, 부서 소식, 페이지, 예배 시간·메인 화면 설정을 이 로그인 그대로 편집합니다. 저장하면 2~3분 뒤 사이트에 반영됩니다.</p>
-    </div>
-    <a class="btn btn-primary" href="/manage/content"><Icon name="file-text" size={16} /> 콘텐츠 관리 열기</a>
-  </section>
-
-  {pending.length > 0 && (
+  {pending.length > 0 ? (
     <section class="mb-5" aria-labelledby="pending-heading">
       <h2 id="pending-heading" class="h5 mb-3">승인 대기 회원</h2>
       <div class="table-responsive">
-        <table class="table table-sm table-report">
-          <thead><tr><th>이름</th><th>이메일</th><th>가입일</th><th></th></tr></thead>
+        <table class="table table-sm table-report table-mobile-cards" role="table">
+          <thead><tr><th scope="col">이름</th><th scope="col">이메일</th><th scope="col">가입일</th><th scope="col"><span class="sr-only">작업</span></th></tr></thead>
           <tbody>
             {pending.map((u) => (
               <tr>
-                <td><a href={`/manage/users/${u.id}`}>{u.name}</a></td>
-                <td>{u.email}</td>
-                <td>{formatLocal(u.created_at)}</td>
-                <td class="text-right">
+                <td data-label="이름"><a href={`/manage/users/${u.id}`}>{u.name}</a></td>
+                <td data-label="이메일">{u.email}</td>
+                <td data-label="가입일">{formatLocal(u.created_at)}</td>
+                <td data-label="작업" class="text-right">
                   <form method="post" class="d-inline">
                     <input type="hidden" name="action" value="approve" />
                     <input type="hidden" name="user_id" value={u.id} />
@@ -65,7 +66,7 @@ const [counts, pending, cells, cares] = await Promise.all([dashboardCounts(month
       </div>
       <p class="small text-muted">모르는 사람이면 승인하지 말고 회원 관리에서 비활성화하세요.</p>
     </section>
-  )}
+  ) : <p class="empty-state mb-4">현재 승인 대기 중인 회원이 없습니다. <a href="/manage/users">전체 회원 보기</a></p>}
 
   <div class="row">
     <div class="col-lg-6 mb-4">

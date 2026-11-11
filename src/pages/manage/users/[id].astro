@@ -3,6 +3,7 @@
 export const prerender = false;
 import MemberLayout from '../../../layouts/MemberLayout.astro';
 import NotFound from '../../../components/members/NotFound.astro';
+import PasswordInput from '../../../components/members/PasswordInput.astro';
 import StatusBadge from '../../../components/members/StatusBadge.astro';
 import { deleteUser, getUserDetail, updateUser } from '../../../lib/auth/users';
 import { hashPassword, passwordProblem } from '../../../lib/auth/password';
@@ -15,6 +16,7 @@ const target = Number.isInteger(id) ? await getUserDetail(id) : null;
 if (!target) Astro.response.status = 404;
 const isSelf = target?.id === me.id;
 let error: string | null = null;
+const values = { name: target?.name ?? '', role: target?.role ?? 'member', status: target?.status ?? 'active' };
 
 if (target && Astro.request.method === 'POST') {
   const fd = await Astro.request.formData();
@@ -24,6 +26,7 @@ if (target && Astro.request.method === 'POST') {
     const role = (formStr(fd, 'role', 10) === 'admin' ? 'admin' : 'member') as Role;
     const statusRaw = formStr(fd, 'status', 10);
     const status = ((['pending', 'active', 'disabled'] as const).find((s) => s === statusRaw) ?? target.status) as Status;
+    Object.assign(values, { name, role, status });
     if (!name) error = '이름을 입력해 주세요.';
     else if (isSelf && (role !== 'admin' || status !== 'active')) error = '자기 자신의 관리자 권한이나 활성 상태는 바꿀 수 없습니다.';
     else {
@@ -73,16 +76,16 @@ const canDelete = !!target && !isSelf && target.cell_count === 0 && target.care_
         <input type="hidden" name="action" value="save" />
         <h2 class="h5 mb-3">정보 수정</h2>
         <div class="form-row">
-          <div class="form-group col-md-4"><label for="name">이름</label><input id="name" name="name" class="form-control" value={target.name} required /></div>
+          <div class="form-group col-md-4"><label for="name">이름</label><input id="name" name="name" class="form-control" value={values.name} required /></div>
           <div class="form-group col-md-4"><label for="role">권한</label>
-            <select id="role" name="role" class="form-control" disabled={isSelf}><option value="member" selected={target.role === 'member'}>교인</option><option value="admin" selected={target.role === 'admin'}>관리자</option></select>
+            <select id="role" name="role" class="form-control" disabled={isSelf}><option value="member" selected={values.role === 'member'}>교인</option><option value="admin" selected={values.role === 'admin'}>관리자</option></select>
             {isSelf && <input type="hidden" name="role" value="admin" />}
           </div>
           <div class="form-group col-md-4"><label for="status">상태</label>
             <select id="status" name="status" class="form-control" disabled={isSelf}>
-              <option value="pending" selected={target.status === 'pending'}>승인 대기</option>
-              <option value="active" selected={target.status === 'active'}>활성</option>
-              <option value="disabled" selected={target.status === 'disabled'}>비활성 (로그인 불가)</option>
+              <option value="pending" selected={values.status === 'pending'}>승인 대기</option>
+              <option value="active" selected={values.status === 'active'}>활성</option>
+              <option value="disabled" selected={values.status === 'disabled'}>비활성 (로그인 불가)</option>
             </select>
             {isSelf && <input type="hidden" name="status" value="active" />}
           </div>
@@ -95,7 +98,7 @@ const canDelete = !!target && !isSelf && target.cell_count === 0 && target.care_
           <form method="post" novalidate>
             <input type="hidden" name="action" value="password" />
             <h2 class="h6">비밀번호 재설정</h2>
-            <div class="form-group"><input name="password" type="text" class="form-control" placeholder="새 비밀번호 (8자 이상)" autocomplete="off" required minlength="8" /></div>
+            <div class="form-group"><PasswordInput id="reset-password" name="password" label="새 비밀번호" autocomplete="new-password" required minlength={8} copy help="8자 이상 입력한 뒤 재설정하세요. 본인에게 새 비밀번호를 직접 전달해 주세요." /></div>
             <button type="submit" class="btn btn-outline-primary btn-sm">재설정</button>
           </form>
         </div>

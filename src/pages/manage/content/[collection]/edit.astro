@@ -14,6 +14,9 @@ import { recordChange } from '../../../../lib/content/changes';
 import { formStr, setFlash, todayLocal } from '../../../../lib/http';
 
 const user = Astro.locals.user!;
+const savedDraft = Astro.cookies.get('ck_content_saved')?.value;
+const clearDraft = savedDraft?.startsWith(`content:${user.id}:`) ? savedDraft : null;
+if (savedDraft) Astro.cookies.delete('ck_content_saved', { path: '/manage/content' });
 const col = getCollection(Astro.params.collection);
 if (!col) Astro.response.status = 404;
 
@@ -109,6 +112,7 @@ if (col && store && Astro.request.method === 'POST') {
         const { sha: commitSha } = await store.commit({ put: [...ctx.puts, { path, base64: utf8ToBase64(text) }], delete: [] }, message, author);
         await recordChange({ collection: col.key, path, title, action: isNew ? 'create' : 'update', userId: user.id, commitSha });
         for (const up of ctx.uploaded) await recordChange({ collection: col.key, path: up, title: up.split('/').pop() ?? up, action: 'upload', userId: user.id, commitSha });
+        Astro.cookies.set('ck_content_saved', `content:${user.id}:${col.key}:${isNew ? 'new' : formPath}`, { path: '/manage/content', httpOnly: true, sameSite: 'lax', secure: Astro.url.protocol === 'https:', maxAge: 120 });
         setFlash(Astro.cookies, 'success', `${isNew ? '만들었습니다' : '저장했습니다'}. 2~3분 뒤 사이트에 반영됩니다.${ctx.uploaded.length ? ` (파일 ${ctx.uploaded.length}개 포함)` : ''}`);
         return Astro.redirect(col.kind === 'json' ? `/manage/content/${col.key}/edit` : listHref, 303);
       }
@@ -121,11 +125,12 @@ if (col && store && Astro.request.method === 'POST') {
 const heading = !col ? '콘텐츠' : col.kind === 'json' ? col.label : path ? `${col.label} · 편집` : `${col.label} · 새 글`;
 ---
 <MemberLayout title={heading} subtitle="Content" area="manage">
+  {clearDraft && <span hidden data-draft-clear={clearDraft}></span>}
   {!col || loadFailed || (requestedPath && !path) ? <NotFound back={listHref} backLabel="목록으로" /> : (
     <>
       {storeError && <div class="alert alert-warning" role="alert"><strong>저장소가 연결되지 않아 편집할 수 없습니다.</strong> {storeError}</div>}
       {!storeError && (
-        <ContentForm collection={col} values={values} body={body} path={path} sha={sha} errors={errors} backHref={listHref} previewUrl={path && col.kind === 'folder' ? urlForPath(col, path) : null} />
+        <ContentForm userId={user.id} collection={col} values={values} body={body} path={path} sha={sha} errors={errors} backHref={listHref} previewUrl={path && col.kind === 'folder' ? urlForPath(col, path) : null} />
       )}
     </>
   )}

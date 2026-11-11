@@ -46,19 +46,19 @@ const csvHref = (() => { const u = new URL(Astro.url); u.searchParams.set('forma
   <p class="text-muted small">총 {total}건</p>
   {rows.length === 0 ? <p class="text-muted">조건에 맞는 보고서가 없습니다.</p> : (
     <div class="table-responsive">
-      <table class="table table-sm table-report">
-        <thead><tr><th>양육 날짜</th><th>부서</th><th>바나바</th><th>양육 대상</th><th class="num">주차</th><th>지난주 출석</th><th class="num">답글</th><th>제출일</th></tr></thead>
+      <table class="table table-sm table-report table-mobile-cards" role="table">
+        <thead><tr><th scope="col">양육 날짜</th><th scope="col">부서</th><th scope="col">바나바</th><th scope="col">양육 대상</th><th scope="col" class="num">주차</th><th scope="col">지난주 출석</th><th scope="col" class="num">답글</th><th scope="col">제출일</th></tr></thead>
         <tbody>
           {rows.map((r) => (
             <tr>
-              <td><a href={`/members/care-reports/${r.id}`}>{r.care_date}</a></td>
-              <td>{r.department}</td>
-              <td>{r.barnabas_name}</td>
-              <td>{r.disciple_name}</td>
-              <td class="num">{r.week}</td>
-              <td>{r.attended_last_sunday === 1 ? 'Y' : r.attended_last_sunday === 0 ? 'N' : '–'}</td>
-              <td class="num">{r.comment_count > 0 ? <span class="badge badge-primary">{r.comment_count}</span> : '–'}</td>
-              <td><time datetime={r.created_at}>{formatLocal(r.created_at, false)}</time></td>
+              <td data-label="양육 날짜"><a href={`/members/care-reports/${r.id}`}>{r.care_date}</a></td>
+              <td data-label="부서">{r.department}</td>
+              <td data-label="바나바">{r.barnabas_name}</td>
+              <td data-label="양육 대상">{r.disciple_name}</td>
+              <td data-label="주차" class="num">{r.week}</td>
+              <td data-label="지난주 출석">{r.attended_last_sunday === 1 ? 'Y' : r.attended_last_sunday === 0 ? 'N' : '–'}</td>
+              <td data-label="답글" class="num">{r.comment_count > 0 ? <span class="badge badge-primary">{r.comment_count}</span> : '–'}</td>
+              <td data-label="제출일"><time datetime={r.created_at}>{formatLocal(r.created_at, false)}</time></td>
             </tr>
           ))}
         </tbody>

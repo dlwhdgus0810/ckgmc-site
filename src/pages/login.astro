@@ -8,6 +8,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PageBanner from '../components/PageBanner.astro';
 import Flash from '../components/members/Flash.astro';
 import Icon from '../components/Icon.astro';
+import PasswordInput from '../components/members/PasswordInput.astro';
+import { site, telHref } from '../data/site';
 import { enabledProviders } from '../lib/env';
 import { PROVIDERS } from '../lib/auth/oauth';
 import { createSession } from '../lib/auth/session';
@@ -76,7 +78,7 @@ const formAction = Astro.url.pathname + Astro.url.search;
     <main id="main" tabindex="-1">
       <div class="login-card">
         <Flash />
-        {error && <div class="alert alert-danger" role="alert">{error}</div>}
+        {error && <div class="alert alert-danger" role="alert" tabindex="-1" data-login-error>{error}</div>}
         <p class="text-muted small mb-4">D그룹 리더 보고서·일대일 양육보고서 등 교인 전용 기능은 로그인 후 이용할 수 있습니다.</p>
 
         {providers.length > 0 && (
@@ -95,29 +97,31 @@ const formAction = Astro.url.pathname + Astro.url.search;
           </>
         )}
 
-        <form method="post" action={formAction} novalidate>
+        <form method="post" action={formAction}>
           <input type="hidden" name="kind" value="password" />
           <div class="form-group">
-            <label for="login-email">이메일</label>
+            <label for="login-email">이메일 <span class="small text-muted">(필수)</span></label>
             <input id="login-email" class="form-control" type="email" name="email" value={emailValue} autocomplete="username" required />
           </div>
-          <div class="form-group">
-            <label for="login-password">비밀번호</label>
-            <input id="login-password" class="form-control" type="password" name="password" autocomplete="current-password" required />
-          </div>
+          <PasswordInput id="login-password" name="password" label="비밀번호" autocomplete="current-password" />
           <button type="submit" class="btn btn-primary btn-block">로그인</button>
         </form>
-        <p class="small text-muted mt-3 mb-0">
-          비밀번호를 잊으셨거나 계정이 없으면 <a href="/about/contact" style="text-decoration: underline;">교회 사무실(관리자)</a>에 문의해 주세요.
-        </p>
+        <details class="login-help mt-4">
+          <summary>계정 신청·비밀번호 재설정 안내</summary>
+          <div class="small mt-3">
+            <p><strong>계정이 없으신가요?</strong> 교회 사무실에 교인 전용 계정을 요청해 주세요. 관리자에게 받은 이메일과 초기 비밀번호로 로그인한 뒤, 마이페이지에서 비밀번호를 변경할 수 있습니다.</p>
+            <p><strong>비밀번호를 잊으셨나요?</strong> 교회 사무실에서 본인 확인 후 비밀번호를 재설정해 드립니다. 이전에 소셜 로그인을 이용했다면 같은 소셜 계정으로 로그인해 주세요.</p>
+            <p class="mb-0"><a href={telHref}>사무실 전화 {site.phone}</a><br /><a href={`mailto:${site.email}`}>이메일 {site.email}</a> · <a href="/about/contact">문의 안내</a></p>
+          </div>
+        </details>
 
         {isDev && (
           <form method="post" action={formAction} class="dev-login">
             <input type="hidden" name="kind" value="dev" />
             <p class="small font-weight-bold text-danger mb-2">개발용 로그인 (astro dev 에서만 보임)</p>
             <div class="form-row">
-              <div class="form-group col-7"><input class="form-control form-control-sm" type="email" name="email" placeholder="이메일" required /></div>
-              <div class="form-group col-5"><input class="form-control form-control-sm" type="text" name="name" placeholder="이름 (새 계정일 때)" /></div>
+              <div class="form-group col-7"><label for="dev-email" class="sr-only">개발용 이메일</label><input id="dev-email" class="form-control form-control-sm" type="email" name="email" placeholder="이메일" required /></div>
+              <div class="form-group col-5"><label for="dev-name" class="sr-only">개발용 새 계정 이름</label><input id="dev-name" class="form-control form-control-sm" type="text" name="name" placeholder="이름 (새 계정일 때)" /></div>
             </div>
             <button type="submit" class="btn btn-outline-danger btn-sm">이 이메일로 바로 로그인</button>
             <p class="small text-muted mt-2 mb-0">.dev.vars 의 ADMIN_EMAILS 에 있는 이메일은 관리자가 됩니다.</p>
@@ -127,3 +131,11 @@ const formAction = Astro.url.pathname + Astro.url.search;
     </main>
   </div>
 </BaseLayout>
+
+<style>
+  .login-help summary { cursor: pointer; padding: .75rem 0; font-weight: 600; }
+  .login-help a { overflow-wrap: anywhere; text-decoration: underline; }
+</style>
+<script>
+  document.querySelector<HTMLElement>('[data-login-error]')?.focus();
+</script>

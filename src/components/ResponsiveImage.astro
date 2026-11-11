@@ -1,0 +1,10 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+interface Props extends HTMLAttributes<'img'> { src: string; alt: string; sizes: string }
+const { src, alt, sizes, width, height, ...rest } = Astro.props;
+const variant = __RESPONSIVE_IMAGES__[src];
+---
+<picture>
+  {variant && <source type="image/webp" srcset={variant.srcset} sizes={sizes} />}
+  <img src={src} alt={alt} width={width ?? variant?.width} height={height ?? variant?.height} {...rest} />
+</picture>

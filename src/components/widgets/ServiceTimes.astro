@@ -1,20 +1,75 @@
 ---
-/** 예배 시간 목록 (site.json 의 serviceTimes) — 메인 화면·처음 오셨나요 페이지·푸터에서 사용 */
-import { site } from '../../data/site';
+/** 예배 시간은 site.json 한 곳에서 관리합니다. 방문 안내에서는 주일만 먼저 보여줍니다. */
+import { site, liveUrl, mapsDirectionsUrl, telHref } from '../../data/site';
 interface Props { compact?: boolean }
 const { compact = false } = Astro.props;
+const path = Astro.url.pathname.replace(/\/$/, '');
+const english = path === '/visit-en';
+const visitor = path === '/welcome' || english;
+const times = visitor ? site.serviceTimes.filter((s) => /주일|sunday|english/i.test(s.name + ' ' + s.time)) : site.serviceTimes;
+const englishName = (name: string) => /english/i.test(name) ? 'English worship' : /주일/.test(name) ? 'Korean worship' : name;
+const englishTime = (time: string) => time.replace(/주일 오전 (\d{1,2}:\d{2})\s*·\s*(\d{1,2}:\d{2})/, 'Sunday $1 AM · $2 AM');
+const englishPlace = (place: string) => place
+  .replace('1부 도서관 · 2부 본당', 'First service: library · Second service: sanctuary')
+  .replace('1층 친교실 (Fellowship Hall)', 'Fellowship Hall, first floor');
 ---
-<div class:list={['service-times row', { 'service-times--compact': compact }]}>
-  {site.serviceTimes.map((s) => (
-    <div class="col-sm-6 col-lg-3 mb-3">
+<section class:list={['service-overview', { 'service-overview--visit': visitor }]} aria-labelledby="visit-services" lang={english ? 'en' : undefined}>
+  <div class="service-overview__heading">
+    <h2 id="visit-services">{visitor ? (english ? 'Your Sunday visit, at a glance' : '주일 방문 한눈에 보기') : '예배 시간과 참여 안내'}</h2>
+    {visitor && <a href={english ? '/welcome' : '/visit-en'} lang={english ? 'ko' : 'en'}>{english ? '한국어 안내' : 'English visitor guide'}</a>}
+  </div>
+  {visitor && (
+    <nav class="visit-shortcuts" aria-label={english ? 'Plan your visit' : '방문 안내 바로가기'}>
+      <a href="#visit-parking">{english ? 'Directions & parking' : '길찾기·주차'}</a>
+      <a href="#visit-children">{english ? 'Kids & youth' : '자녀와 함께'}</a>
+      <a href="#visit-next">{english ? 'What to expect' : '도착 후 안내'}</a>
+      <a href="#visit-contact">{english ? 'Questions & contact' : '방문 문의'}</a>
+    </nav>
+  )}
+  <div class:list={['service-times row', { 'service-times--compact': compact || visitor }]}>
+  {times.map((s) => (
+    <div class="col-md-6 mb-3">
       <div class="card-tile card-tile--flat h-100">
         <div class="card-tile__body">
-          <span class="card-tile__eyebrow">{s.name}</span>
-          <strong class="service-times__time">{s.time}</strong>
-          {s.place && <span class="text-muted">{s.place}</span>}
+          <h3 class="service-overview__name">{english ? englishName(s.name) : s.name}</h3>
+          <strong class="service-times__time">{english ? englishTime(s.time) : s.time}</strong>
+          {s.place && <span class="text-muted">{english ? englishPlace(s.place) : s.place}</span>}
           {s.note && <small class="text-muted">{s.note}</small>}
+          {!visitor && <div class="service-overview__actions">
+            {/youtube/i.test(s.place) && <a class="btn btn-primary btn-sm" href={liveUrl} target="_blank" rel="noopener">YouTube로 예배 참여 <span class="sr-only">(새 창)</span></a>}
+            {/zoom/i.test(s.place) && <a class="btn btn-primary btn-sm" href="https://zoom.us/my/ckgmc" target="_blank" rel="noopener">Zoom으로 참여 <span class="sr-only">(새 창)</span></a>}
+            {/english/i.test(s.name) && <a class="btn btn-primary btn-sm" href="/visit-en">English visitor guide</a>}
+            <a href="/about/directions" class="btn btn-outline-primary btn-sm">현장 길찾기</a>
+          </div>}
         </div>
       </div>
     </div>
   ))}
-</div>
+  </div>
+  {visitor && <div class="visit-arrival">
+    <p><strong>{english ? 'Find us' : '주소'}</strong> {site.address}</p>
+    <div class="service-overview__actions">
+      <a class="btn btn-primary" href={mapsDirectionsUrl} target="_blank" rel="noopener">{english ? 'Get directions' : '길찾기'}<span class="sr-only">{english ? ' (new tab)' : ' (새 창)'}</span></a>
+      <a class="btn btn-outline-primary" href={telHref}>{english ? 'Call the church' : '교회에 전화하기'}</a>
+      <a href="/about/services">{english ? 'All worship times (Korean)' : '평일 예배·전체 시간 보기'}</a>
+    </div>
+  </div>}
+</section>
+<style>
+  .service-overview { margin-bottom: 2.5rem; }
+  .service-overview__heading { display:flex; align-items:baseline; justify-content:space-between; gap:.75rem; flex-wrap:wrap; margin-bottom:.75rem; }
+  .service-overview__heading h2 { font-size:1.375rem; margin:0; }
+  .service-overview__heading a { font-weight:600; text-decoration:underline; }
+  .visit-shortcuts { display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:1rem; }
+  .visit-shortcuts a { display:inline-flex; align-items:center; min-height:44px; padding:.4rem .75rem; border:1px solid #cdd9f0; border-radius:2rem; font-weight:600; }
+  .service-overview__name { font-size:1rem; margin:0 0 .4rem; }
+  .service-overview__actions { display:flex; align-items:center; flex-wrap:wrap; gap:.65rem; margin-top:1rem; }
+  .service-overview--visit .card-tile__body { padding:1rem; }
+  .service-overview--visit .service-times__time { font-size:1.0625rem; }
+  .visit-arrival { padding:.5rem 0; }
+  .visit-arrival p { margin-bottom:0; }
+  @media (max-width:575px) {
+    .service-overview--visit .service-times > div { margin-bottom:.5rem !important; }
+    .service-overview--visit .card-tile__body { padding:.8rem 1rem; }
+  }
+</style>

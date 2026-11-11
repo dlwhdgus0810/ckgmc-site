@@ -1,81 +1,96 @@
 ---
-/** 마이페이지: 내 정보, 내가 낸 보고서와 답글 수 */
+/** 마이페이지: 내 정보, 기간별 보고서 전체 목록과 답변 상태 */
 export const prerender = false;
 import MemberLayout from '../../layouts/MemberLayout.astro';
 import StatusBadge from '../../components/members/StatusBadge.astro';
+import ReportPager from '../../components/members/ReportPager.astro';
 import Icon from '../../components/Icon.astro';
-import { listCareReports, listCellReports } from '../../lib/reports';
-import { formatLocal } from '../../lib/http';
+import { countCareReports, countCellReports, listCareReports, listCellReports, parseAbsentees } from '../../lib/reports';
+import { formatLocal, isValidDate, paging } from '../../lib/http';
 import { isAdmin } from '../../lib/auth/session';
 
 const user = Astro.locals.user!;
 const active = user.status === 'active';
-const [cells, cares] = active ? await Promise.all([listCellReports({ userId: user.id }, 30), listCareReports({ userId: user.id }, 30)]) : [[], []];
+const rawFrom = Astro.url.searchParams.get('from') ?? '';
+const rawTo = Astro.url.searchParams.get('to') ?? '';
+const from = isValidDate(rawFrom) ? rawFrom : '';
+const to = isValidDate(rawTo) ? rawTo : '';
+const invalidPeriod = (rawFrom && !from) || (rawTo && !to) || (from && to && from > to);
+const filter = { userId: user.id, ...(invalidPeriod ? {} : { from, to }) };
+const [cellTotal, careTotal, cellAll, careAll] = active ? await Promise.all([
+  countCellReports(filter), countCareReports(filter), countCellReports({ userId: user.id }), countCareReports({ userId: user.id }),
+]) : [0, 0, 0, 0];
+const pageNumber = (name: string) => String(Math.max(1, Math.floor(Number(Astro.url.searchParams.get(name)) || 1)));
+const cellPaging = paging(pageNumber('cell_page'), cellTotal);
+const carePaging = paging(pageNumber('care_page'), careTotal);
+const [cells, cares] = active ? await Promise.all([
+  listCellReports(filter, cellPaging.perPage, cellPaging.offset), listCareReports(filter, carePaging.perPage, carePaging.offset),
+]) : [[], []];
+const range = (p: typeof cellPaging) => p.total ? `${p.offset + 1}–${Math.min(p.offset + p.perPage, p.total)}건` : '0건';
 ---
 <MemberLayout title="마이페이지" subtitle="My Page">
-  {user.status === 'pending' && (
-    <div class="alert alert-warning" role="status">
-      <strong>승인 대기 중입니다.</strong> 관리자가 교인으로 확인하면 D그룹 리더 보고서와 일대일 양육보고서를 작성할 수 있습니다.
-    </div>
-  )}
-
-  <div class="report-detail mb-4">
+  {user.status === 'pending' && <div class="alert alert-warning" role="status"><strong>승인 대기 중입니다.</strong> 관리자가 교인으로 확인하면 보고서를 작성할 수 있습니다. <a href="/about/contact">승인·계정 문의</a></div>}
+  <dl class="report-detail mb-4">
     <dt>이름</dt><dd>{user.name}</dd>
     <dt>이메일</dt><dd>{user.email}</dd>
     <dt>권한 · 상태</dt><dd><StatusBadge role={user.role} status={user.status} /></dd>
-  </div>
-
-  {active && (
+  </dl>
+  {active && <>
     <p class="d-flex flex-wrap" style="gap:.5rem">
       <a class="btn btn-primary" href="/members/cell-report"><Icon name="file-text" size={18} /> D그룹 리더 보고서 작성</a>
       <a class="btn btn-outline-primary" href="/members/care-report"><Icon name="heart" size={18} /> 일대일 양육보고서 작성</a>
       {isAdmin(user) && <a class="btn btn-outline-secondary" href="/manage">관리자 대시보드</a>}
     </p>
-  )}
-
-  {active && (
-    <>
-      <h2 class="h5 mt-5 mb-3">내 D그룹 리더 보고서 <span class="text-muted">({cells.length})</span></h2>
-      {cells.length === 0 ? <p class="text-muted">아직 제출한 보고서가 없습니다.</p> : (
-        <div class="table-responsive">
-          <table class="table table-sm table-report">
-            <thead><tr><th>모임 날짜</th><th>D그룹</th><th class="num">출석</th><th class="num">결석</th><th class="num">답글</th><th>제출일</th></tr></thead>
-            <tbody>
-              {cells.map((r) => (
-                <tr>
-                  <td><a href={`/members/cell-reports/${r.id}`}>{r.meeting_date}</a></td>
-                  <td>{r.group_name}</td>
-                  <td class="num">{r.attendance}</td>
-                  <td class="num">{JSON.parse(r.absentees || '[]').length}</td>
-                  <td class="num">{r.comment_count > 0 ? <span class="badge badge-primary">{r.comment_count}</span> : '–'}</td>
-                  <td><time datetime={r.created_at}>{formatLocal(r.created_at)}</time></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <h2 class="h5 mt-5 mb-3">내 일대일 양육보고서 <span class="text-muted">({cares.length})</span></h2>
-      {cares.length === 0 ? <p class="text-muted">아직 제출한 보고서가 없습니다.</p> : (
-        <div class="table-responsive">
-          <table class="table table-sm table-report">
-            <thead><tr><th>양육 날짜</th><th>부서</th><th>양육 대상</th><th class="num">주차</th><th class="num">답글</th><th>제출일</th></tr></thead>
-            <tbody>
-              {cares.map((r) => (
-                <tr>
-                  <td><a href={`/members/care-reports/${r.id}`}>{r.care_date}</a></td>
-                  <td>{r.department}</td>
-                  <td>{r.disciple_name}</td>
-                  <td class="num">{r.week}주차</td>
-                  <td class="num">{r.comment_count > 0 ? <span class="badge badge-primary">{r.comment_count}</span> : '–'}</td>
-                  <td><time datetime={r.created_at}>{formatLocal(r.created_at)}</time></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </>
-  )}
+    <form method="get" class="report-period mt-4" aria-label="내 보고서 기간 검색">
+      <div><label for="report-from">시작일</label><input id="report-from" class="form-control" type="date" name="from" value={from} /></div>
+      <div><label for="report-to">종료일</label><input id="report-to" class="form-control" type="date" name="to" value={to} /></div>
+      <button type="submit" class="btn btn-primary">기간 적용</button>
+      <a href="/members" class="btn btn-outline-secondary">전체 기간</a>
+    </form>
+    {invalidPeriod && <p class="alert alert-warning mt-2" role="alert">날짜 범위를 확인해 주세요. 시작일은 종료일보다 늦을 수 없습니다. 전체 기간을 표시합니다.</p>}
+    <p class="small text-muted mt-2" data-reply-user={user.id}>새 답변 표시는 이 브라우저에서 확인한 기록을 기준으로 합니다.</p>
+    <section aria-labelledby="cell-reports-heading" id="cell-reports" class="mt-4">
+      <h2 id="cell-reports-heading" class="h5">내 D그룹 리더 보고서</h2>
+      <p class="small text-muted">전체 {cellAll}건 · 선택 기간 {cellTotal}건 · {range(cellPaging)} 표시</p>
+      {cells.length === 0 ? <p class="report-empty">{cellAll ? '선택한 기간에 제출한 보고서가 없습니다. 기간을 변경하거나 전체 기간을 선택해 주세요.' : '아직 제출한 보고서가 없습니다. 위의 작성 버튼으로 첫 보고서를 제출할 수 있습니다.'}</p> : <div class="table-responsive">
+        <table class="table table-sm table-report table-mobile-cards">
+          <caption class="sr-only">내 D그룹 보고서 {range(cellPaging)}</caption>
+          <thead><tr><th scope="col">모임 날짜</th><th scope="col">D그룹</th><th scope="col">출석 / 결석</th><th scope="col">답글</th><th scope="col">제출일</th></tr></thead>
+          <tbody>{cells.map(r => <tr>
+            <td data-label="모임 날짜"><a href={`/members/cell-reports/${r.id}`}>{r.meeting_date}</a></td>
+            <td data-label="D그룹">{r.group_name}</td>
+            <td data-label="출석 / 결석">{r.attendance} / {parseAbsentees(r.absentees).length}명</td>
+            <td data-label="답글">{r.comment_count}개 <span class="badge badge-primary" hidden data-reply-marker={`cell:${r.id}`} data-latest-reply={r.latest_reply_id}>새 답변</span></td>
+            <td data-label="제출일"><time datetime={r.created_at}>{formatLocal(r.created_at)}</time></td>
+          </tr>)}</tbody>
+        </table>
+      </div>}
+      <ReportPager paging={cellPaging} param="cell_page" anchor="cell-reports" label="D그룹 보고서" />
+    </section>
+    <section aria-labelledby="care-reports-heading" id="care-reports" class="mt-5">
+      <h2 id="care-reports-heading" class="h5">내 일대일 양육보고서</h2>
+      <p class="small text-muted">전체 {careAll}건 · 선택 기간 {careTotal}건 · {range(carePaging)} 표시</p>
+      {cares.length === 0 ? <p class="report-empty">{careAll ? '선택한 기간에 제출한 보고서가 없습니다. 기간을 변경하거나 전체 기간을 선택해 주세요.' : '아직 제출한 양육보고서가 없습니다. 위의 작성 버튼으로 첫 보고서를 제출할 수 있습니다.'}</p> : <div class="table-responsive">
+        <table class="table table-sm table-report table-mobile-cards">
+          <caption class="sr-only">내 일대일 양육보고서 {range(carePaging)}</caption>
+          <thead><tr><th scope="col">양육 날짜</th><th scope="col">부서</th><th scope="col">양육 대상</th><th scope="col">주차</th><th scope="col">답글</th><th scope="col">제출일</th></tr></thead>
+          <tbody>{cares.map(r => <tr>
+            <td data-label="양육 날짜"><a href={`/members/care-reports/${r.id}`}>{r.care_date}</a></td>
+            <td data-label="부서">{r.department}</td><td data-label="양육 대상">{r.disciple_name}</td><td data-label="주차">{r.week}주차</td>
+            <td data-label="답글">{r.comment_count}개 <span class="badge badge-primary" hidden data-reply-marker={`care:${r.id}`} data-latest-reply={r.latest_reply_id}>새 답변</span></td>
+            <td data-label="제출일"><time datetime={r.created_at}>{formatLocal(r.created_at)}</time></td>
+          </tr>)}</tbody>
+        </table>
+      </div>}
+      <ReportPager paging={carePaging} param="care_page" anchor="care-reports" label="양육보고서" />
+    </section>
+  </>}
 </MemberLayout>
+<style>
+  .report-period { display:flex; flex-wrap:wrap; gap:.75rem; align-items:end; padding:1rem; background:#f4f6fa; border-radius:.5rem; }
+  .report-period > div { flex:1 1 10rem; }
+  .report-period label { display:block; }
+  .report-empty { padding:1rem; border:1px solid #cdd9f0; border-radius:.5rem; }
+  [data-reply-marker][hidden] { display:none; }
+</style>
+<script>import '../../scripts/report-replies';</script>

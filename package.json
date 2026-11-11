@@ -9,6 +9,8 @@
     "build": "wrangler types && astro build",
     "preview": "wrangler types && astro preview",
     "check": "wrangler types && astro check",
+    "test:ui": "node scripts/ui-regression.cjs && node scripts/content-regression.cjs",
+    "test:editor": "node scripts/editor-regression.cjs",
     "deploy": "npm run build && wrangler deploy",
     "cms-auth:deploy": "wrangler deploy --config cms-auth/wrangler.toml",
     "db:migrate:local": "wrangler d1 migrations apply ckgmc --local",
@@ -31,6 +33,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@astrojs/markdown-satteri": "^0.4.0",
+    "playwright": "^1.62.1",
     "sharp": "^0.35.4",
     "typescript": "^6.0.3",
     "wrangler": "^4.129.0"

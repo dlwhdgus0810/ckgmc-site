@@ -25,33 +25,45 @@ const ordered = newestFirst ? [...episodes].reverse() : episodes;
     <p class="card-tile__meta">{total}편 · {formatKoreanDate(series.data.updated ?? series.data.date)} 업데이트</p>
   </header>
 
-  <div id="yt-player" class="media-frame series__player" aria-live="polite">
-    <img class="series__poster" src={series.data.thumbnail} alt="" width="960" height="540" />
+  <div id="yt-player" class="media-frame series__player">
+    <img class="series__poster" src={series.data.thumbnail} alt="" width="960" height="540" onerror={"this.onerror=null;this.src='/images/thumbnail-default.jpg'"} />
     {total > 0 && <p class="series__hint">아래 목록에서 재생할 설교를 선택하세요</p>}
   </div>
 
+  <div class="series__controls" data-episode-controls hidden>
+    <p class="series__current" role="status" data-episode-current></p>
+    <div class="series__actions">
+      <button type="button" class="btn btn-outline-primary btn-sm" data-episode-prev>← 이전 회차</button>
+      <button type="button" class="btn btn-outline-primary btn-sm" data-episode-next>다음 회차 →</button>
+      <a class="btn btn-link btn-sm" data-episode-external target="_blank" rel="noopener">YouTube에서 보기 (새 창)</a>
+      <button type="button" class="btn btn-link btn-sm" data-episode-copy>이 회차 주소 복사</button>
+    </div>
+    <p class="small text-muted" data-episode-copy-status role="status"></p>
+  </div>
   {hasContent && <div class="series__content entry-content"><Content /></div>}
 
   {total === 0 ? (
     <p class="text-muted text-center">등록된 영상이 없습니다.</p>
   ) : (
     <>
-      {total > 5 && (
-        <p class="episode-tools">
+      <div class="episode-tools">
+        <div><label for="episode-search">시리즈 안에서 찾기</label><input id="episode-search" class="form-control" type="search" placeholder="제목·설교자·날짜" /></div>
+        {total > 5 && (
           <button type="button" class="btn btn-link btn-sm" data-episode-order>{newestFirst ? '1편부터 보기' : '최신 회차부터 보기'}</button>
-        </p>
-      )}
+        )}
+      </div>
+      <p role="status" class="small text-muted" data-episode-search-status></p>
       <ol class="episode-list" reversed={newestFirst} data-order={newestFirst ? 'newest' : 'oldest'}>
         {ordered.map((ep) => (
-          <li class="episode">
+          <li class="episode" value={ep.no}>
             <span class="episode__no" aria-hidden="true">{ep.no}</span>
             <span class="episode__title">
               <strong>{ep.name}</strong>
               {ep.info && <small>{ep.info}</small>}
             </span>
-            <button type="button" class="btn btn-outline-primary btn-sm" data-youtube-id={ep.youtube} data-title={ep.title} aria-pressed="false" aria-label={`${ep.no}편 재생: ${ep.name}`}>
+            <a class="btn btn-outline-primary btn-sm" href={`https://www.youtube.com/watch?v=${ep.youtube}`} data-youtube-id={ep.youtube} data-no={ep.no} data-title={ep.name} aria-label={`${ep.no}편 재생: ${ep.name}`}>
               <Emoji name="play" size={18} /> 재생
-            </button>
+            </a>
           </li>
         ))}
       </ol>
@@ -61,35 +73,5 @@ const ordered = newestFirst ? [...episodes].reverse() : episodes;
 <p class="text-center mt-4"><a href={base} class="btn btn-outline-primary">목록으로</a></p>
 
 <script>
-  const player = document.getElementById('yt-player');
-  const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('.episode [data-youtube-id]'));
-  buttons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.youtubeId;
-      if (!player || !id) return;
-      const iframe = document.createElement('iframe');
-      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
-      iframe.title = btn.dataset.title ?? '설교 영상';
-      iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
-      iframe.setAttribute('allowfullscreen', '');
-      player.replaceChildren(iframe);
-      buttons.forEach((b) => { b.setAttribute('aria-pressed', 'false'); b.closest('.episode')?.classList.remove('is-active'); });
-      btn.setAttribute('aria-pressed', 'true');
-      btn.closest('.episode')?.classList.add('is-active');
-      player.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    });
-  });
-
-  // 회차 순서 바꾸기 (최신 회차부터 ↔ 1편부터)
-  const list = document.querySelector<HTMLOListElement>('.episode-list');
-  const orderBtn = document.querySelector<HTMLButtonElement>('[data-episode-order]');
-  if (list && orderBtn) {
-    orderBtn.addEventListener('click', () => {
-      const newest = list.dataset.order !== 'newest';
-      for (const li of Array.from(list.children).reverse()) list.appendChild(li);
-      list.dataset.order = newest ? 'newest' : 'oldest';
-      list.reversed = newest;
-      orderBtn.textContent = newest ? '1편부터 보기' : '최신 회차부터 보기';
-    });
-  }
+  import '../scripts/series-player';
 </script>

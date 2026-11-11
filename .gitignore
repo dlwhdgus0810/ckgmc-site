@@ -9,3 +9,4 @@ npm-debug.log*
 .wrangler/
 .dev.vars
 worker-configuration.d.ts
+public/images/responsive/

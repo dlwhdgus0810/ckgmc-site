@@ -46,9 +46,9 @@ export interface CellReport {
   id: number; group_id: number; user_id: number; meeting_date: string; attendance: number;
   absentees: string; newcomers: string; mood_score: number | null; prep_score: number | null;
   reflection: string; visits: string; visit_requests: string; created_at: string;
-  group_name: string; reporter_name: string; reporter_email: string; comment_count: number;
+  group_name: string; reporter_name: string; reporter_email: string; comment_count: number; latest_reply_id: number;
 }
-export type CellReportInput = Omit<CellReport, 'id' | 'created_at' | 'group_name' | 'reporter_name' | 'reporter_email' | 'comment_count'>;
+export type CellReportInput = Omit<CellReport, 'id' | 'created_at' | 'group_name' | 'reporter_name' | 'reporter_email' | 'comment_count' | 'latest_reply_id'>;
 
 export function parseAbsentees(json: string): Absentee[] {
   try {
@@ -58,7 +58,8 @@ export function parseAbsentees(json: string): Absentee[] {
 }
 
 const CELL_SELECT = `SELECT r.*, g.name AS group_name, u.name AS reporter_name, u.email AS reporter_email,
-       (SELECT COUNT(*) FROM report_comments c WHERE c.report_type = 'cell' AND c.report_id = r.id) AS comment_count
+       (SELECT COUNT(*) FROM report_comments c WHERE c.report_type = 'cell' AND c.report_id = r.id) AS comment_count,
+       COALESCE((SELECT MAX(c.id) FROM report_comments c WHERE c.report_type = 'cell' AND c.report_id = r.id AND c.user_id != r.user_id), 0) AS latest_reply_id
   FROM cell_reports r JOIN groups g ON g.id = r.group_id JOIN users u ON u.id = r.user_id`;
 
 export async function createCellReport(d: CellReportInput): Promise<number> {
@@ -96,12 +97,13 @@ export async function listCellReports(f: CellFilter, limit: number, offset = 0):
 export interface CareReport {
   id: number; user_id: number; department: string; barnabas_name: string; disciple_name: string; care_date: string;
   week: number; curriculum: string; attended_last_sunday: number | null; response: string; prayer: string; notes: string; created_at: string;
-  reporter_name: string; reporter_email: string; comment_count: number;
+  reporter_name: string; reporter_email: string; comment_count: number; latest_reply_id: number;
 }
-export type CareReportInput = Omit<CareReport, 'id' | 'created_at' | 'reporter_name' | 'reporter_email' | 'comment_count'>;
+export type CareReportInput = Omit<CareReport, 'id' | 'created_at' | 'reporter_name' | 'reporter_email' | 'comment_count' | 'latest_reply_id'>;
 
 const CARE_SELECT = `SELECT r.*, u.name AS reporter_name, u.email AS reporter_email,
-       (SELECT COUNT(*) FROM report_comments c WHERE c.report_type = 'care' AND c.report_id = r.id) AS comment_count
+       (SELECT COUNT(*) FROM report_comments c WHERE c.report_type = 'care' AND c.report_id = r.id) AS comment_count,
+       COALESCE((SELECT MAX(c.id) FROM report_comments c WHERE c.report_type = 'care' AND c.report_id = r.id AND c.user_id != r.user_id), 0) AS latest_reply_id
   FROM care_reports r JOIN users u ON u.id = r.user_id`;
 
 export async function createCareReport(d: CareReportInput): Promise<number> {

@@ -19,39 +19,51 @@ const manageLinks = [
   { href: '/manage/stats', label: '그룹 통계' },
   { href: '/manage/users', label: '회원 관리' },
 ];
-/** 글·사진은 별도 관리 화면(Sveltia CMS, GitHub 로그인)에서 편집 */
 const cmsLink = { href: '/admin/', label: '개발자용 CMS (GitHub)' };
 const cur = (href: string) => (href === path || (href !== '/manage' && href !== '/members' && path.startsWith(href + '/')) ? 'page' : undefined);
+const inManage = path.startsWith('/manage');
+const currentMember = memberLinks.find((l) => cur(l.href))?.label ?? '내 보고서';
+const currentManage = manageLinks.find((l) => cur(l.href))?.label ?? '관리자';
 ---
 <nav class="section-nav member-nav" aria-label="교인 공간 메뉴">
-  <div class="section-nav__title">
-    <strong>교인 공간</strong>
-    <span>Members</span>
-  </div>
-  <ul class="section-nav__list">
-    {memberLinks.map((l) => <li><a href={l.href} aria-current={cur(l.href)}>{l.label}</a></li>)}
-  </ul>
-  {isAdmin(user) && (
-    <>
-      <div class="section-nav__title member-nav__title--admin">
-        <strong>관리자</strong>
-        <span>Admin</span>
-      </div>
-      <ul class="section-nav__list">
-        {manageLinks.map((l) => <li><a href={l.href} aria-current={cur(l.href)}>{l.label}</a></li>)}
-        <li><a href={cmsLink.href} class="member-nav__external" target="_blank" rel="noopener">{cmsLink.label} <Icon name="external" size={14} /></a></li>
-      </ul>
-    </>
-  )}
   {user && (
     <div class="member-nav__user">
       <div class="member-nav__who">
         {user.avatar_url ? <img src={user.avatar_url} alt="" width="32" height="32" /> : <span class="member-nav__initial" aria-hidden="true">{user.name.slice(0, 1)}</span>}
-        <div><strong>{user.name}</strong><small>{user.email}</small></div>
+        <div><strong>{user.name}</strong><small title={user.email}>{user.email}</small></div>
       </div>
       <form method="post" action="/auth/logout">
-        <button type="submit" class="btn btn-outline-secondary btn-sm"><Icon name="arrow-right" size={16} /> 로그아웃</button>
+        <button type="submit" class="btn btn-outline-secondary btn-sm">로그아웃</button>
       </form>
     </div>
   )}
+  <details class="member-nav__group" open={!inManage} data-active={!inManage ? 'true' : 'false'}>
+    <summary><span>교인 공간</span>{!inManage && <strong>{currentMember}</strong>}<Icon name="chevron-down" size={16} /></summary>
+    <ul class="section-nav__list">
+      {memberLinks.map((l) => <li><a href={l.href} aria-current={cur(l.href)}>{l.label}</a></li>)}
+    </ul>
+  </details>
+  {isAdmin(user) && (
+    <>
+      <details class="member-nav__group" open={inManage} data-active={inManage ? 'true' : 'false'}>
+        <summary><span>관리자</span>{inManage && <strong>{currentManage}</strong>}<Icon name="chevron-down" size={16} /></summary>
+        <ul class="section-nav__list">
+          {manageLinks.map((l) => <li><a href={l.href} aria-current={cur(l.href)}>{l.label}</a></li>)}
+        </ul>
+      </details>
+      <details class="member-nav__group member-nav__advanced">
+        <summary>고급 도구 <Icon name="chevron-down" size={16} /></summary>
+        <ul class="section-nav__list"><li><a href={cmsLink.href} class="member-nav__external" target="_blank" rel="noopener">{cmsLink.label}<span class="sr-only"> (새 창)</span> <Icon name="external" size={14} /></a></li></ul>
+      </details>
+    </>
+  )}
 </nav>
+<script>
+  // 화면 크기가 바뀌어도 현재 위치는 항상 보이고, 모바일에서는 메뉴가 본문을 밀어내지 않습니다.
+  const compact = window.matchMedia('(max-width: 991.98px)');
+  const update = () => document.querySelectorAll<HTMLDetailsElement>('.member-nav__group[data-active]').forEach((group) => {
+    group.open = !compact.matches;
+  });
+  update();
+  compact.addEventListener('change', update);
+</script>

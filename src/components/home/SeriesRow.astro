@@ -3,11 +3,13 @@
 import type { CollectionEntry } from 'astro:content';
 import SectionHeader from '../SectionHeader.astro';
 import Icon from '../Icon.astro';
-import { formatKoreanDate } from '../../lib/posts';
+import { formatKoreanDate, parseSermonTitle } from '../../lib/posts';
+import ResponsiveImage from '../ResponsiveImage.astro';
 interface Props { series: CollectionEntry<'series'>[] }
 const { series } = Astro.props;
 const [featured, ...others] = series;
 const latestEp = featured?.data.episodes.at(-1);
+const latestTitle = latestEp ? parseSermonTitle(latestEp.title).title : '';
 ---
 {featured && (
   <section class="section section--surface" aria-labelledby="series-title">
@@ -15,20 +17,20 @@ const latestEp = featured?.data.episodes.at(-1);
       <SectionHeader id="series-title" eyebrow="Sermon Series" title="설교 시리즈" icon="book" more={{ href: '/media/series', label: '모든 시리즈' }} />
       <div class="series-feature">
         <a class="card-tile series-feature__main" href={`/media/series/${featured.id}`}>
-          <div class="card-tile__media"><img src={featured.data.thumbnail} alt="" loading="lazy" width="960" height="540" /></div>
+          <div class="card-tile__media"><ResponsiveImage src={featured.data.thumbnail} alt="" loading="lazy" sizes="(min-width: 992px) 640px, 100vw" width="960" height="540" /></div>
           <div class="card-tile__body">
             <span class="card-tile__eyebrow">{featured.data.ongoing ? '진행 중인 시리즈' : '최근 시리즈'}</span>
             <h3 class="series-feature__title">{featured.data.title}</h3>
             <p class="card-tile__meta">{featured.data.episodes.length}편 · 최근 업데이트 {formatKoreanDate(featured.data.updated ?? featured.data.date)}</p>
             {latestEp && (
-              <p class="series-feature__latest"><Icon name="play" size={14} /> <span>최신 회차</span> {latestEp.title}</p>
+              <p class="series-feature__latest"><Icon name="play" size={14} /> <span>최신 회차</span> {latestTitle}</p>
             )}
           </div>
         </a>
         <div class="series-feature__side">
           {others.map((s) => (
             <a class="series-mini" href={`/media/series/${s.id}`}>
-              <img src={s.data.thumbnail} alt="" loading="lazy" width="320" height="180" />
+              <ResponsiveImage src={s.data.thumbnail} alt="" loading="lazy" sizes="128px" width="320" height="180" />
               <div>
                 <span class="card-tile__eyebrow">{s.data.ongoing ? '진행 중' : '지난 시리즈'}</span>
                 <strong>{s.data.title}</strong>
