@@ -51,10 +51,10 @@
   &__controls[hidden] { display: none; }
   &__arrow {
     display: inline-flex; align-items: center; justify-content: center; flex: none;
-    width: 44px; height: 44px; padding: 0; color: $navy; background: #fff;
-    border: 1px solid $line; border-radius: 50%;
+    width: 44px; height: 44px; padding: 0; color: $navy; background: rgba(#fff, .65);
+    border: 1px solid rgba($line, .6); border-radius: 50%;
     box-shadow: 0 2px 8px rgba($navy-900, .14);
-    &:hover { background: $navy-100; }
+    &:hover, &:focus-visible { background: rgba(#fff, .85); }
   }
   &.is-ready &__viewport { touch-action: pan-y pinch-zoom; }
   &.is-ready &__track { display: grid; }
