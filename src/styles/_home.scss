@@ -8,29 +8,24 @@
   display: flex;
   align-items: flex-end;
   min-height: clamp(420px, 52vh, 560px);
-  background: $navy-900;
-  color: #fff;
+  background: #f9f8f2;
+  color: $navy-900;
   overflow: hidden;
   &__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 63%; }
   &__scrim {
     position: absolute; inset: 0;
-    // 사진은 밝게 두고, 글자가 놓이는 왼쪽·아래쪽만 남색으로 받칩니다
-    background:
-      linear-gradient(90deg, rgba($navy-900, .52) 0, rgba($navy-900, .34) 42%, rgba($navy-900, 0) 80%),
-      linear-gradient(to top, rgba($navy-900, .72) 0%, rgba($navy-900, .3) 38%, rgba($navy-900, 0) 74%);
+    // 별도 카드나 블러 없이 밝은 배경 위에서 진한 글자가 읽히도록 합니다.
+    background: linear-gradient(90deg, rgba(#fff, .92) 0%, rgba(#fff, .7) 38%, rgba(#fff, .22) 64%, rgba(#fff, 0) 100%);
   }
-  &__content { position: relative; padding-top: 2rem; padding-bottom: 2rem; @include media-breakpoint-up(lg) { padding-top: 3rem; padding-bottom: 3rem; } }
-  &__eyebrow { margin-bottom: .75rem; font-size: .875rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: $gold-300; text-shadow: 0 1px 8px rgba($navy-900, .85), 0 0 2px rgba($navy-900, .6); }
-  &__title { max-width: 18ch; margin-bottom: 1rem; font-size: clamp(2rem, 1.2rem + 3.5vw, 3.75rem); line-height: 1.15; color: #fff; text-shadow: 0 2px 16px rgba($navy-900, .6); }
-  &__sub { max-width: 40rem; margin-bottom: 1.75rem; font-size: 1.0625rem; color: rgba(#fff, .95); text-shadow: 0 1px 10px rgba($navy-900, .7); @include media-breakpoint-up(md) { font-size: 1.125rem; } }
-  &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; .btn-outline-light { border-color: rgba(#fff, .85); } }
-  &__visit { margin: 1rem 0 1.25rem; padding: .75rem 1rem; max-width: 39rem; border-left: 3px solid $gold-300; background: rgba($navy-900, .65); border-radius: 0 .375rem .375rem 0;
-    p { margin: 0 0 .25rem; display: flex; gap: .35rem 1rem; flex-wrap: wrap; font-size: .9375rem; }
-    a { color: #fff; text-decoration: underline; font-size: .875rem; }
-  }
-  &__english { color: #fff; text-decoration: underline; padding: .5rem 0; font-size: .875rem; }
+  &__content { position: relative; padding-top: 2rem; padding-bottom: 2rem; @include media-breakpoint-up(lg) { padding-top: 3rem; padding-bottom: 7rem; } }
+  &__eyebrow { margin-bottom: .75rem; font-size: .875rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: $navy-700; }
+  &__title { max-width: 18ch; margin-bottom: 1rem; font-size: clamp(2rem, 1.2rem + 3.5vw, 3.75rem); line-height: 1.15; color: $navy-900; }
+  &__sub { max-width: 40rem; margin-bottom: 1.75rem; font-size: 1.0625rem; color: $navy-900; @include media-breakpoint-up(md) { font-size: 1.125rem; } }
+  &__actions { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; }
+  &__english { color: $navy-700; text-decoration: underline; padding: .5rem 0; font-size: .875rem; }
   @include media-breakpoint-down(sm) {
     min-height: 0;
+    &__scrim { background: linear-gradient(90deg, rgba(#fff, .9), rgba(#fff, .65)); }
     &__eyebrow { display: none; }
     &__sub { margin-bottom: 1rem; font-size: 1rem; }
     &__title { font-size: 2rem; }
@@ -263,19 +258,6 @@ a.event-card:hover, a.event-card:focus-visible { text-decoration: none; color: i
   .card-tile__title > a { display: block; padding: .5rem 0; margin: -.5rem 0; }
 }
 
-// Frequent tasks stay near the introduction on every screen size.
-.home-shortcuts {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; padding-top: 1rem; padding-bottom: 1rem;
-  @include media-breakpoint-up(md) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  > a { display: flex; align-items: center; gap: .75rem; padding: .875rem; color: $navy-900; background: $navy-50; border: 1px solid $navy-200; border-radius: $border-radius; min-height: 76px;
-    &:hover { background: $navy-100; text-decoration: none; }
-    svg { flex: none; color: $navy; }
-    strong, small { display: block; }
-    strong { font-size: 1rem; }
-    small { color: $ink-600; font-size: .875rem; }
-  }
-  @media(max-width:359px) { > a { padding: .625rem; gap: .5rem; } small { display: none!important; } }
-}
 .notice-strip__body { display: flex; flex: 1; flex-direction: column; align-items: flex-start; padding: 1rem; gap: .625rem;
   h3 { font-size: 1.125rem; margin: 0; }
   p { font-size: .9375rem; margin: 0; }

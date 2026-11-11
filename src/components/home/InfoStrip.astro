@@ -1,22 +1,40 @@
 ---
-import { liveUrl } from '../../data/site';
-import { pdfOf, fileUrl, type Post } from '../../lib/posts';
+/** 히어로 아래 정보 띠: 예배 시간 3개 + 주소 + YouTube Live */
+import { site, mapsDirectionsUrl, liveUrl } from '../../data/site';
 import Icon from '../Icon.astro';
-interface Props { bulletin?: Post }
-const pdf = Astro.props.bulletin ? pdfOf(Astro.props.bulletin) : undefined;
-const links = [
-  { title: '이번 주 주보', description: pdf ? 'PDF 바로 열기' : '최근 주보 보기', href: pdf ? fileUrl(pdf.file) : '/media/bulletins', icon: 'file-text', external: !!pdf },
-  { title: '예배 영상', description: 'YouTube 예배 채널', href: liveUrl, icon: 'play', external: true },
-  { title: '길찾기·주차', description: '주소와 방문 안내', href: '/about/directions', icon: 'map-pin', external: false },
-  { title: '처음 방문', description: '예배·자녀·새가족 안내', href: '/welcome', icon: 'user', external: false },
-];
+import Emoji from '../Emoji.astro';
+import type { EmojiName } from '../../lib/emoji';
+const times = site.serviceTimes.slice(0, 3);
+/** 예배 이름에 맞는 이모티콘: 영어 예배 = 지구, 금요 찬양 집회 = 음표, 새벽기도 = 반짝임, 주일예배 = 교회 */
+const emojiFor = (name: string): EmojiName =>
+  /english|영어/i.test(name) ? 'globe' : /금요|friday|찬양|헤세드/i.test(name) ? 'music' : /새벽|dawn/i.test(name) ? 'sparkle' : /주일|sunday|예배/i.test(name) ? 'church' : 'clock';
 ---
-<nav class="home-shortcuts container" aria-label="자주 찾는 안내">
-  {links.map((l) => (
-    <a href={l.href} target={l.external ? '_blank' : undefined} rel={l.external ? 'noopener' : undefined}>
-      <Icon name={l.icon} size={24} />
-      <span><strong>{l.title}</strong><small>{l.description}</small></span>
-      {l.external && <span class="sr-only"> (새 창)</span>}
-    </a>
-  ))}
-</nav>
+<section class="info-strip" aria-label="예배 시간과 오시는 길">
+  <div class="container">
+    <div class="info-strip__card">
+      {times.map((s) => (
+        <div class="info-strip__cell">
+          <Emoji name={emojiFor(s.name)} size={30} class="info-strip__icon" />
+          <div>
+            <strong>{s.name}</strong>
+            <span>{s.time}</span>
+            {s.place && <small>{s.place}</small>}
+            {s.note && <small class="info-strip__note">{s.note}</small>}
+          </div>
+        </div>
+      ))}
+      <div class="info-strip__cell">
+        <Emoji name="pin" size={30} class="info-strip__icon" />
+        <div>
+          <strong>오시는 길</strong>
+          <a href={mapsDirectionsUrl} target="_blank" rel="noopener">{site.address}</a>
+          <a class="info-strip__more" href="/about/directions">지도 보기 <Icon name="arrow-right" size={14} /></a>
+        </div>
+      </div>
+      <div class="info-strip__cell info-strip__cell--action">
+        <a class="btn btn-primary" href={liveUrl} target="_blank" rel="noopener"><Emoji name="play" size={20} /> YouTube Live<span class="sr-only"> (새 창)</span></a>
+        <a class="info-strip__more" href="/media/sermons">지난 예배 영상 <Icon name="arrow-right" size={14} /></a>
+      </div>
+    </div>
+  </div>
+</section>

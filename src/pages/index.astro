@@ -39,7 +39,7 @@ const stories = (await getCollection('stories')).sort((a, b) => b.data.date.getT
 <BaseLayout description={site.description}>
   <main id="main" tabindex="-1">
     <Hero />
-    <InfoStrip bulletin={bulletin} />
+    <InfoStrip />
     <ThisWeek sermon={sermon} bulletin={bulletin} resource={resource} />
     <EventList events={site.events} today={today} />
     <NoticeCards notices={site.notices} today={today} />
