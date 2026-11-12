@@ -1,0 +1,56 @@
+# 매일 페이스북 페이지의 새 사진 글을 "우리 교회 이야기"에 자동으로 추가합니다.
+# 저장소 Secret `FACEBOOK_PAGE_TOKEN`(페이지 액세스 토큰)이 있어야 동작합니다. 없으면 아무것도 하지 않고 끝납니다.
+# 새 글을 커밋한 뒤 배포 워크플로(deploy-cloudflare.yml)를 직접 실행합니다 (유튜브 자동 등록과 같은 이유).
+name: 페이스북 이야기 자동 등록
+on:
+  schedule:
+    - cron: '23 14 * * *'   # 매일 14:23 UTC (캔자스 오전 8~9시)
+  workflow_dispatch:         # Actions 탭에서 수동 실행도 가능
+permissions:
+  contents: write   # 새 이야기 커밋
+  actions: write    # 배포 워크플로 실행
+concurrency:
+  group: facebook-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # 일부 글만 실패해도 받은 글은 커밋하도록 여기서는 멈추지 않고, 맨 끝에서 실패로 표시합니다
+      - name: 페이스북 새 글 가져오기
+        id: import
+        continue-on-error: true
+        run: npm run import:facebook
+        env:
+          FACEBOOK_PAGE_TOKEN: ${{ secrets.FACEBOOK_PAGE_TOKEN }}
+      - name: 새 이야기가 있으면 커밋
+        id: commit
+        run: |
+          git add src/content/stories public/images/stories scripts/import/facebook-state.json
+          if git diff --cached --quiet; then
+            echo "새 이야기가 없습니다."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: auto-add Facebook stories"
+          # 그 사이 다른 커밋(관리 화면 저장 등)이 올라왔어도 밀어 넣을 수 있게
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+      - name: 새 이야기를 사이트에 배포
+        if: steps.commit.outputs.pushed == 'true'
+        run: gh workflow run deploy-cloudflare.yml --ref "$GITHUB_REF_NAME"
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: 가져오기 실패 알림
+        if: steps.import.outcome == 'failure'
+        run: |
+          echo "::error::페이스북 글을 가져오지 못했습니다. 위 '페이스북 새 글 가져오기' 단계의 기록을 확인하세요 (토큰 만료가 가장 흔한 원인입니다)."
+          exit 1
