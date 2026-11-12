@@ -181,6 +181,9 @@ The overall look is light: a white header, photos shown bright, a light footer, 
 * **Header** (`_header.scss`) is white, so the logo in Site settings must be the dark-lettered version. A white-lettered logo would be invisible.
 * **Home hero** (`_home.scss`): the first slide keeps its text and buttons small (title at most 40px) and at the lower left, so the sky
   and the church building stay visible. Only that corner fades to white behind the navy text; nothing dark is laid over the photo.
+* **Info cards under the hero** (`InfoStrip.astro`, `.info-card` in `_home.scss`) are five separate cards: three service times, directions
+  and YouTube Live. The last two are pressable as a whole (the title link is stretched over the card; the small link inside stays separate).
+  Their layout follows the width of the group, not the screen: five in a row, then 3 + 2, then stacked rows on phones.
 * **Page banners** (`_banner.scss`) do not cover the photo with a dark overlay. Only the corner where the title sits
   is shaded so the white text stays readable. Banners without a photo use a light background with navy text.
   On phones the breadcrumb sits on a white pill and the English subtitle is hidden, because the text fills the whole banner there.
