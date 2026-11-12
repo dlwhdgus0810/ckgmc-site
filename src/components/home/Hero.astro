@@ -3,6 +3,7 @@
 import { site } from '../../data/site';
 import Icon from '../Icon.astro';
 import ResponsiveImage from '../ResponsiveImage.astro';
+import { langOf } from '../../lib/lang';
 interface Props { today: string }
 const { today } = Astro.props;
 const h = site.hero;
@@ -17,7 +18,7 @@ const titles = [h.headline, ...notices.map((notice) => notice.title ?? '교회 �
         <ResponsiveImage class="hero__img" src={h.image} alt={h.alt} sizes="(min-width: 768px) 1600px, 100vw" fetchpriority="high" loading="eager" decoding="async" />
         <div class="hero__scrim" aria-hidden="true"></div>
         <div class="container hero__content">
-          {h.eyebrow && <p class="hero__eyebrow">{h.eyebrow}</p>}
+          {h.eyebrow && <p class="hero__eyebrow" lang={langOf(h.eyebrow)}>{h.eyebrow}</p>}
           <h1 id="hero-title" class="hero__title">{h.headline}</h1>
           {h.subline && <p class="hero__sub">{h.subline}</p>}
           <div class="hero__actions">
@@ -30,7 +31,7 @@ const titles = [h.headline, ...notices.map((notice) => notice.title ?? '교회 �
       {notices.map((notice, index) => (
         <div class="hero__slide hero__slide--notice" data-banner-slide data-banner-title={notice.title ?? '교회 안내'} role="group" aria-roledescription="슬라이드" aria-label={`${index + 2} / ${titles.length}: ${notice.title ?? '교회 안내'}`}>
           <a class="hero__poster-link" href={notice.href || '/about/contact'} aria-label={`${notice.title ?? '교회 안내'} — ${notice.actionLabel || '자세히 보기'}`}>
-            <ResponsiveImage class="hero__poster" src={notice.image} alt={notice.alt} loading="lazy" sizes="(min-width: 768px) 1600px, 100vw" />
+            <ResponsiveImage class="hero__poster" src={notice.image} alt={notice.alt} loading="lazy" fetchpriority="low" sizes="(min-width: 768px) 1600px, 100vw" />
           </a>
           <div class="hero__caption">
             <h2>{notice.title ?? '교회 안내'}</h2>
@@ -49,5 +50,7 @@ const titles = [h.headline, ...notices.map((notice) => notice.title ?? '교회 �
   )}
   </div>
   <p class="sr-only" data-banner-status aria-live="polite" aria-atomic="true"></p>
+  <!-- 스크립트가 꺼져 있으면 배너를 넘길 수 없으므로 모든 장을 세로로 펼쳐 보여줍니다 -->
+  <noscript><style is:inline>.hero__track{display:block}.hero__slide{opacity:1!important;visibility:visible!important;pointer-events:auto!important}</style></noscript>
 </section>
 <script>import '../../scripts/hero-carousel';</script>

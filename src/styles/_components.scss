@@ -55,6 +55,8 @@
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    // 휴대폰의 두 칸 목록은 칸이 좁아 두 줄로는 제목 절반이 잘립니다 — 네 줄까지 보여줍니다
+    @include media-breakpoint-down(sm) { -webkit-line-clamp: 4; }
   }
   &__text {
     margin: 0;
@@ -136,6 +138,8 @@
   svg { flex: none; }
 }
 .btn-lg { min-height: 52px; }
+// 전송 중인 폼의 버튼 (src/scripts/member-forms.ts)
+.btn[aria-disabled="true"] { opacity: .65; pointer-events: none; }
 .btn-sm { min-height: 36px; }
 // 터치 기기(휴대전화·태블릿)에서는 작은 버튼도 손가락 크기(44px)를 확보
 @media (pointer: coarse) { .btn-sm { min-height: 44px; } }
@@ -174,6 +178,8 @@
   border-radius: $border-radius;
   overflow: hidden;
   iframe, video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  // 재생 전 썸네일 (video-poster)
+  &.video-poster > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 }
 
 // ── 페이지 번호 ────────────────────────────────────────────────────────

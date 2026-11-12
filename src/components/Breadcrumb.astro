@@ -21,7 +21,7 @@ const isSectionIndex = !!section && path.replace(/\/$/, '') === '/' + section.ke
 ---
 <nav aria-label="현재 위치" class="crumbs">
   <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/">HOME</a></li>
+    <li class="breadcrumb-item"><a href="/" lang="en">HOME</a></li>
     {section?.items && !isSectionIndex && (
       <li class="breadcrumb-item"><a href={'/' + section.key}>{section.label}</a></li>
     )}

@@ -10,7 +10,7 @@ const year = new Date().getFullYear();
     <div class="row site-footer__grid">
       <div class="col-md-6 col-lg-3">
         <h2 class="site-footer__heading">{site.name}</h2>
-        <p class="site-footer__sub">{site.nameEn}</p>
+        <p class="site-footer__sub" lang="en">{site.nameEn}</p>
         <address class="site-footer__address">
           <a href={mapsDirectionsUrl} target="_blank" rel="noopener"><Icon name="map-pin" size={16} /> {site.address}</a>
           <a href={telHref}><Icon name="phone" size={16} /> {site.phone}</a>

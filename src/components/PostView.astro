@@ -6,7 +6,7 @@
 import { render, getCollection } from 'astro:content';
 import Icon from './Icon.astro';
 import Emoji from './Emoji.astro';
-import { slugOf, formatKoreanDate, displayDate, dateTimeAttr, pdfOf, fileUrl, textExcerpt, titleParts, displayTitle, splitDescription, type Post } from '../lib/posts';
+import { slugOf, formatKoreanDate, displayDate, dateTimeAttr, pdfOf, fileUrl, textExcerpt, titleParts, displayTitle, splitDescription, thumbAttrs, type Post } from '../lib/posts';
 
 interface Props {
   post: Post;
@@ -50,14 +50,10 @@ if (post.data.youtube) {
   </header>
 
   {post.data.youtube && (
-    <><div class="media-frame post__video">
-      <iframe
-        src={`https://www.youtube.com/embed/${post.data.youtube}?rel=0`}
-        title={post.data.title}
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowfullscreen
-        loading="lazy"
-      ></iframe>
+    <><div class="media-frame post__video video-poster" data-youtube={post.data.youtube} data-title={post.data.title}>
+      {/* 처음에는 썸네일만 — 재생 버튼을 누르면 유튜브 플레이어로 바뀝니다 (src/scripts/video-poster.ts) */}
+      <img {...thumbAttrs(post, 'hd')} alt="" width="1280" height="720" fetchpriority="high" decoding="async" />
+      <button type="button" class="video-poster__play" aria-label={`영상 재생: ${t.title}`}><Icon name="play" size={30} /></button>
     </div><p class="media-fallback"><a href={`https://www.youtube.com/watch?v=${post.data.youtube}`} target="_blank" rel="noopener">YouTube에서 보기 <span class="sr-only">(새 창)</span></a><span>영상이 재생되지 않으면 YouTube에서 확인해 주세요.</span></p></>
   )}
 
@@ -136,3 +132,4 @@ if (post.data.youtube) {
 <script>
   import '../scripts/post-details';
 </script>
+<script>import '../scripts/video-poster';</script>

@@ -77,7 +77,7 @@ export function initFormDrafts(root: ParentNode = document) {
     }
     if (failedSubmit) save(); else setStatus();
     form.addEventListener('input', save); form.addEventListener('change', save); form.addEventListener('draft:changed', save);
-    form.addEventListener('submit', (event) => { queueMicrotask(() => { if (!event.defaultPrevented) { save(); submitting = true; } }); });
+    form.addEventListener('submit', (event) => { setTimeout(() => { if (!event.defaultPrevented) { save(); submitting = true; } }, 0); });
     window.addEventListener('pageshow', () => { submitting = false; });
     window.addEventListener('beforeunload', (event) => { if (dirty && !submitting) { event.preventDefault(); event.returnValue = ''; } });
   });

@@ -3,12 +3,13 @@
 import Icon from './Icon.astro';
 import Emoji from './Emoji.astro';
 import type { EmojiName } from '../lib/emoji';
+import { langOf } from '../lib/lang';
 interface Props { id: string; eyebrow?: string; title: string; icon?: EmojiName; more?: { href: string; label: string } }
 const { id, eyebrow, title, icon, more } = Astro.props;
 ---
 <div class="section__header">
   <div>
-    {eyebrow && <span class="section__eyebrow">{eyebrow}</span>}
+    {eyebrow && <span class="section__eyebrow" lang={langOf(eyebrow)}>{eyebrow}</span>}
     <h2 id={id} class="section__title">{icon && <Emoji name={icon} size={30} />}{title}</h2>
   </div>
   {more && <a class="section__more" href={more.href}>{more.label} <Icon name="arrow-right" size={16} /></a>}

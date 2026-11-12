@@ -24,7 +24,7 @@
 @import "bootstrap/scss/pagination";
 @import "bootstrap/scss/card";
 @import "bootstrap/scss/utilities";
-@import "bootstrap/scss/print";
+// bootstrap/scss/print 는 쓰지 않습니다 (용지를 A3 로 강제하고 화면 폭을 992px 로 고정함). 인쇄 규칙은 _print.scss 에 있습니다.
 
 @import "base";
 @import "components";
@@ -37,3 +37,4 @@
 @import "widgets";
 @import "members";
 @import "editor";
+@import "print";

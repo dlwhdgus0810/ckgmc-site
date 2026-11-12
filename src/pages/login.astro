@@ -101,7 +101,7 @@ const formAction = Astro.url.pathname + Astro.url.search;
           <input type="hidden" name="kind" value="password" />
           <div class="form-group">
             <label for="login-email">이메일 <span class="small text-muted">(필수)</span></label>
-            <input id="login-email" class="form-control" type="email" name="email" value={emailValue} autocomplete="username" required />
+            <input id="login-email" class="form-control" type="email" name="email" value={emailValue} autocomplete="username" spellcheck="false" autocapitalize="none" enterkeyhint="next" aria-invalid="false" required />
           </div>
           <PasswordInput id="login-password" name="password" label="비밀번호" autocomplete="current-password" />
           <button type="submit" class="btn btn-primary btn-block">로그인</button>

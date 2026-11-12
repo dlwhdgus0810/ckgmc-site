@@ -71,6 +71,8 @@ document.querySelectorAll<HTMLElement>('[data-banner-carousel]').forEach((carous
   });
   carousel.addEventListener('keydown', (event) => {
     if (slides.length < 2 || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    // 슬라이드 안의 링크·버튼에서는 화살표 키를 가로채지 않습니다 (배너 컨트롤 위에서만 좌우 키로 넘깁니다)
+    if (!controls?.contains(event.target as Node)) return;
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       event.preventDefault(); manual(current + (event.key === 'ArrowRight' ? 1 : -1));
     }
