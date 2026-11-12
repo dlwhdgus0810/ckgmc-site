@@ -7,6 +7,8 @@ import { site } from '../data/site';
 import { headerCtas } from '../data/nav';
 import { getNav } from '../lib/nav';
 import Icon from './Icon.astro';
+import ResponsiveImage from './ResponsiveImage.astro';
+import { langOf } from '../lib/lang';
 
 const nav = await getNav();
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
@@ -16,7 +18,7 @@ const [welcomeCta, givingCta] = headerCtas;
 <header class="site-header">
   <div class="container site-header__inner">
     <a class="site-header__brand" href="/" aria-label={`${site.name} 홈`}>
-      <img src={site.logo} alt="" width="274" height="40" />
+      <ResponsiveImage src={site.logo} alt="" sizes="274px" width="274" height="40" />
     </a>
 
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" aria-label="메뉴 열기">
@@ -31,7 +33,7 @@ const [welcomeCta, givingCta] = headerCtas;
             <li class:list={['site-nav__item has-menu', { 'is-current': section.key === currentKey }]}>
               <button type="button" class="site-nav__link" id={`navbtn-${section.key}`} aria-expanded="false" aria-controls={`navmenu-${section.key}`}>
                 <span>{section.label}</span>
-                <small>{section.labelEn}</small>
+                <small lang={langOf(section.labelEn)}>{section.labelEn}</small>
                 <Icon name="chevron-down" size={16} />
               </button>
               <ul id={`navmenu-${section.key}`} class="site-nav__menu" aria-labelledby={`navbtn-${section.key}`}>
@@ -44,7 +46,7 @@ const [welcomeCta, givingCta] = headerCtas;
             <li class:list={['site-nav__item', { 'is-current': section.href === currentPath }]}>
               <a class="site-nav__link" href={section.href} aria-current={section.href === currentPath ? 'page' : undefined}>
                 <span>{section.label}</span>
-                <small>{section.labelEn}</small>
+                <small lang={langOf(section.labelEn)}>{section.labelEn}</small>
               </a>
             </li>
           )

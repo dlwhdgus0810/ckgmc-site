@@ -59,6 +59,8 @@ const currentManage = manageLinks.find((l) => cur(l.href))?.label ?? '관리자'
   )}
 </nav>
 <script>
+  import { initMemberForms } from '../../scripts/member-forms';
+  initMemberForms();
   // 화면 크기가 바뀌어도 현재 위치는 항상 보이고, 모바일에서는 메뉴가 본문을 밀어내지 않습니다.
   const compact = window.matchMedia('(max-width: 991.98px)');
   const update = () => document.querySelectorAll<HTMLDetailsElement>('.member-nav__group[data-active]').forEach((group) => {

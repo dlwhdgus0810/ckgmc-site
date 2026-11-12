@@ -35,6 +35,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <meta name="theme-color" content="#ffffff" />
+    <!-- 이 사이트는 밝은 화면 하나만 있습니다. 기기가 어두운 모드여도 입력칸·스크롤바를 어둡게 바꾸지 않게 알려 줍니다 -->
+    <meta name="color-scheme" content="light" />
+    <!-- 링크에 마우스를 올리거나 손가락을 대는 순간 다음 페이지를 미리 받아 둡니다 (지원하는 브라우저만; 로그인 구역·파일·바깥 링크 제외) -->
+    <script type="speculationrules" is:inline>{"prefetch":[{"where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":"/auth/*"}},{"not":{"href_matches":"/login*"}},{"not":{"href_matches":"/members*"}},{"not":{"href_matches":"/manage*"}},{"not":{"href_matches":"/admin*"}},{"not":{"href_matches":"/files/*"}},{"not":{"href_matches":"/images/*"}},{"not":{"href_matches":"/*\\?*"}},{"not":{"selector_matches":"[target=_blank], [download]"}}]},"eagerness":"moderate"}]}</script>
     <slot name="head" />
   </head>
   <body class="site-layout">

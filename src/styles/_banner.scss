@@ -93,7 +93,8 @@ $banner-img-max: 1320px;
   overflow: hidden;
   .breadcrumb-item { white-space: nowrap; }
   .breadcrumb-item.active { color: $ink-900; overflow: hidden; text-overflow: ellipsis; }
-  .breadcrumb-item + .breadcrumb-item::before { color: rgba($ink-600, .7); }
+  // 구분선은 장식입니다 — 화면낭독기가 "슬래시"로 읽지 않게 대체 글자를 비워 둡니다 (둘째 줄을 모르는 브라우저는 첫 줄 사용)
+  .breadcrumb-item + .breadcrumb-item::before { color: rgba($ink-600, .7); content: "/"; content: "/" / ""; }
   a { color: $ink-600; &:hover { color: $navy; } }
 }
 .page-banner--image .crumbs .breadcrumb {
@@ -102,4 +103,21 @@ $banner-img-max: 1320px;
   .breadcrumb-item.active { color: #fff; }
   .breadcrumb-item + .breadcrumb-item::before { color: rgba(#fff, .6); }
   a { color: rgba(#fff, .92); &:hover { color: #fff; } }
+}
+// 휴대폰의 사진 배너: 글자가 배너 전체 높이를 쓰므로 위쪽 줄(현재 위치·영문 부제)은 밝은 사진 위에 놓여 잘 안 읽힙니다.
+// 사진 전체를 어둡게 덮는 대신, 현재 위치만 흰 알약 모양 바탕에 진한 글자로 올리고 영문 부제는 숨깁니다 (메인 배너와 같음).
+@include media-breakpoint-down(sm) {
+  .page-banner--image .crumbs .breadcrumb {
+    width: fit-content; max-width: 100%;
+    padding: .2rem .7rem;
+    background: rgba(#fff, .9);
+    border-radius: 999px;
+    color: $ink-900;
+    text-shadow: none;
+    .breadcrumb-item.active { color: $ink-900; }
+    .breadcrumb-item + .breadcrumb-item::before { color: rgba($ink-600, .8); }
+    a { color: $ink-600; &:hover { color: $navy; } }
+  }
+  .page-banner--image .crumbs { --focus-ring: #{$navy-500}; }
+  .page-banner--image .page-banner__eyebrow { display: none; }
 }

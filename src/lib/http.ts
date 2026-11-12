@@ -54,9 +54,17 @@ export function takeFlash(cookies: AstroCookies): Flash | null {
 }
 
 // ── 로그인 뒤 돌아갈 주소 (같은 사이트 안의 경로만 허용) ────────────────
+/**
+ * 글자 앞부분만 보고 판단하면 뚫립니다: 브라우저는 주소 안의 탭·줄바꿈을 지우므로 `/<탭>/다른사이트` 가 `//다른사이트` 로 바뀌어
+ * 다른 사이트로 넘어갑니다. 그래서 브라우저와 같은 방식으로 주소를 해석한 뒤, 같은 사이트일 때만 정리된 경로를 돌려줍니다.
+ */
+const NEXT_BASE = 'https://next.invalid';
 export function safeNext(next: string | null | undefined, fallback = '/members'): string {
-  if (!next || !next.startsWith('/') || next.startsWith('//') || next.includes('\\')) return fallback;
-  return next;
+  if (!next || !next.startsWith('/') || next.includes('\\')) return fallback;
+  let url: URL;
+  try { url = new URL(next, NEXT_BASE); } catch { return fallback; }
+  if (url.origin !== NEXT_BASE || !url.pathname.startsWith('/') || url.pathname.startsWith('//')) return fallback;
+  return url.pathname + url.search + url.hash;
 }
 
 // ── 날짜 표시 ─────────────────────────────────────────────────────────

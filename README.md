@@ -183,6 +183,7 @@ The overall look is light: a white header, photos shown bright, a light footer, 
   and the church building stay visible. Only that corner fades to white behind the navy text; nothing dark is laid over the photo.
 * **Page banners** (`_banner.scss`) do not cover the photo with a dark overlay. Only the corner where the title sits
   is shaded so the white text stays readable. Banners without a photo use a light background with navy text.
+  On phones the breadcrumb sits on a white pill and the English subtitle is hidden, because the text fills the whole banner there.
 * On very wide screens the banner photo stops at 1320px and the sides are filled with a blurred copy of the same photo.
 * **Buttons** (`_components.scss`) are not filled with dark navy. The main button (`.btn-primary`) is a soft tint with navy text and
   the secondary one (`.btn-outline-primary`) is white with a light border. The gold giving button is unchanged.
@@ -191,7 +192,11 @@ The overall look is light: a white header, photos shown bright, a light footer, 
   used as `<Emoji name="wave" />` (`src/components/Emoji.astro`). They are decorative, so always keep the text next to them.
   To add one, draw it on a 24×24 grid with the six colors defined at the top of that file.
 Fonts are Pretendard (body and headings) and Nanum Myeongjo (Bible verses and quotes). To change Nanum Myeongjo, edit `scripts/fetch-fonts.mjs` and run `npm run fetch:fonts`.
-Accessibility: all color pairs meet WCAG AA contrast (4.5:1), with keyboard focus rings, a skip-to-content link, and reduced motion support.
+Accessibility: all color pairs meet WCAG AA contrast (4.5:1), with keyboard focus rings (also on buttons, form fields and pagination,
+where Bootstrap removes them), a skip-to-content link, and reduced motion support. English text inside Korean pages carries `lang="en"`
+(`langOf()` in `src/lib/lang.ts`). The hero only sets a minimum height, so larger text settings do not clip it.
+The site is light-only and says so (`color-scheme: light`); high-contrast mode and printing have their own small rule sets
+(`_base.scss`, `_print.scss`).
 
 ## Automatic YouTube sermon posts
 `.github/workflows/youtube-sync.yml` reads the YouTube channel RSS (`youtubeChannelId` in `site.json`) **every Monday**,
@@ -234,6 +239,23 @@ How it behaves:
 * **Photos are shrunk before upload** in the admin UI (long side 2000px, JPEG quality 85; transparent PNGs stay PNG) — `src/scripts/image-shrink.ts`.
   For photos added to `public/images` by hand, run `npm run optimize:images` (add `-- --dry-run` to preview) and commit the result.
   It converts opaque PNGs to JPEG and updates the paths in `src/`.
+
+## Speed and security notes
+* **Images**: `src/lib/responsive-images.mjs` builds WebP variants at build time for the hero, notice posters, page banners, the logo,
+  series/ministry cards and every story photo; pages use them through `<ResponsiveImage>`. Their file names contain a content hash,
+  so `public/_headers` lets browsers cache `/images/responsive/*` and `/fonts/*` for a year.
+* **Videos** on post pages show a thumbnail and a play button; the YouTube player loads only when it is pressed (`src/scripts/video-poster.ts`).
+* **Next page**: `<script type="speculationrules">` in `BaseLayout.astro` prefetches a page when its link is hovered or touched
+  (Chrome/Edge only; login areas, files and external links are excluded).
+* **Response headers** are set in two places with the same values: `public/_headers` for static pages and `src/middleware.ts` for
+  server-rendered pages. They include HSTS (30 days, apex only) and a small Content-Security-Policy
+  (`object-src 'none'; base-uri 'self'; frame-ancestors 'self'`). A policy that also restricts script sources is not in place yet:
+  post bodies are stored HTML and a few forms still use inline `onsubmit` handlers.
+* **Return address after login** (`safeNext` in `src/lib/http.ts`) is parsed the way a browser parses it and must stay on this site.
+* **`/admin/` (Sveltia CMS)** loads a pinned version with an `integrity` hash. To upgrade, change the version and the hash together
+  (the command is in the comment in `public/admin/index.html`).
+* **Forms in the members area** submit only once even when the button is pressed twice, and report drafts kept in the browser tab
+  are removed on logout (`src/scripts/member-forms.ts`).
 
 ## Contact form · baptism application form
 A static site has no server, so it uses the free form service [FormSubmit](https://formsubmit.co) (no sign-up).

@@ -44,6 +44,12 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   res.headers.set('x-content-type-options', 'nosniff');
   res.headers.set('referrer-policy', 'strict-origin-when-cross-origin');
   res.headers.set('x-frame-options', 'SAMEORIGIN');
+  // 아래 넷은 정적 페이지의 public/_headers 와 같은 값입니다 (서버 응답에는 _headers 가 적용되지 않습니다)
+  res.headers.set('permissions-policy', 'camera=(), microphone=(), geolocation=()');
+  res.headers.set('strict-transport-security', 'max-age=2592000');
+  res.headers.set('content-security-policy', "object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
+  // 이 사이트가 연 창이 아닌 다른 사이트의 창에서 이 페이지를 조작하지 못하게 합니다
+  res.headers.set('cross-origin-opener-policy', 'same-origin-allow-popups');
   if (protectedArea || path === '/login' || path.startsWith('/auth/')) {
     res.headers.set('cache-control', 'private, no-store');
     res.headers.set('x-robots-tag', 'noindex, nofollow');

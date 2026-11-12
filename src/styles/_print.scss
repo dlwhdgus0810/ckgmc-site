@@ -1,0 +1,14 @@
+// =====================================================================
+//  인쇄용 — 다른 모든 스타일 뒤에 읽혀야 배너·헤더 규칙을 이깁니다 (global.scss 의 마지막 import)
+// =====================================================================
+// 인쇄: 종이에는 본문만 — 메뉴·탭·푸터·버튼류는 빼고, 배너는 제목만 검은 글씨로
+@media print {
+  .skip-link, .site-header, .section-nav, .site-footer, .pagination, .hero__controls, .nav-toggle, [data-board-search], .video-poster__play, .media-fallback { display: none !important; }
+  body { color: #000; background: #fff; }
+  .page-banner { min-height: 0; background: none; color: #000; }
+  .page-banner__img, .page-banner__backdrop, .page-banner__scrim { display: none; }
+  .page-banner .page-banner__title, .page-banner .page-banner__eyebrow, .page-banner .crumbs .breadcrumb, .page-banner .crumbs .breadcrumb a { color: #000; text-shadow: none; }
+  a { text-decoration: underline; }
+  img, figure, table, blockquote, .card-tile { break-inside: avoid; }
+  h1, h2, h3 { break-after: avoid; }
+}

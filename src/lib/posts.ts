@@ -180,7 +180,13 @@ export function splitDescription(html: string | undefined): { intro: string; mor
   let body = html.trim().replace(/^<div>\s*/i, '').replace(/\s*<\/div>\s*$/i, '');
   const m = DIVIDER.exec(body);
   if (!m) return null;
-  const linkify = (s: string) => s.replace(/(^|[^"'>])(https?:\/\/[^\s<]+)/g, (_, pre, url) => `${pre}<a href="${url}" target="_blank" rel="noopener">${decodeURIComponent(url).replace(/^https?:\/\//, '')}</a>`);
+  // 유튜브 설명은 교회 밖에서 온 글자입니다. 주소 안의 따옴표나 %3C 같은 글자가 태그·속성으로 바뀌지 않게 막습니다
+  const readable = (url: string) => {
+    let text = url;
+    try { text = decodeURIComponent(url); } catch { /* 깨진 % 표기는 그대로 보여줍니다 */ }
+    return text.replace(/^https?:\/\//, '').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  };
+  const linkify = (s: string) => s.replace(/(^|[^"'>])(https?:\/\/[^\s<"]+)/g, (_, pre, url) => `${pre}<a href="${url}" target="_blank" rel="noopener">${readable(url)}</a>`);
   const intro = linkify(body.slice(0, m.index).trim());
   const more = linkify(body.slice(m.index + m[0].length).replace(DIVIDER, '<hr>').replace(new RegExp(DIVIDER.source, 'gi'), '<hr>').trim());
   return { intro, more };

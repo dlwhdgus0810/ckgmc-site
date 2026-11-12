@@ -93,13 +93,16 @@ document.querySelectorAll<HTMLFormElement>('form[data-public-form]').forEach((fo
     }
     if (error) { error.textContent = message; error.hidden = !message; }
     if (message) field.setAttribute('aria-invalid', 'true');
+    else if (field.required) field.setAttribute('aria-invalid', 'false');
     else field.removeAttribute('aria-invalid');
     return !message;
   };
   fields.forEach((field) => {
+    // 필수 칸은 오류가 나기 전까지 "잘못되지 않음"으로 알립니다 (빈 필수 칸을 오류로 읽는 화면낭독기 대비)
+    if (field.required && !field.hasAttribute('aria-invalid')) field.setAttribute('aria-invalid', 'false');
     field.addEventListener('input', () => {
       dirty = initial() !== baseline;
-      if (field.hasAttribute('aria-invalid')) validate(field);
+      if (field.getAttribute('aria-invalid') === 'true') validate(field);
     });
     field.addEventListener('change', () => { dirty = initial() !== baseline; });
   });

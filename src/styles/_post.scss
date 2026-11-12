@@ -163,6 +163,8 @@
 }
 
 body.gallery-open { overflow: hidden; }
+// 사진 창 안에서 끝까지 스크롤해도 뒤 페이지가 따라 움직이지 않게
+.story-gallery { overscroll-behavior: contain; }
 .story-gallery {
   width: min(1100px, calc(100vw - 2rem)); max-width: none; max-height: calc(100dvh - 2rem); padding: 1rem; border: 0; border-radius: $border-radius; background: $navy-900; color: #fff;
   &::backdrop { background: rgba(0, 0, 0, .8); }

@@ -27,7 +27,7 @@
     flex: 0 1 auto;   // 아주 좁은 화면(≤320px)에서는 로고가 줄어들고 메뉴 버튼(44px)은 그대로
     min-width: 0;
     min-height: 44px;
-    img { display: block; height: 34px; width: auto; max-width: 100%; object-fit: contain; object-position: left center; }
+    img { display: block; height: 34px; width: auto; max-width: 100%; min-width: 0; object-fit: contain; object-position: left center; }
     @include media-breakpoint-up(lg) { img { height: 36px; } }
     @include media-breakpoint-up(xl) { img { height: 40px; } }
   }

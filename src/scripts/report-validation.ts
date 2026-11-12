@@ -9,9 +9,20 @@ export function initReportValidation() {
       if (field instanceof HTMLInputElement && field.type === 'radio') return field.closest('fieldset')?.querySelector('legend')?.textContent?.replace(/\s*\(필수\)/, '').trim() || '항목';
       return Array.from(field.labels || []).map(label => label.textContent).join(' ').replace(/\s*\((필수|선택)\)/g, '').replace(/^\d+\.\s*/, '').trim() || '항목';
     };
+    // 필수 칸은 오류가 나기 전까지 aria-invalid="false" — 빈 필수 칸을 오류로 읽는 화면낭독기가 있습니다
+    const resetInvalid = (field: { required?: boolean; setAttribute(name: string, value: string): void; removeAttribute(name: string): void }) => { if (field.required) field.setAttribute('aria-invalid', 'false'); else field.removeAttribute('aria-invalid'); };
+    controls().forEach((field) => { if (field.getAttribute('aria-invalid') !== 'true') resetInvalid(field); });
+    // 고친 칸은 다음 제출을 기다리지 않고 바로 오류 표시를 거둡니다
+    form.addEventListener('input', (event) => {
+      const field = event.target as HTMLInputElement;
+      if (field.getAttribute?.('aria-invalid') !== 'true' || !field.validity?.valid) return;
+      resetInvalid(field);
+      const inline = field.id ? form.querySelector<HTMLElement>(`[data-field-error="${field.id}"]`) : null;
+      if (inline) { inline.hidden = true; inline.textContent = ''; }
+    });
     const showErrors = (errors: Map<string, string>) => {
       form.querySelectorAll<HTMLElement>('[data-field-error]').forEach(el => { el.hidden = true; el.textContent = ''; });
-      controls().forEach(field => field.removeAttribute('aria-invalid'));
+      controls().forEach(resetInvalid);
       errors.forEach((message, id) => {
         const field = document.getElementById(id) as HTMLInputElement | null;
         if (!field || !form.contains(field)) return;

@@ -3,6 +3,7 @@
  * 섹션 내비: 데스크톱은 왼쪽 고정 목록, 모바일은 배너 아래 가로 스크롤 탭 (마크업은 하나, CSS 로 전환)
  */
 import { getNav, findSection } from '../lib/nav';
+import { langOf } from '../lib/lang';
 interface Props { path: string }
 const { path } = Astro.props;
 const section = findSection(await getNav(), path);
@@ -11,7 +12,7 @@ const section = findSection(await getNav(), path);
   <nav class="section-nav" aria-label={`${section.label} 하위 메뉴`}>
     <div class="section-nav__title">
       <strong>{section.label}</strong>
-      <span>{section.labelEn}</span>
+      <span lang={langOf(section.labelEn)}>{section.labelEn}</span>
     </div>
     <ul class="section-nav__list">
       {section.items.map((item) => (

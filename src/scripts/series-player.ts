@@ -8,6 +8,8 @@ const previous = document.querySelector<HTMLButtonElement>('[data-episode-prev]'
 const next = document.querySelector<HTMLButtonElement>('[data-episode-next]');
 const copyStatus = document.querySelector<HTMLElement>('[data-episode-copy-status]');
 let selected = -1;
+// 첫 회·마지막 회에서 버튼을 disabled 로 바꾸면 방금 누른 버튼의 키보드 초점이 사라집니다. 누를 수 없다는 것만 aria-disabled 로 알립니다
+const setEnd = (button: HTMLButtonElement | null, atEnd: boolean) => { if (!button) return; if (atEnd) button.setAttribute('aria-disabled', 'true'); else button.removeAttribute('aria-disabled'); };
 const initialPlayer = player ? [...player.childNodes].map((node) => node.cloneNode(true)) : [];
 
 const choose = (index: number, userAction = false, updateUrl = false) => {
@@ -23,8 +25,8 @@ const choose = (index: number, userAction = false, updateUrl = false) => {
   if (controls) controls.hidden = false;
   if (current) current.textContent = `현재 회차: ${link.dataset.no}편 · ${link.dataset.title}`;
   if (externalLink) externalLink.href = link.href;
-  if (previous) previous.disabled = index === 0;
-  if (next) next.disabled = index === links.length - 1;
+  setEnd(previous, index === 0);
+  setEnd(next, index === links.length - 1);
   if (copyStatus) copyStatus.textContent = '';
   if (updateUrl) {
     const url = new URL(location.href); url.searchParams.set('episode', link.dataset.youtubeId!);

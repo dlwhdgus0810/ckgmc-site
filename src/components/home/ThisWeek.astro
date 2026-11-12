@@ -71,20 +71,4 @@ const st = sermon ? titleParts(sermon) : undefined;
   </div>
 </section>
 
-<script>
-  // 재생 버튼을 누르면 그 자리에 유튜브 플레이어를 넣습니다 (누르기 전에는 유튜브 스크립트를 불러오지 않음)
-  document.querySelectorAll<HTMLElement>('.video-poster').forEach((box) => {
-    const btn = box.querySelector<HTMLButtonElement>('.video-poster__play');
-    const id = box.dataset.youtube;
-    if (!btn || !id) return;
-    btn.addEventListener('click', () => {
-      const iframe = document.createElement('iframe');
-      iframe.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
-      iframe.title = box.dataset.title ?? '설교 영상';
-      iframe.allow = 'autoplay; encrypted-media; picture-in-picture';
-      iframe.setAttribute('allowfullscreen', '');
-      box.replaceChildren(iframe);
-      box.classList.add('is-playing');
-    });
-  });
-</script>
+<script>import '../../scripts/video-poster';</script>
