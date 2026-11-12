@@ -17,6 +17,7 @@
     "db:migrate:remote": "wrangler d1 migrations apply ckgmc --remote",
     "admin:create": "node scripts/create-admin.mjs",
     "import:youtube": "node scripts/import-youtube.mjs",
+    "import:facebook": "node scripts/import-facebook.mjs",
     "optimize:images": "node scripts/optimize-images.mjs",
     "fetch:fonts": "node scripts/fetch-fonts.mjs"
   },

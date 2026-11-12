@@ -57,11 +57,13 @@ wrangler.jsonc          Cloudflare Workers config (D1 binding, static assets dir
 .dev.vars.example       example local env vars → copy to .dev.vars
 scripts/
   import-youtube.mjs    new YouTube channel videos → posts/sermons (run weekly by GitHub Actions)
+  import-facebook.mjs   new Facebook Page photo posts → stories (run daily by GitHub Actions, needs a token)
   optimize-images.mjs   shrink heavy photos already in public/images (npm run optimize:images)
   fetch-fonts.mjs       download Nanum Myeongjo web fonts
   import/               tools for importing data from the old site
 .github/workflows/
   youtube-sync.yml      weekly Monday YouTube sync, then commit and start the deploy
+  facebook-sync.yml     daily Facebook Page sync (only when the FACEBOOK_PAGE_TOKEN secret exists)
   deploy-cloudflare.yml deploy to Cloudflare Workers on every commit to main
 ```
 
@@ -199,6 +201,29 @@ You can also run it immediately from the GitHub repository → Actions tab → *
 Titles and bodies are copied from the YouTube title and description, so polish them in the admin UI if needed.
 When the same service is uploaded again with the same title, only the later upload stays visible; the earlier post gets `hidden: true`.
 
+## Automatic Facebook stories
+`.github/workflows/facebook-sync.yml` checks the church Facebook Page **every day** and adds new photo posts to
+`src/content/stories/` (their photos are downloaded to `public/images/stories/`), commits them, and starts the deploy.
+**It does nothing until the repository Secret `FACEBOOK_PAGE_TOKEN` exists.** Until then, add stories by hand in the admin UI.
+
+**One-time setup — a Page access token.** Someone who is an admin of the church Page has to do this (Meta renames these screens often):
+1. [Meta for Developers](https://developers.facebook.com/) → My Apps → create an app, or reuse the one made for Facebook login.
+   The Page admin needs a role on the app.
+2. Tools → Graph API Explorer: choose the app, *Get Page Access Token*, select the church Page, and grant `pages_show_list` and `pages_read_engagement`.
+3. Make it long-lived: open the token in the Access Token Debugger → *Extend Access Token*, then call `me/accounts` in the Explorer with
+   the extended token and copy the `access_token` listed for the church Page. The debugger should show that Page token as "Expires: Never".
+4. GitHub repository → Settings → Secrets and variables → Actions → *New repository secret*: name `FACEBOOK_PAGE_TOKEN`, value = that token.
+   Never commit the token or paste it into a chat or an issue.
+5. Actions tab → *페이스북 이야기 자동 등록* → *Run workflow* imports right away.
+
+How it behaves:
+* Only posts with photos are imported (an album becomes one story with several photos). Text-only posts, links and videos are skipped.
+* It only looks at posts newer than the last one it handled (`scripts/import/facebook-state.json`; on the first run, newer than the latest
+  existing story). So a story deleted or edited in the admin UI is never recreated or overwritten — and later edits on Facebook are not copied.
+* To re-check older posts: `FACEBOOK_PAGE_TOKEN=… npm run import:facebook -- --since 2026-05-01` (add `--dry-run` to preview).
+* The token stops working when the admin who issued it changes their Facebook password or loses the Page role. The run then fails with a
+  "token expired" message (GitHub emails the repository owner) — issue a new token and update the Secret.
+
 ## Board lists, search, and photos
 * **List layout is automatic**: boards whose posts have their own picture (video, thumbnail, photo in the body) show as cards;
   boards without pictures (bulletins, discussion sheets) show as a compact list with an "open PDF" button (`boardLayout` in `src/lib/posts.ts`).
@@ -318,7 +343,8 @@ If you have a DB dump, create a `data/<board>.json` per board in the form
 * Reply emails, the "support request" (vendor contact) menu, and group statistics charts — dropped. Group statistics are provided as tables.
 * Edits are not instant: commit → auto deploy (2–3 minutes). In exchange, every change is kept in the repository history and can be reverted.
 * Home page — instead of a poster slider: church photo hero + service times/directions info strip + this week's sermon and bulletin + ministry intro + newcomer guide.
-* Facebook feed — requires an API token, so stories are managed as `content/stories/` Markdown (photo stories can be added in the admin UI).
+* Facebook feed — stories are stored as `content/stories/` Markdown. New Page posts are copied in automatically once a Page token is set up
+  ("Automatic Facebook stories" above); without it, add photo stories in the admin UI.
 * URL scheme — English paths such as `/about/staff`. Old Korean URLs are redirected via `public/_redirects`.
 * Fonts — Pretendard + Nanum Myeongjo, self-hosted (no Google Fonts or jsDelivr dependency).
 
