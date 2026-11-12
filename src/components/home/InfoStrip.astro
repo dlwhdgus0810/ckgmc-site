@@ -1,40 +1,56 @@
 ---
-/** 히어로 아래 정보 띠: 예배 시간 3개 + 주소 + YouTube Live */
+/**
+ * 히어로 아래 정보 카드 다섯 장: 예배 시간 3장 + 오시는 길 + YouTube Live
+ * - 예배 카드는 읽기만 하는 카드, 뒤의 두 장은 카드 전체가 눌리는 카드입니다 (제목 링크를 카드 크기로 넓힘).
+ * - 배치는 화면 폭이 아니라 이 묶음이 실제로 차지한 폭에 맞춰 바뀝니다 (_home.scss 의 .info-strip).
+ */
 import { site, mapsDirectionsUrl, liveUrl } from '../../data/site';
 import Icon from '../Icon.astro';
 import Emoji from '../Emoji.astro';
 import type { EmojiName } from '../../lib/emoji';
+import { langOf } from '../../lib/lang';
 const times = site.serviceTimes.slice(0, 3);
 /** 예배 이름에 맞는 이모티콘: 영어 예배 = 지구, 금요 찬양 집회 = 음표, 새벽기도 = 반짝임, 주일예배 = 교회 */
 const emojiFor = (name: string): EmojiName =>
   /english|영어/i.test(name) ? 'globe' : /금요|friday|찬양|헤세드/i.test(name) ? 'music' : /새벽|dawn/i.test(name) ? 'sparkle' : /주일|sunday|예배/i.test(name) ? 'church' : 'clock';
+/** "9400 Nall Ave. Overland Park, KS 66207" → 도로명 줄 / 도시 줄 */
+const cut = site.address.indexOf('. ');
+const [street, city] = cut > 0 ? [site.address.slice(0, cut + 1), site.address.slice(cut + 2)] : [site.address, ''];
 ---
-<section class="info-strip" aria-label="예배 시간과 오시는 길">
+<section class="info-strip" aria-labelledby="info-strip-title">
   <div class="container">
-    <div class="info-strip__card">
+    <h2 id="info-strip-title" class="sr-only">예배 시간과 오시는 길</h2>
+    <div class="info-strip__grid">
       {times.map((s) => (
-        <div class="info-strip__cell">
-          <Emoji name={emojiFor(s.name)} size={30} class="info-strip__icon" />
-          <div>
-            <strong>{s.name}</strong>
-            <span>{s.time}</span>
-            {s.place && <small>{s.place}</small>}
-            {s.note && <small class="info-strip__note">{s.note}</small>}
-          </div>
-        </div>
+        <article class="info-card">
+          <span class="info-card__badge"><Emoji name={emojiFor(s.name)} size={28} /></span>
+          <h3 class="info-card__name" lang={langOf(s.name)}>{s.name}</h3>
+          <p class="info-card__lead" lang={langOf(s.time)}>{s.time}</p>
+          <p class="info-card__meta">
+            {s.place}
+            {s.note && <span class="info-card__note">{s.note}</span>}
+          </p>
+        </article>
       ))}
-      <div class="info-strip__cell">
-        <Emoji name="pin" size={30} class="info-strip__icon" />
-        <div>
-          <strong>오시는 길</strong>
-          <a href={mapsDirectionsUrl} target="_blank" rel="noopener">{site.address}</a>
-          <a class="info-strip__more" href="/about/directions">지도 보기 <Icon name="arrow-right" size={14} /></a>
-        </div>
-      </div>
-      <div class="info-strip__cell info-strip__cell--action">
-        <a class="btn btn-primary" href={liveUrl} target="_blank" rel="noopener"><Emoji name="play" size={20} /> YouTube Live<span class="sr-only"> (새 창)</span></a>
-        <a class="info-strip__more" href="/media/sermons">지난 예배 영상 <Icon name="arrow-right" size={14} /></a>
-      </div>
+      <article class="info-card info-card--action">
+        <span class="info-card__badge"><Emoji name="pin" size={28} /></span>
+        <h3 class="info-card__name"><a class="info-card__link" href="/about/directions">오시는 길</a></h3>
+        <p class="info-card__lead">{street}</p>
+        <p class="info-card__meta">
+          {city}
+          <a class="info-card__more" href={mapsDirectionsUrl} target="_blank" rel="noopener">길찾기<span class="sr-only"> (Google 지도, 새 창)</span> <Icon name="arrow-right" size={14} /></a>
+        </p>
+        <span class="info-card__go" aria-hidden="true"><Icon name="arrow-right" size={16} /></span>
+      </article>
+      <article class="info-card info-card--action info-card--live">
+        <span class="info-card__badge"><Emoji name="play" size={28} /></span>
+        <h3 class="info-card__name"><a class="info-card__link" href={liveUrl} target="_blank" rel="noopener" lang="en">YouTube Live<span class="sr-only" lang="ko"> (새 창)</span></a></h3>
+        <p class="info-card__lead">실시간 예배 보기</p>
+        <p class="info-card__meta">
+          <a class="info-card__more" href="/media/sermons">지난 예배 영상 <Icon name="arrow-right" size={14} /></a>
+        </p>
+        <span class="info-card__go" aria-hidden="true"><Icon name="arrow-right" size={16} /></span>
+      </article>
     </div>
   </div>
 </section>
