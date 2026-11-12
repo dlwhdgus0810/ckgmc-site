@@ -5,7 +5,7 @@
   "address": "9400 Nall Ave. Overland Park, KS 66207",
   "mapQuery": "9400 Nall Ave, Overland Park, KS 66207",
   "phone": "+1 913-649-2488",
-  "email": "mchrissong@gmail.com",
+  "email": "admin@ckgmc.org",
   "logo": "/images/uploads/2026/10/교회로고-가로-Black-Letters-i1of3.png",
   "ogImage": "/images/uploads/2026/10/파스텔-느낌-hqlhc.jpg",
   "social": {
@@ -19,8 +19,8 @@
     "url": "https://ckgmc.churchtrac.com/give",
     "embed": "https://ckgmc.churchtrac.com/give/embed"
   },
-  "membershipFormEmbed": "https://docs.google.com/forms/d/e/1FAIpQLSfucF16fd_sQuAYPZN6Mq2jLaiWbX-WjLg7MywkTFf5u6OcMA/viewform?embedded=true",
-  "newFamilyFormUrl": "https://forms.gle/1YSckhKR3hkLQJv86",
+  "membershipFormEmbed": "https://docs.google.com/forms/d/e/1FAIpQLSfucF16fd_sQuAYPZN6Mq2jLaiWbX-WjLg7MywkTFf5u6OcMA/viewform?usp=header",
+  "newFamilyFormUrl": "https://forms.gle/yn3L4Nva3H2dfZ4C9",
   "formEndpoint": "https://formsubmit.co/mchrissong@gmail.com",
   "formThanksPath": "/thanks",
   "hero": {
@@ -66,37 +66,37 @@
       "image": "/images/slides/slide-1.jpg",
       "alt": "청년부 수련회 9월 6–7일 Springfield, MO — Prayerful House",
       "title": "청년부 수련회 9/6–7",
-      "href": "/ministries/young-adult",
-      "until": "2026-09-07",
       "description": "청년부 수련회 Prayerful House 안내입니다.",
       "time": "2026년 9월 6–7일",
       "place": "Springfield, MO",
-      "actionLabel": "청년부 안내"
+      "actionLabel": "청년부 안내",
+      "href": "/ministries/young-adult",
+      "until": "2026-09-07"
     },
     {
       "image": "/images/slides/slide-2.jpg",
       "alt": "새로운 주일 설교 시리즈 Who We Are — 그리스도인과 웨슬리안의 정체성, 2026년 6월 14일부터",
       "title": "설교 시리즈 Who We Are",
-      "href": "/media/series/61",
       "description": "그리스도인과 웨슬리안의 정체성을 나누는 설교 시리즈입니다.",
-      "actionLabel": "시리즈 영상 보기"
+      "actionLabel": "시리즈 영상 보기",
+      "href": "/media/series/61"
     },
     {
       "image": "/images/slides/slide-3.jpg",
       "alt": "2026년 표어: 최고의 하나님께 최선의 예배를 (시편 29:2)",
       "title": "2026 표어 — 최고의 하나님께 최선의 예배를",
       "description": "최고의 하나님께 최선의 예배를 — 시편 29:2",
-      "until": "2026-12-31",
+      "actionLabel": "예배 안내",
       "href": "/about/services",
-      "actionLabel": "예배 안내"
+      "until": "2026-12-31"
     },
     {
       "image": "/images/slides/slide-4.jpg",
       "alt": "기도모임 안내 — 오로지 기도에 힘쓰더라 (행 1:14). 주일 중보기도모임 주일 오전 10:30 2층 청년부실 · 수요 중보기도모임 수요일 오전 10시 도서관 · 가족과 자녀를 위한 기도회 매월 셋째 주 금요성령집회 본당 · 주간 새벽이슬 월요일 오전 6시 본당 · 주품 토요큐티모임 토요일 오전 7시 Apex at Cityplace",
       "title": "기도모임 안내",
       "description": "주일·수요 중보기도, 가족과 자녀를 위한 기도회, 새벽이슬과 주품 모임을 안내합니다. 포스터의 시간과 장소는 시즌에 따라 달라질 수 있습니다.",
-      "href": "/about/services",
-      "actionLabel": "모임 안내 확인"
+      "actionLabel": "모임 안내 확인",
+      "href": "/about/services"
     }
   ],
   "events": [
