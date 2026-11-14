@@ -5,6 +5,9 @@
  *   FACEBOOK_PAGE_TOKEN=… npm run import:facebook
  *   FACEBOOK_PAGE_TOKEN=… npm run import:facebook -- --dry-run            # 파일을 만들지 않고 무엇이 추가될지만 표시
  *   FACEBOOK_PAGE_TOKEN=… npm run import:facebook -- --since 2026-05-01   # 이 날짜 뒤에 올린 글부터 다시 확인
+ *   FACEBOOK_PAGE_TOKEN=… npm run import:facebook -- --since 2026-05-01 --refresh-images
+ *                                   # 이미 가져온 글의 사진만 다시 받기 (제목·본문은 건드리지 않음)
+ *   (자동 실행에서는 같은 옵션을 환경 변수 FACEBOOK_SINCE, FACEBOOK_REFRESH_IMAGES=1 로 넘깁니다)
  *
  * 토큰: 교회 페이지 관리자가 발급한 "페이지 액세스 토큰" (README "Facebook stories" 절). 환경 변수 FACEBOOK_PAGE_TOKEN 으로만 받고
  *       저장소에는 넣지 않습니다. 토큰이 없으면 아무것도 하지 않고 끝납니다(자동 실행이 실패로 표시되지 않게).
@@ -26,7 +29,8 @@ const MAX_PAGES = 10; // 한 번에 최대 250개 글까지만 거슬러 올라�
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
-const sinceArg = args.includes('--since') ? args[args.indexOf('--since') + 1] : undefined;
+const sinceArg = (args.includes('--since') ? args[args.indexOf('--since') + 1] : undefined) || process.env.FACEBOOK_SINCE?.trim() || undefined;
+const refreshImages = args.includes('--refresh-images') || process.env.FACEBOOK_REFRESH_IMAGES === '1';
 
 const token = process.env.FACEBOOK_PAGE_TOKEN?.trim();
 if (!token) {
@@ -56,7 +60,7 @@ if (!Number.isFinite(sinceMs)) {
 }
 
 // ── 페이스북에서 글 목록 받기 ───────────────────────────────────────────
-const FIELDS = 'id,message,created_time,permalink_url,full_picture,attachments{type,media{image{src}},subattachments.limit(40){type,media{image{src}}}}';
+const FIELDS = 'id,message,created_time,permalink_url,full_picture,attachments{type,target{id},media{image{src}},subattachments.limit(40){type,target{id},media{image{src}}}}';
 /** 토큰은 주소가 아니라 헤더로 보냅니다. 오류 문구에 주소를 넣지 않습니다 (다음 쪽 주소에는 토큰이 들어 있습니다) */
 async function api(url) {
   let res;
@@ -94,21 +98,34 @@ try {
 // ── 글 → 이야기 ─────────────────────────────────────────────────────────
 const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const PHOTO = new Set(['photo', 'album', 'cover_photo', 'profile_media']);
-/** 글에 달린 사진 주소들 (앨범은 낱장으로). 사진이 아닌 글(링크·영상)은 빈 목록 */
+/** 글에 달린 사진들 (앨범은 낱장으로): { src: 글 목록에 딸려 온 주소(가로 720px 남짓), id: 사진 번호 }. 사진이 아닌 글(링크·영상)은 빈 목록 */
 function photosOf(post) {
-  const out = [];
+  const out = new Map();
+  const add = (item) => { const src = item.media?.image?.src; if (src && !out.has(src)) out.set(src, { src, id: item.target?.id }); };
   for (const a of post.attachments?.data ?? []) {
     const subs = a.subattachments?.data ?? [];
-    if (subs.length) {
-      for (const s of subs) if (s.type === 'photo' && s.media?.image?.src) out.push(s.media.image.src);
-    } else if (PHOTO.has(a.type) && a.media?.image?.src) {
-      out.push(a.media.image.src);
-    }
+    if (subs.length) { for (const s of subs) if (s.type === 'photo') add(s); }
+    else if (PHOTO.has(a.type)) add(a);
   }
-  return [...new Set(out)];
+  return [...out.values()];
+}
+/**
+ * 사진의 가장 큰 원본 주소. 글 목록에 딸려 오는 것은 작은 판(가로 720px)이라 컴퓨터 화면에서 흐릿합니다.
+ * 사진 번호로 한 번 더 물어 가장 큰 판을 고르고, 실패하면(권한 없음 등) 작은 판을 그대로 씁니다.
+ */
+async function largestOf(photo) {
+  if (!photo.id) return photo.src;
+  try {
+    const body = await api(`${graph}/${encodeURIComponent(photo.id)}?fields=images`);
+    const best = (body.images ?? []).filter((i) => i?.source && i.width > 0).sort((a, b) => b.width * b.height - a.width * a.height)[0];
+    return best?.source ?? photo.src;
+  } catch {
+    return photo.src;
+  }
 }
 /** 사진을 내려받아 긴 변 2000px 이하 JPEG 으로 */
-async function fetchImage(url) {
+async function fetchImage(photo) {
+  const url = await largestOf(photo);
   const res = await fetch(url);
   if (!res.ok) throw new Error(`사진을 받지 못했습니다 (HTTP ${res.status})`);
   const input = Buffer.from(await res.arrayBuffer());
@@ -129,8 +146,25 @@ for (const post of posts) {
   const first = message.split('\n')[0].trim();
   const label = `${post.created_time.slice(0, 10)} ${first.slice(0, 40) || '(글 없음)'}`;
 
-  if (known.has(short) || (post.permalink_url && knownLinks.has(post.permalink_url))) { latest = Math.max(latest, time); continue; }
   const photos = photosOf(post);
+  if (known.has(short) || (post.permalink_url && knownLinks.has(post.permalink_url))) {
+    latest = Math.max(latest, time);
+    // 이미 가져온 글: 사진만 다시 받습니다 (장수가 같을 때만 — 제목·본문·사진 목록은 그대로)
+    const file = files.find((f) => f.replace(/\.md$/, '').split('-').pop() === short);
+    const current = file ? [...readFileSync(join(STORIES, file), 'utf8').matchAll(/^  - "?(\/images\/stories\/[^"\n]+)"?$/gm)].map((m) => m[1]) : [];
+    if (!refreshImages || !file) continue;
+    if (current.length !== photos.length) { console.log(`사진 다시 받기 건너뜀 (장수가 다름: 사이트 ${current.length} · 페이스북 ${photos.length}): ${label}`); continue; }
+    if (dryRun) { console.log(`사진 다시 받을 예정: ${label} · ${photos.length}장`); continue; }
+    try {
+      const fresh = await Promise.all(photos.map(fetchImage));
+      fresh.forEach((buf, i) => writeFileSync(join('public', current[i]), buf));
+      console.log(`사진 다시 받음: ${label} · ${fresh.length}장`);
+    } catch (e) {
+      console.error(`실패: ${label} — ${e.message}`);
+      failed = true;
+    }
+    continue;
+  }
   if (!photos.length) {
     console.log(`건너뜀 (사진 없음): ${label}`);
     skipped++; latest = Math.max(latest, time);
@@ -174,7 +208,9 @@ for (const post of posts) {
   added++; latest = Math.max(latest, time);
 }
 
-if (!dryRun && latest > sinceMs) {
+// 기록은 앞으로만 갑니다 (--since 로 예전 글을 다시 볼 때 뒤로 돌아가지 않게)
+const recorded = Date.parse(state.since ?? '') || 0;
+if (!dryRun && latest > sinceMs && latest > recorded) {
   writeFileSync(STATE, JSON.stringify({ since: new Date(latest).toISOString() }, null, 2) + '\n');
 }
 console.log(`${dryRun ? '[미리보기] ' : ''}새 이야기 ${added}개${skipped ? `, 건너뜀 ${skipped}개` : ''} (기준: ${new Date(sinceMs).toISOString()} 이후)`);

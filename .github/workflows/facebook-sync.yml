@@ -8,6 +8,16 @@ on:
     - cron: '23 14 * * *'   # 매일 14:23 UTC (캔자스 오전 8~9시) — 오류가 있으면 이 실행만 실패로 표시
     - cron: '*/15 * * * *'  # 15분마다 — 오류가 있어도 조용히 넘어감
   workflow_dispatch:         # Actions 탭에서 수동 실행도 가능
+    inputs:
+      since:
+        description: '이 날짜 뒤에 올린 글부터 다시 확인 (예: 2026-10-01). 비우면 마지막으로 확인한 글 뒤부터'
+        required: false
+        type: string
+      refresh_images:
+        description: '이미 가져온 글의 사진을 큰 원본으로 다시 받기 (위 날짜와 함께 사용)'
+        required: false
+        type: boolean
+        default: false
 permissions:
   contents: write   # 새 이야기 커밋
   actions: write    # 배포 워크플로 실행
@@ -33,6 +43,9 @@ jobs:
           FACEBOOK_PAGE_TOKEN: ${{ secrets.FACEBOOK_PAGE_TOKEN }}
           # 15분마다 도는 실행에서는 오류를 기록만 하고 성공으로 끝냅니다 (하루 한 번 실행과 수동 실행은 실패로 표시)
           FACEBOOK_LENIENT: ${{ github.event.schedule == '*/15 * * * *' && '1' || '' }}
+          # 수동 실행 때 넣은 값 (명령줄에 직접 끼워 넣지 않고 환경 변수로 넘깁니다)
+          FACEBOOK_SINCE: ${{ inputs.since }}
+          FACEBOOK_REFRESH_IMAGES: ${{ inputs.refresh_images && '1' || '' }}
       - name: 새 이야기가 있으면 커밋
         id: commit
         run: |

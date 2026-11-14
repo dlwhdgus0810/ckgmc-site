@@ -112,11 +112,64 @@
   .icon { margin-left: auto; flex: none; color: $ink-600; }
 }
 
-// 우리 교회 이야기 상세: 앨범 사진은 4:3 상자에 맞춰 (로딩 전후 배치 이동 없음)
-.story__thumb {
-  display: block; aspect-ratio: 4 / 3; overflow: hidden;
-  border-radius: $border-radius-sm; background: $surface;
-  img { width: 100%; height: 100%; object-fit: cover; }
+// 우리 교회 이야기 상세 — 대표 사진: 가로 사진은 본문 폭에 꽉 채우고,
+// 세로로 긴 사진(포스터 등)은 한 화면에 들어오도록 높이를 제한해 가운데에 둡니다
+.story__lead-link { display: block; margin-bottom: 1.5rem; }
+.story__lead { display: block; width: 100%; height: auto; border-radius: $border-radius-sm; }
+.story__lead--tall { width: auto; max-width: 100%; max-height: min(78vh, 760px); margin-inline: auto; }
+// 사진이 여러 장일 때: 화살표·밀기로 넘겨 보는 상자 (src/scripts/story-viewer.ts)
+// 상자 비율은 첫 사진을 따르고(--ratio), 한 화면에 들어오도록 높이를 제한합니다. 비율이 다른 사진은 잘리지 않게 안쪽에 맞춥니다
+.story-viewer {
+  margin-bottom: 1.5rem;
+  &__stage { position: relative; width: 100%; max-width: calc(min(78vh, 760px) * var(--ratio, 1.5)); margin-inline: auto; }
+  &__track {
+    display: flex; overflow-x: auto; overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;        // 항상 한 장에 딱 멈춥니다
+    scrollbar-width: none; touch-action: manipulation;
+    aspect-ratio: var(--ratio, 1.5);
+    border-radius: $border-radius; background: $surface-tint;
+    &::-webkit-scrollbar { display: none; }
+    @media (prefers-reduced-motion: no-preference) { scroll-behavior: smooth; }
+  }
+  &__slide {
+    // scroll-snap-stop: always 는 쓰지 않습니다 — 버튼·작은 사진으로 여러 장을 건너뛸 때 한 장씩만 가다 멈춥니다
+    flex: 0 0 100%; min-width: 0; scroll-snap-align: center;
+    a { display: block; width: 100%; height: 100%; }
+    img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  }
+  // 버튼은 사진 양옆에 떠 있고, 버튼 사이의 사진은 그대로 밀거나 누를 수 있습니다
+  &__controls {
+    position: absolute; inset: 0; z-index: 1; pointer-events: none;
+    display: flex; align-items: center; justify-content: space-between; padding: 0 .5rem;
+    &[hidden] { display: none; }
+  }
+  &__arrow {
+    pointer-events: auto; touch-action: manipulation;
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: 44px; height: 44px; padding: 0; border-radius: 50%;
+    color: $navy; background: rgba(#fff, .88); border: 1px solid rgba($line, .9);
+    box-shadow: 0 2px 8px rgba($navy-900, .2);
+    &:hover { background: #fff; }
+    &[aria-disabled="true"] { opacity: .35; }
+  }
+  &__count {
+    position: absolute; right: .625rem; bottom: .625rem; z-index: 1; margin: 0; pointer-events: none;
+    padding: .125rem .625rem; border-radius: 999px;
+    background: rgba($navy-900, .72); color: #fff; font-size: .8125rem; font-variant-numeric: tabular-nums;
+  }
+  // 아래 작은 사진: 누르면 그 사진으로 바로 갑니다. 넘치면 이 줄만 옆으로 스크롤
+  &__markers {
+    display: flex; gap: .5rem; width: fit-content; max-width: 100%; margin: .625rem auto 0; padding: .25rem;
+    overflow-x: auto; scrollbar-width: thin;
+    &[hidden] { display: none; }
+    button {
+      flex: none; width: 64px; height: 64px; padding: 0; overflow: hidden; touch-action: manipulation;
+      border: 2px solid transparent; border-radius: $border-radius-sm; background: $surface; opacity: .6;
+      &:hover { opacity: 1; }
+      &[aria-current="true"] { opacity: 1; border-color: $navy; }
+    }
+    img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  }
 }
 
 // ── 게시판 검색 ────────────────────────────────────────────────────────

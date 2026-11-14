@@ -173,6 +173,9 @@ Body `<img>` tags get their actual pixel size (width/height) added at build time
 
 ### Church stories (`src/content/stories/YYYY-MM-DD-name.md`)
 `title`, `date`, `image` (cover), `images` (album), `permalink` (original Facebook post). The body is the story text.
+With more than one photo the story page shows them in a viewer: arrows, swipe, keyboard, and small thumbnails to jump
+(`src/scripts/story-viewer.ts`; native scroll snap, so swiping works without the script). Pressing a photo opens it full screen.
+The viewer takes the shape of the first photo and never grows taller than the screen, so portrait posters stay in view.
 
 ## Changing the design
 Only edit the variables in `src/styles/_tokens.scss` — navy (`$navy-*`), gold (`$gold-*`), text colors, fonts, spacing, corner radius.
@@ -229,6 +232,9 @@ How it behaves:
 * It only looks at posts newer than the last one it handled (`scripts/import/facebook-state.json`; on the first run, newer than the latest
   existing story). So a story deleted or edited in the admin UI is never recreated or overwritten — and later edits on Facebook are not copied.
 * To re-check older posts: `FACEBOOK_PAGE_TOKEN=… npm run import:facebook -- --since 2026-05-01` (add `--dry-run` to preview).
+  In GitHub the same is done from Actions → *페이스북 이야기 자동 등록* → *Run workflow*, which has a date field and a
+  "download the photos again" checkbox (`--refresh-images`: replaces only the photo files of posts already imported).
+* Photos are downloaded at the largest size Facebook offers (the post list itself only carries 720px copies), then limited to 2000px.
 * The token stops working when the admin who issued it changes their Facebook password or loses the Page role. The once-a-day run
   (and any manual run) then fails with a "token expired" message and GitHub emails the repository owner — issue a new token and
   update the Secret. The 15-minute runs only log the error, so one problem does not produce a failure email every 15 minutes.
