@@ -12,7 +12,7 @@ export async function homeImageVariants(root = process.cwd()) {
   const site = JSON.parse(await readFile(resolve(root, 'src/data/site.json'), 'utf8'));
   const noticeImages = new Set(site.notices.map((n) => n.image));
   const sources = new Set([site.hero.image, ...noticeImages]);
-  /** 작게만 쓰는 그림(이야기 앨범 썸네일, 로고)은 작은 크기만 만듭니다 — 빌드 시간을 아끼려고 */
+  /** 작게만 쓰는 그림(로고)은 작은 크기만 만듭니다 — 빌드 시간을 아끼려고 */
   const smallOnly = new Map();
   const frontmatter = async (file) => {
     const match = (await readFile(file, 'utf8')).match(/^---\r?\n([\s\S]*?)\r?\n---/);
@@ -26,8 +26,8 @@ export async function homeImageVariants(root = process.cwd()) {
       if (!data) continue;
       const src = data.thumbnail ?? data.image ?? data.headerImage;
       if (typeof src === 'string') sources.add(src);
-      // 이야기 앨범의 나머지 사진: 상세 페이지에서 썸네일로만 보입니다 (크게 볼 때는 원본을 엽니다)
-      if (folder === 'stories' && Array.isArray(data.images)) for (const img of data.images) if (typeof img === 'string' && img !== src) smallOnly.set(img, [320, 640]);
+      // 이야기 앨범의 나머지 사진: 상세 페이지의 "사진 넘겨 보기"에서 첫 사진과 같은 크기로 보입니다
+      if (folder === 'stories' && Array.isArray(data.images)) for (const img of data.images) if (typeof img === 'string') sources.add(img);
     }
   }
   // 하위 페이지 배너 사진: 모든 페이지의 headerImage + 레이아웃이 직접 가리키는 public/images/headers 의 사진

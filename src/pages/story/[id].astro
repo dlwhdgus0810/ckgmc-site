@@ -18,38 +18,61 @@ const { Content } = await render(story);
 const images = story.data.images.length ? story.data.images : story.data.image ? [story.data.image] : [];
 // 대표 사진의 실제 크기 (빌드 시 계산, 없으면 속성 생략)
 const lead = images[0] ? __IMAGE_SIZES__[images[0]] : undefined;
+/** 세로로 긴 사진(포스터·세로 사진)인지 — 가로 폭에 꽉 채우면 컴퓨터 화면에서 한 화면을 넘게 커집니다 */
+const leadTall = !!lead && lead.height > lead.width * 1.1;
+// 사진 넘겨 보기 상자의 가로:세로 비율 = 첫 사진의 비율 (너무 길거나 납작하지 않게 2:3 ~ 2:1 사이로)
+const ratio = lead ? Math.min(2, Math.max(2 / 3, lead.width / lead.height)) : 1.5;
+// 상자는 화면 높이의 78%(최대 760px)를 넘지 않으므로, 실제로 보이는 폭은 이보다 넓어지지 않습니다
+const viewerSizes = `(min-width: 768px) ${Math.round(Math.min(1110, 760 * ratio))}px, 100vw`;
 ---
 <SubpageLayout path="/story" parentHref="/story" title="우리 교회 이야기" subtitle="Our Story" headerImage="/images/headers/about.jpg" leaf={story.data.title} bannerHeading="p">
   <article class="story" data-story-gallery>
     <h1 class="post__title">{story.data.title}</h1>
     <p><small class="text-muted"><Icon name="calendar" size={14} /> {formatKoreanDate(story.data.date, true)}</small></p>
-    {images[0] && <a href={images[0]} data-gallery-image aria-label={`사진 1 / ${images.length} 크게 보기`} target="_blank" rel="noopener"><ResponsiveImage src={images[0]} alt={story.data.title ?? '교회 이야기 대표 사진'} class="img-fluid w-100 mb-4" sizes="(min-width: 992px) 800px, 100vw" fetchpriority="high" {...(lead ?? {})} /></a>}
-    <div class="story-body"><Content /></div>
+    {images.length === 1 && <a class="story__lead-link" href={images[0]} data-gallery-image aria-label={`사진 1 / ${images.length} 크게 보기`} target="_blank" rel="noopener"><ResponsiveImage src={images[0]} alt={story.data.title ?? '교회 이야기 대표 사진'} class:list={['story__lead', { 'story__lead--tall': leadTall }]} sizes={leadTall ? '(min-width: 768px) 620px, 100vw' : '(min-width: 992px) 800px, 100vw'} fetchpriority="high" {...(lead ?? {})} /></a>}
     {images.length > 1 && (
-      <div class="row mt-4">
-        {images.slice(1).map((img, i) => (
-          <div class="col-6 col-md-4 mb-3">
-            <a class="story__thumb" data-gallery-image href={img} target="_blank" rel="noopener" aria-label={`사진 ${i + 2} / ${images.length} 크게 보기 (새 창)`}>
-              <ResponsiveImage src={img} alt="" loading="lazy" sizes="(min-width: 768px) 260px, 50vw" width="1000" height="750" />
-            </a>
+      <section class="story-viewer" data-story-viewer aria-roledescription="사진 슬라이드" aria-label={`사진 ${images.length}장`} style={`--ratio: ${ratio.toFixed(4)}`}>
+        <div class="story-viewer__stage">
+          {/* 이전·다음 버튼은 사진 줄보다 앞에 둡니다 (키보드·화면낭독기가 먼저 만나게). 스크립트가 켜지면 보입니다 */}
+          <div class="story-viewer__controls" data-viewer-controls hidden>
+            <button type="button" class="story-viewer__arrow" data-direction="previous" aria-label="이전 사진"><Icon name="chevron-right" size={22} class="flip-x" /></button>
+            <button type="button" class="story-viewer__arrow" data-direction="next" aria-label="다음 사진"><Icon name="chevron-right" size={22} /></button>
           </div>
-        ))}
-      </div>
+          <div class="story-viewer__track" data-viewer-track tabindex="0" role="group" aria-label="사진 (좌우로 넘겨 볼 수 있습니다)">
+            {images.map((img, i) => (
+              <div class="story-viewer__slide" role="group" aria-roledescription="슬라이드" aria-label={`${i + 1} / ${images.length}`}>
+                <a href={img} data-gallery-image target="_blank" rel="noopener" aria-label={`사진 ${i + 1} / ${images.length} 크게 보기`}>
+                  <ResponsiveImage src={img} alt="" sizes={viewerSizes} loading={i === 0 ? 'eager' : 'lazy'} fetchpriority={i === 0 ? 'high' : undefined} decoding="async" {...(__IMAGE_SIZES__[img] ?? {})} />
+                </a>
+              </div>
+            ))}
+          </div>
+          <p class="story-viewer__count" aria-hidden="true"><span data-viewer-count>1</span> / {images.length}</p>
+        </div>
+        <p class="sr-only" role="status" aria-live="polite" data-viewer-status></p>
+        <nav class="story-viewer__markers" aria-label="사진 고르기" data-viewer-markers hidden>
+          {images.map((img, i) => (
+            <button type="button" data-marker aria-label={`사진 ${i + 1} 보기`} aria-current={i === 0 ? 'true' : undefined}>
+              <ResponsiveImage src={img} alt="" sizes="72px" loading="lazy" width="72" height="72" />
+            </button>
+          ))}
+        </nav>
+      </section>
     )}
+    <div class="story-body"><Content /></div>
     {story.data.permalink && (
       <p class="mt-3"><a href={story.data.permalink} target="_blank" rel="noopener" class="btn btn-sm btn-primary"><Icon name="facebook" size={16} /> 페이스북에서 보기</a></p>
     )}
+    {/* 사진을 눌렀을 때: 화면 전체를 어둡게 덮고 사진만 크게 보여줍니다. 버튼은 가장자리의 동그란 아이콘 */}
     <dialog id="story-gallery" class="story-gallery" aria-labelledby="gallery-caption" data-gallery-dialog {...{ closedby: 'any' }}>
-      <div class="story-gallery__toolbar">
-        <button type="button" class="btn btn-light" data-gallery-close aria-label="사진 보기 닫기" {...{ commandfor: 'story-gallery', command: 'close' }}>닫기 ✕</button>
-        <a class="btn btn-light" data-gallery-original target="_blank" rel="noopener">원본 보기 (새 창)</a>
+      <div class="story-gallery__bar">
+        <a class="story-gallery__tool" data-gallery-original target="_blank" rel="noopener" aria-label="원본 사진 보기 (새 창)" title="원본 사진 보기"><Icon name="external" size={20} /></a>
+        <button type="button" class="story-gallery__tool" data-gallery-close aria-label="사진 보기 닫기" title="닫기" autofocus {...{ commandfor: 'story-gallery', command: 'close' }}><Icon name="close" size={24} /></button>
       </div>
-      <img data-gallery-full alt="" />
-      <div class="story-gallery__navigation">
-        <button type="button" class="btn btn-light" data-gallery-prev aria-label="이전 사진">← 이전</button>
-        <p id="gallery-caption" aria-live="polite"></p>
-        <button type="button" class="btn btn-light" data-gallery-next aria-label="다음 사진">다음 →</button>
-      </div>
+      <button type="button" class="story-gallery__arrow story-gallery__arrow--prev" data-gallery-prev aria-label="이전 사진"><Icon name="chevron-right" size={26} class="flip-x" /></button>
+      <div class="story-gallery__stage" data-gallery-stage><img data-gallery-full alt="" decoding="async" /></div>
+      <button type="button" class="story-gallery__arrow story-gallery__arrow--next" data-gallery-next aria-label="다음 사진"><Icon name="chevron-right" size={26} /></button>
+      <p id="gallery-caption" class="story-gallery__caption" aria-live="polite"></p>
     </dialog>
   </article>
   <hr />
@@ -61,5 +84,6 @@ const lead = images[0] ? __IMAGE_SIZES__[images[0]] : undefined;
 </SubpageLayout>
 
 <script>
+  import '../../scripts/story-viewer';
   import '../../scripts/story-gallery';
 </script>
