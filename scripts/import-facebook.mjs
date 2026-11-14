@@ -34,6 +34,8 @@ if (!token) {
   process.exit(0);
 }
 // 페이지 토큰으로 부르면 `me` 가 그 페이지를 가리키므로 페이지 ID 는 없어도 됩니다
+/** 오류가 나도 실패로 끝내지 않는 모드 — 15분마다 도는 자동 실행에서 같은 오류로 실패 알림이 쏟아지지 않게 (기록에는 남습니다) */
+const failCode = process.env.FACEBOOK_LENIENT === '1' ? 0 : 1;
 const page = process.env.FACEBOOK_PAGE_ID?.trim() || 'me';
 const graph = (process.env.FACEBOOK_GRAPH_URL?.trim() || 'https://graph.facebook.com').replace(/\/$/, '');
 
@@ -86,7 +88,7 @@ try {
   }
 } catch (e) {
   console.error(e.message);
-  process.exit(1);
+  process.exit(failCode);
 }
 
 // ── 글 → 이야기 ─────────────────────────────────────────────────────────
@@ -176,4 +178,4 @@ if (!dryRun && latest > sinceMs) {
   writeFileSync(STATE, JSON.stringify({ since: new Date(latest).toISOString() }, null, 2) + '\n');
 }
 console.log(`${dryRun ? '[미리보기] ' : ''}새 이야기 ${added}개${skipped ? `, 건너뜀 ${skipped}개` : ''} (기준: ${new Date(sinceMs).toISOString()} 이후)`);
-if (failed) process.exit(1);
+if (failed) process.exit(failCode);
