@@ -63,17 +63,16 @@ const viewerSizes = `(min-width: 768px) ${Math.round(Math.min(1110, 760 * ratio)
     {story.data.permalink && (
       <p class="mt-3"><a href={story.data.permalink} target="_blank" rel="noopener" class="btn btn-sm btn-primary"><Icon name="facebook" size={16} /> 페이스북에서 보기</a></p>
     )}
+    {/* 사진을 눌렀을 때: 화면 전체를 어둡게 덮고 사진만 크게 보여줍니다. 버튼은 가장자리의 동그란 아이콘 */}
     <dialog id="story-gallery" class="story-gallery" aria-labelledby="gallery-caption" data-gallery-dialog {...{ closedby: 'any' }}>
-      <div class="story-gallery__toolbar">
-        <button type="button" class="btn btn-light" data-gallery-close aria-label="사진 보기 닫기" {...{ commandfor: 'story-gallery', command: 'close' }}>닫기 ✕</button>
-        <a class="btn btn-light" data-gallery-original target="_blank" rel="noopener">원본 보기 (새 창)</a>
+      <div class="story-gallery__bar">
+        <a class="story-gallery__tool" data-gallery-original target="_blank" rel="noopener" aria-label="원본 사진 보기 (새 창)" title="원본 사진 보기"><Icon name="external" size={20} /></a>
+        <button type="button" class="story-gallery__tool" data-gallery-close aria-label="사진 보기 닫기" title="닫기" autofocus {...{ commandfor: 'story-gallery', command: 'close' }}><Icon name="close" size={24} /></button>
       </div>
-      <img data-gallery-full alt="" />
-      <div class="story-gallery__navigation">
-        <button type="button" class="btn btn-light" data-gallery-prev aria-label="이전 사진">← 이전</button>
-        <p id="gallery-caption" aria-live="polite"></p>
-        <button type="button" class="btn btn-light" data-gallery-next aria-label="다음 사진">다음 →</button>
-      </div>
+      <button type="button" class="story-gallery__arrow story-gallery__arrow--prev" data-gallery-prev aria-label="이전 사진"><Icon name="chevron-right" size={26} class="flip-x" /></button>
+      <div class="story-gallery__stage" data-gallery-stage><img data-gallery-full alt="" decoding="async" /></div>
+      <button type="button" class="story-gallery__arrow story-gallery__arrow--next" data-gallery-next aria-label="다음 사진"><Icon name="chevron-right" size={26} /></button>
+      <p id="gallery-caption" class="story-gallery__caption" aria-live="polite"></p>
     </dialog>
   </article>
   <hr />

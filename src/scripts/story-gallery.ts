@@ -24,20 +24,15 @@ if (gallery && dialog && typeof dialog.showModal === 'function') {
     event.preventDefault(); opener = link; show(number); dialog.showModal();
     document.body.classList.add('gallery-open');
   }));
-  // 닫기 버튼과 "바깥을 눌러 닫기"는 HTML 속성(commandfor/command, closedby="any")으로 동작합니다.
-  // 아래 둘은 그 속성을 아직 지원하지 않는 브라우저(주로 iPhone·구형 브라우저)에서만 붙는 대체 처리입니다.
+  // 닫기 버튼은 HTML 속성(commandfor/command)으로 동작합니다. 그 속성을 아직 지원하지 않는 브라우저(주로 iPhone·구형 브라우저)에서만 스크립트로 닫습니다.
   if (!('commandForElement' in HTMLButtonElement.prototype)) {
     dialog.querySelector('[data-gallery-close]')?.addEventListener('click', () => dialog.close());
   }
-  if (!('closedBy' in HTMLDialogElement.prototype)) {
-    dialog.addEventListener('click', (event) => {
-      if (event.target !== dialog) return;
-      // 창 안쪽 여백을 눌렀을 때는 닫지 않도록, 누른 자리가 창 바깥(어두운 배경)인지 좌표로 확인합니다
-      const box = dialog.getBoundingClientRect();
-      const inside = event.clientX >= box.left && event.clientX <= box.right && event.clientY >= box.top && event.clientY <= box.bottom;
-      if (!inside) dialog.close();
-    });
-  }
+  // 창이 화면 전체를 덮으므로 "바깥"이 따로 없습니다. 사진·버튼이 아닌 어두운 빈 곳을 누르면 닫습니다
+  dialog.addEventListener('click', (event) => {
+    const target = event.target as Element;
+    if (target === dialog || target.hasAttribute('data-gallery-stage') || target.id === 'gallery-caption') dialog.close();
+  });
   dialog.addEventListener('close', () => { document.body.classList.remove('gallery-open'); opener?.focus(); });
   previous.addEventListener('click', () => show(index - 1));
   next.addEventListener('click', () => show(index + 1));
