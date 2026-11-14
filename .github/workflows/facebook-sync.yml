@@ -32,7 +32,9 @@ jobs:
       - name: 새 이야기가 있으면 커밋
         id: commit
         run: |
-          git add src/content/stories public/images/stories scripts/import/facebook-state.json
+          git add src/content/stories public/images/stories
+          # 기록 파일은 글을 한 번이라도 확인한 뒤에야 생깁니다. 없는 파일을 git add 하면 오류로 끝나므로 있을 때만 담습니다
+          if [ -f scripts/import/facebook-state.json ]; then git add scripts/import/facebook-state.json; fi
           if git diff --cached --quiet; then
             echo "새 이야기가 없습니다."
             exit 0
