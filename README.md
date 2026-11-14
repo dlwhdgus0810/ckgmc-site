@@ -57,13 +57,13 @@ wrangler.jsonc          Cloudflare Workers config (D1 binding, static assets dir
 .dev.vars.example       example local env vars → copy to .dev.vars
 scripts/
   import-youtube.mjs    new YouTube channel videos → posts/sermons (run weekly by GitHub Actions)
-  import-facebook.mjs   new Facebook Page photo posts → stories (run daily by GitHub Actions, needs a token)
+  import-facebook.mjs   new Facebook Page photo posts → stories (run every 15 minutes by GitHub Actions, needs a token)
   optimize-images.mjs   shrink heavy photos already in public/images (npm run optimize:images)
   fetch-fonts.mjs       download Nanum Myeongjo web fonts
   import/               tools for importing data from the old site
 .github/workflows/
   youtube-sync.yml      weekly Monday YouTube sync, then commit and start the deploy
-  facebook-sync.yml     daily Facebook Page sync (only when the FACEBOOK_PAGE_TOKEN secret exists)
+  facebook-sync.yml     Facebook Page sync every 15 minutes (only when the FACEBOOK_PAGE_TOKEN secret exists)
   deploy-cloudflare.yml deploy to Cloudflare Workers on every commit to main
 ```
 
@@ -210,7 +210,7 @@ Titles and bodies are copied from the YouTube title and description, so polish t
 When the same service is uploaded again with the same title, only the later upload stays visible; the earlier post gets `hidden: true`.
 
 ## Automatic Facebook stories
-`.github/workflows/facebook-sync.yml` checks the church Facebook Page **every day** and adds new photo posts to
+`.github/workflows/facebook-sync.yml` checks the church Facebook Page **every 15 minutes** and adds new photo posts to
 `src/content/stories/` (their photos are downloaded to `public/images/stories/`), commits them, and starts the deploy.
 **It does nothing until the repository Secret `FACEBOOK_PAGE_TOKEN` exists.** Until then, add stories by hand in the admin UI.
 
@@ -229,8 +229,9 @@ How it behaves:
 * It only looks at posts newer than the last one it handled (`scripts/import/facebook-state.json`; on the first run, newer than the latest
   existing story). So a story deleted or edited in the admin UI is never recreated or overwritten — and later edits on Facebook are not copied.
 * To re-check older posts: `FACEBOOK_PAGE_TOKEN=… npm run import:facebook -- --since 2026-05-01` (add `--dry-run` to preview).
-* The token stops working when the admin who issued it changes their Facebook password or loses the Page role. The run then fails with a
-  "token expired" message (GitHub emails the repository owner) — issue a new token and update the Secret.
+* The token stops working when the admin who issued it changes their Facebook password or loses the Page role. The once-a-day run
+  (and any manual run) then fails with a "token expired" message and GitHub emails the repository owner — issue a new token and
+  update the Secret. The 15-minute runs only log the error, so one problem does not produce a failure email every 15 minutes.
 
 ## Board lists, search, and photos
 * **List layout is automatic**: boards whose posts have their own picture (video, thumbnail, photo in the body) show as cards;

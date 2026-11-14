@@ -1,10 +1,12 @@
-# 매일 페이스북 페이지의 새 사진 글을 "우리 교회 이야기"에 자동으로 추가합니다.
+# 15분마다 페이스북 페이지의 새 사진 글을 "우리 교회 이야기"에 자동으로 추가합니다 (올린 뒤 보통 20분 안에 사이트에 나옵니다).
+# 토큰 만료 같은 오류는 하루 한 번(아래 첫 번째 일정)만 "실패"로 표시합니다 — 15분마다 실패 메일이 오지 않게.
 # 저장소 Secret `FACEBOOK_PAGE_TOKEN`(페이지 액세스 토큰)이 있어야 동작합니다. 없으면 아무것도 하지 않고 끝납니다.
 # 새 글을 커밋한 뒤 배포 워크플로(deploy-cloudflare.yml)를 직접 실행합니다 (유튜브 자동 등록과 같은 이유).
 name: 페이스북 이야기 자동 등록
 on:
   schedule:
-    - cron: '23 14 * * *'   # 매일 14:23 UTC (캔자스 오전 8~9시)
+    - cron: '23 14 * * *'   # 매일 14:23 UTC (캔자스 오전 8~9시) — 오류가 있으면 이 실행만 실패로 표시
+    - cron: '*/15 * * * *'  # 15분마다 — 오류가 있어도 조용히 넘어감
   workflow_dispatch:         # Actions 탭에서 수동 실행도 가능
 permissions:
   contents: write   # 새 이야기 커밋
@@ -29,10 +31,14 @@ jobs:
         run: npm run import:facebook
         env:
           FACEBOOK_PAGE_TOKEN: ${{ secrets.FACEBOOK_PAGE_TOKEN }}
+          # 15분마다 도는 실행에서는 오류를 기록만 하고 성공으로 끝냅니다 (하루 한 번 실행과 수동 실행은 실패로 표시)
+          FACEBOOK_LENIENT: ${{ github.event.schedule == '*/15 * * * *' && '1' || '' }}
       - name: 새 이야기가 있으면 커밋
         id: commit
         run: |
-          git add src/content/stories public/images/stories scripts/import/facebook-state.json
+          git add src/content/stories public/images/stories
+          # 기록 파일은 글을 한 번이라도 확인한 뒤에야 생깁니다. 없는 파일을 git add 하면 오류로 끝나므로 있을 때만 담습니다
+          if [ -f scripts/import/facebook-state.json ]; then git add scripts/import/facebook-state.json; fi
           if git diff --cached --quiet; then
             echo "새 이야기가 없습니다."
             exit 0
