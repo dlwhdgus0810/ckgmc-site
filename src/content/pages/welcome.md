@@ -1,12 +1,13 @@
 ---
-title: "처음 오셨나요?"
-subtitle: "I'm New"
+title: 처음 오셨나요?
+subtitle: I'm New
+order: 0
 headerImage: /images/headers/about.jpg
-description: "첫 주일 방문 한눈에 보기 — 예배 시간, 길찾기와 주차, 자녀 프로그램, 방문 문의"
+description: 첫 주일 방문 한눈에 보기 — 예배 시간, 길찾기와 주차, 자녀 프로그램, 방문 문의
 widget: service-times
 widgetPosition: top
-order: 0
 ---
+
 <section class="mb-4">
 <h2 class="h4">함께 예배드리며 만나 뵙겠습니다</h2>
 <p>처음 오시는 분도 편안하게 예배드리실 수 있도록 안내해 드립니다. 정문 안내 데스크에 첫 방문이라고 말씀해 주세요.</p>
@@ -41,7 +42,7 @@ order: 0
 <li><strong>예배에 함께하세요.</strong> 예배 후에는 친교실에서 함께 식사하며 인사를 나눕니다.</li>
 <li><strong>교회와 연결되고 싶으시면 새가족 등록을 해 주세요.</strong> 담당 교역자가 연락드리고, 양육과 새가족환영회로 이어집니다.</li>
 </ol>
-<p><a class="btn btn-primary" href="https://forms.gle/1YSckhKR3hkLQJv86" target="_blank" rel="noopener">새가족 등록하기 <span class="sr-only">(Google 설문지, 새 창)</span></a> <a class="btn btn-outline-primary" href="/next-steps/membership">교인등록 절차 보기</a></p>
+<p><a class="btn btn-primary" href="https://forms.gle/yn3L4Nva3H2dfZ4C9" target="_blank" rel="noopener">새가족 등록하기 <span class="sr-only">(Google 설문지, 새 창)</span></a> <a class="btn btn-outline-primary" href="/next-steps/membership">교인등록 절차 보기</a></p>
 <p class="small text-muted">새가족 등록은 Google 설문지에서 작성합니다. 양식 이용이 어려우시면 안내 데스크나 교회 연락처로 말씀해 주세요.</p>
 </section>
 
