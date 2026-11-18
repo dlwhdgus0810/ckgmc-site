@@ -10,6 +10,8 @@ const MEMBER_PREFIX = '/members';
 const MANAGE_PREFIX = '/manage';
 /** 승인 대기 중인 사용자도 들어갈 수 있는 곳 */
 const PENDING_OK = new Set(['/members', '/members/password']);
+/** 다른 서비스가 서버끼리 보내는 알림(웹훅). 브라우저 폼이 아니라 출처 헤더가 없으므로, 각 주소가 서명으로 직접 확인합니다 */
+const HOOK_PREFIX = '/hooks/';
 
 export const onRequest = defineMiddleware(async (ctx, next) => {
   ctx.locals.user = null;
@@ -18,7 +20,8 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   const path = ctx.url.pathname.replace(/\/$/, '') || '/';
   const method = ctx.request.method;
 
-  if (method !== 'GET' && method !== 'HEAD' && !sameOrigin(ctx.request, ctx.url)) {
+  const hook = path.startsWith(HOOK_PREFIX);
+  if (method !== 'GET' && method !== 'HEAD' && !hook && !sameOrigin(ctx.request, ctx.url)) {
     return new Response('요청 출처를 확인할 수 없습니다.', { status: 403, headers: { 'content-type': 'text/plain; charset=utf-8' } });
   }
 
@@ -50,7 +53,7 @@ export const onRequest = defineMiddleware(async (ctx, next) => {
   res.headers.set('content-security-policy', "object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
   // 이 사이트가 연 창이 아닌 다른 사이트의 창에서 이 페이지를 조작하지 못하게 합니다
   res.headers.set('cross-origin-opener-policy', 'same-origin-allow-popups');
-  if (protectedArea || path === '/login' || path.startsWith('/auth/')) {
+  if (protectedArea || hook || path === '/login' || path.startsWith('/auth/')) {
     res.headers.set('cache-control', 'private, no-store');
     res.headers.set('x-robots-tag', 'noindex, nofollow');
   }

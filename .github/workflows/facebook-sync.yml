@@ -1,5 +1,7 @@
-# 15분마다 페이스북 페이지의 새 사진 글을 "우리 교회 이야기"에 자동으로 추가합니다 (올린 뒤 보통 20분 안에 사이트에 나옵니다).
-# 토큰 만료 같은 오류는 하루 한 번(아래 첫 번째 일정)만 "실패"로 표시합니다 — 15분마다 실패 메일이 오지 않게.
+# 페이스북 페이지의 새 사진 글을 "우리 교회 이야기"에 자동으로 추가합니다.
+# - 웹훅을 설정했으면: 글을 올리는 순간 Meta 가 사이트(/hooks/facebook)에 알리고, 사이트가 이 워크플로를 바로 실행합니다 (보통 3~4분 뒤 사이트에 나옴).
+# - 15분마다 도는 확인은 웹훅이 놓친 글을 위한 안전망입니다 (GitHub 예약 실행은 늦어지거나 건너뛸 수 있습니다).
+# 토큰 만료 같은 오류는 하루 한 번(아래 첫 번째 일정)과 수동 실행에서만 "실패"로 표시합니다 — 글마다, 15분마다 실패 메일이 오지 않게.
 # 저장소 Secret `FACEBOOK_PAGE_TOKEN`(페이지 액세스 토큰)이 있어야 동작합니다. 없으면 아무것도 하지 않고 끝납니다.
 # 새 글을 커밋한 뒤 배포 워크플로(deploy-cloudflare.yml)를 직접 실행합니다 (유튜브 자동 등록과 같은 이유).
 name: 페이스북 이야기 자동 등록
@@ -7,6 +9,8 @@ on:
   schedule:
     - cron: '23 14 * * *'   # 매일 14:23 UTC (캔자스 오전 8~9시) — 오류가 있으면 이 실행만 실패로 표시
     - cron: '*/15 * * * *'  # 15분마다 — 오류가 있어도 조용히 넘어감
+  repository_dispatch:       # 페이스북 웹훅을 받은 사이트가 실행 (src/pages/hooks/facebook.ts) — 오류가 있어도 조용히 넘어감
+    types: [facebook-post]
   workflow_dispatch:         # Actions 탭에서 수동 실행도 가능
     inputs:
       since:
@@ -41,8 +45,8 @@ jobs:
         run: npm run import:facebook
         env:
           FACEBOOK_PAGE_TOKEN: ${{ secrets.FACEBOOK_PAGE_TOKEN }}
-          # 15분마다 도는 실행에서는 오류를 기록만 하고 성공으로 끝냅니다 (하루 한 번 실행과 수동 실행은 실패로 표시)
-          FACEBOOK_LENIENT: ${{ github.event.schedule == '*/15 * * * *' && '1' || '' }}
+          # 15분마다 도는 실행과 웹훅 실행에서는 오류를 기록만 하고 성공으로 끝냅니다 (하루 한 번 실행과 수동 실행은 실패로 표시)
+          FACEBOOK_LENIENT: ${{ (github.event_name == 'repository_dispatch' || github.event.schedule == '*/15 * * * *') && '1' || '' }}
           # 수동 실행 때 넣은 값 (명령줄에 직접 끼워 넣지 않고 환경 변수로 넘깁니다)
           FACEBOOK_SINCE: ${{ inputs.since }}
           FACEBOOK_REFRESH_IMAGES: ${{ inputs.refresh_images && '1' || '' }}
