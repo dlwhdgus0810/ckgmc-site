@@ -36,7 +36,7 @@ hideFromNav: true
 <li><strong>Join us for worship.</strong> After worship, you are welcome to share a meal and meet others in the fellowship hall.</li>
 <li><strong>Stay connected.</strong> If you would like a church leader to follow up, use the newcomer registration form or contact the church. We can explain newcomer gatherings and the membership process.</li>
 </ol>
-<p><a class="btn btn-primary" href="https://forms.gle/1YSckhKR3hkLQJv86" target="_blank" rel="noopener">Open newcomer registration <span class="sr-only">(Google Form, new tab)</span></a></p>
+<p><a class="btn btn-primary" href="https://forms.gle/yn3L4Nva3H2dfZ4C9" target="_blank" rel="noopener">Open newcomer registration <span class="sr-only">(Google Form, new tab)</span></a></p>
 <p class="small text-muted">The registration form opens in Google Forms and may contain Korean fields. If you need help, contact us directly or ask at the welcome desk.</p>
 </section>
 
