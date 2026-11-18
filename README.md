@@ -213,8 +213,10 @@ Titles and bodies are copied from the YouTube title and description, so polish t
 When the same service is uploaded again with the same title, only the later upload stays visible; the earlier post gets `hidden: true`.
 
 ## Automatic Facebook stories
-`.github/workflows/facebook-sync.yml` checks the church Facebook Page **every 15 minutes** and adds new photo posts to
+`.github/workflows/facebook-sync.yml` adds new photo posts from the church Facebook Page to
 `src/content/stories/` (their photos are downloaded to `public/images/stories/`), commits them, and starts the deploy.
+It runs **as soon as a post is published** when the webhook below is set up (the story is live about 3–4 minutes later),
+and also **every 15 minutes** as a safety net (GitHub may delay or skip scheduled runs by hours).
 **It does nothing until the repository Secret `FACEBOOK_PAGE_TOKEN` exists.** Until then, add stories by hand in the admin UI.
 
 **One-time setup — a Page access token.** Someone who is an admin of the church Page has to do this (Meta renames these screens often):
@@ -227,6 +229,23 @@ When the same service is uploaded again with the same title, only the later uplo
    Never commit the token or paste it into a chat or an issue.
 5. Actions tab → *페이스북 이야기 자동 등록* → *Run workflow* imports right away.
 
+**Optional — import the moment a post goes up (webhook).** Facebook calls `https://ckgmc.org/hooks/facebook` when the Page feed changes;
+the site checks Meta's signature and, for a new post, starts the workflow above through GitHub (`repository_dispatch`, using the
+Worker's existing `GITHUB_TOKEN`, which already has *Contents: Read and write*). Nothing from the notification is stored.
+1. Cloudflare dashboard → Workers & Pages → ckgmc-site → Settings → Variables and Secrets → add two **Secrets**:
+   `FACEBOOK_APP_SECRET` (Meta app → App settings → Basic → *App secret*) and `FACEBOOK_WEBHOOK_VERIFY_TOKEN`
+   (any long random text you make up; you type the same text into Meta in the next step). Until both exist the address answers 404.
+2. Meta app → Use cases → *Manage everything on your Page* → Customize → Webhooks (or the *Webhooks* product) → object **Page** →
+   Callback URL `https://ckgmc.org/hooks/facebook`, Verify token = the same text → *Verify and save* → subscribe to the **feed** field.
+   The field's *Test* button sends a sample post; a *페이스북 이야기 자동 등록* run should start in the Actions tab within seconds.
+3. Install the app on the Page: Graph API Explorer → Page token for the church Page with `pages_manage_metadata` added →
+   `POST /{page-id}/subscribed_apps?subscribed_fields=feed` (a `GET` on the same path should then list the app).
+4. Switch the app from *Development* to **Live** (top of the app dashboard; it asks for a privacy policy URL —
+   `https://ckgmc.org/privacy-policy`). Meta only sends test notifications to apps in Development mode.
+Check it: publish a photo post, then watch Actions → the run's event says `repository_dispatch`. Worker logs
+(Cloudflare → ckgmc-site → Logs) show `[facebook-webhook]` lines if GitHub refused to start the run.
+`node scripts/facebook-webhook-regression.mjs` tests the signature check and which notifications count as a new post.
+
 How it behaves:
 * Only posts with photos are imported (an album becomes one story with several photos). Text-only posts, links and videos are skipped.
 * It only looks at posts newer than the last one it handled (`scripts/import/facebook-state.json`; on the first run, newer than the latest
@@ -237,7 +256,7 @@ How it behaves:
 * Photos are downloaded at the largest size Facebook offers (the post list itself only carries 720px copies), then limited to 2000px.
 * The token stops working when the admin who issued it changes their Facebook password or loses the Page role. The once-a-day run
   (and any manual run) then fails with a "token expired" message and GitHub emails the repository owner — issue a new token and
-  update the Secret. The 15-minute runs only log the error, so one problem does not produce a failure email every 15 minutes.
+  update the Secret. The 15-minute and webhook runs only log the error, so one problem does not produce a failure email every 15 minutes.
 
 ## Board lists, search, and photos
 * **List layout is automatic**: boards whose posts have their own picture (video, thumbnail, photo in the body) show as cards;
